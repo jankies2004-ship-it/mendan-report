@@ -427,7 +427,7 @@ function getDateStr() {
 // ===== 報告文生成 =====
 async function generateReport() {
   const apiKey = getApiKey();
-  if (!apiKey) { alert('APIキーを入力してください。'); return; }
+  if (!apiKey) { apiKey = ''; }
 
   const btn = document.getElementById('gen-btn');
   btn.disabled = true; btn.textContent = '生成中...';
