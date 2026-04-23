@@ -476,7 +476,7 @@ let apiKey = getApiKey();  if (!apiKey) { apiKey = ''; }
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error.message);
-    generatedReport = data.content?.[0]?.text || data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    generatedReport = data.content?.[0]?.text || '';     if (!generatedReport) throw new Error('レスポンス: ' + JSON.stringify(data));
     payload.report = generatedReport;
 
     ra.innerHTML = `<div class="result-box">${generatedReport}</div>
