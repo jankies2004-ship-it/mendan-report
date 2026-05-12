@@ -172,6 +172,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 .karte-gen-btn:disabled{background:#aaa;cursor:not-allowed}
 .karte-result{background:#f8f9fa;border:1px solid #e0e0e0;border-radius:10px;padding:1.25rem;margin-top:1rem;white-space:pre-wrap;font-size:14px;line-height:1.9;color:#222}
 .section-lbl{font-size:12px;font-weight:700;color:#888;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px}
+
+/* Audio */
+.audio-drop{border:2px dashed #ccc;border-radius:12px;padding:2rem 1rem;text-align:center;cursor:pointer;transition:all 0.2s;background:#fafafa;position:relative}
+.audio-drop:hover,.audio-drop.drag-over{border-color:#378ADD;background:#EBF4FF}
+.audio-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.audio-drop-icon{font-size:32px;margin-bottom:8px}
+.audio-drop-text{font-size:14px;color:#555;font-weight:500}
+.audio-drop-sub{font-size:12px;color:#999;margin-top:4px}
+.audio-filename{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#EBF4FF;border:1px solid #BFDBFE;border-radius:8px;margin-top:10px}
+.audio-filename-text{font-size:13px;color:#1e40af;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.audio-filename-clear{background:none;border:none;cursor:pointer;font-size:16px;color:#666;padding:0;line-height:1;flex-shrink:0}
+.btn-transcribe{background:#7C3AED;border:none;color:#fff;font-weight:600;width:100%;padding:13px;font-size:14px;border-radius:10px;cursor:pointer;font-family:inherit;margin-top:0.75rem;transition:background 0.15s}
+.btn-transcribe:hover{background:#6D28D9}
+.btn-transcribe:disabled{background:#aaa;cursor:not-allowed}
+.transcribe-result{width:100%;font-size:13px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;resize:vertical;min-height:140px;font-family:inherit;color:#222;background:#fff;outline:none;line-height:1.7}
+.transcribe-result:focus{border-color:#378ADD}
+.char-count{font-size:11px;color:#aaa;text-align:right;margin-top:4px}
+.type-btn{padding:9px 16px;border:1px solid #ddd;border-radius:8px;cursor:pointer;font-size:13px;color:#333;font-weight:500;background:#fff;font-family:inherit;transition:all 0.15s}
+.type-btn:hover{background:#f5f5f5}
+.type-btn.selected{background:#EBF4FF;border-color:#378ADD;color:#185FA5;font-weight:600}
+.audio-openai-key{background:#F5F0FF;border:1px solid #DDD6FE;border-radius:10px;padding:1rem;margin-bottom:1rem}
+.audio-openai-key label{font-size:13px;color:#555;display:block;margin-bottom:6px;font-weight:500}
+.audio-openai-key input{width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-family:monospace;background:#fff;color:#222;outline:none}
+.audio-openai-key input:focus{border-color:#7C3AED}
+.warn-msg{color:#854F0B;font-size:12px;padding:7px 10px;background:#FFF3E0;border:1px solid #FDE68A;border-radius:7px;margin-top:6px}
+.step-label{font-size:13px;font-weight:700;color:#185FA5;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#185FA5;color:#fff;font-size:11px;font-weight:700;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -192,6 +219,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
     <button class="tab-btn" onclick="switchTab('parent',this)">保護者面談</button>
     <button class="tab-btn" onclick="switchTab('grade',this)">成績入力</button>
     <button class="tab-btn" onclick="switchTab('karte',this)">生徒カルテ</button>
+    <button class="tab-btn" onclick="switchTab('audio',this)">音声まとめ</button>
   </div>
 
   <!-- ===== 生徒面談 ===== -->
@@ -589,6 +617,79 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
     <div id="g-msg"></div>
   </div>
 
+  <!-- ===== 音声まとめ ===== -->
+  <div id="screen-audio" class="screen">
+
+    <!-- OpenAI APIキー -->
+    <div class="audio-openai-key">
+      <label>OpenAI APIキー（Whisper文字起こし用・このデバイスに保存）</label>
+      <input type="password" id="openai-key" placeholder="sk-..." oninput="saveOpenAiKey(this.value)">
+      <p class="api-note" style="margin-top:6px">音声文字起こしにはOpenAIのAPIキーが別途必要です。</p>
+    </div>
+
+    <!-- STEP 1: 文字起こし -->
+    <div class="card">
+      <div class="step-label"><span class="step-num">1</span>音声ファイルを文字起こし</div>
+
+      <div class="audio-drop" id="audio-drop"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="handleDrop(event)">
+        <input type="file" id="audio-file" accept="audio/*,video/mp4,.m4a,.mp3,.wav,.webm,.ogg" onchange="handleFileSelect(this)">
+        <div class="audio-drop-icon">🎙️</div>
+        <div class="audio-drop-text">音声ファイルをドラッグ＆ドロップ</div>
+        <div class="audio-drop-sub">またはクリックして選択　mp3 / m4a / wav / webm 対応</div>
+      </div>
+      <div id="audio-filename-wrap" class="hidden"></div>
+      <div id="audio-size-warn" class="hidden"></div>
+
+      <div class="field" style="margin-top:12px;margin-bottom:0">
+        <label>音声の言語</label>
+        <div class="radio-group">
+          <div class="radio-btn selected" onclick="selectRadio('a_lang','ja',this)" id="lang-ja">日本語</div>
+          <div class="radio-btn" onclick="selectRadio('a_lang','en',this)">英語</div>
+          <div class="radio-btn" onclick="selectRadio('a_lang','auto',this)">自動検出</div>
+        </div>
+      </div>
+
+      <button class="btn-transcribe" id="transcribe-btn" onclick="transcribeAudio()" disabled>
+        文字起こしを開始する
+      </button>
+      <div id="transcribe-progress"></div>
+
+      <div id="transcribe-result-wrap" class="hidden" style="margin-top:12px">
+        <label style="font-size:13px;color:#555;font-weight:500;display:block;margin-bottom:6px">文字起こし結果（編集できます）</label>
+        <textarea class="transcribe-result" id="transcribe-text" placeholder="文字起こし結果がここに表示されます" oninput="updateCharCount()"></textarea>
+        <div class="char-count" id="char-count">0 文字</div>
+      </div>
+    </div>
+
+    <!-- STEP 2: まとめ生成 -->
+    <div class="card">
+      <div class="step-label"><span class="step-num">2</span>まとめを生成する</div>
+
+      <div class="field">
+        <label>生徒名（任意）</label>
+        <input type="text" id="a-name" placeholder="例：山田 太郎">
+      </div>
+
+      <div class="field">
+        <label>まとめの種類</label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="type-btn selected" onclick="selectType('student',this)">生徒面談まとめ</button>
+          <button class="type-btn" onclick="selectType('parent',this)">保護者面談まとめ</button>
+          <button class="type-btn" onclick="selectType('general',this)">汎用まとめ</button>
+        </div>
+        <div id="type-desc" style="font-size:12px;color:#888;margin-top:8px">
+          生活面・勉強面・進路面・印象・今後の方針を整理します
+        </div>
+      </div>
+
+      <button class="btn-gen" id="audio-gen-btn" onclick="generateAudioSummary()">まとめを生成する</button>
+      <div id="audio-result-area"></div>
+    </div>
+  </div>
+
   <!-- ===== 生徒カルテ ===== -->
   <div id="screen-karte" class="screen">
     <div class="karte-search">
@@ -712,6 +813,7 @@ function selectRadio(field,val,el){
   el.classList.add('selected');
   if(field.startsWith('p_'))pState[field]=val;
   else if(field.startsWith('g_'))gState[field]=val;
+  else if(field.startsWith('a_'))aState[field]=val;
   else sState[field]=val;
 }
 
@@ -1036,10 +1138,210 @@ function copyText(text,btn){
   });
 }
 
+// ===== 音声まとめ =====
+const aState = { a_lang: 'ja', a_type: 'student' };
+let selectedAudioFile = null;
+let generatedAudioSummary = '';
+
+function saveOpenAiKey(val) { localStorage.setItem('openai_api_key', val); }
+function getOpenAiKey() { return document.getElementById('openai-key').value || localStorage.getItem('openai_api_key') || ''; }
+
+function handleFileSelect(input) {
+  const file = input.files[0];
+  if (file) setAudioFile(file);
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('audio-drop').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) setAudioFile(file);
+}
+
+function setAudioFile(file) {
+  selectedAudioFile = file;
+  const wrap = document.getElementById('audio-filename-wrap');
+  wrap.innerHTML = `<div class="audio-filename"><span style="font-size:18px">🎵</span><span class="audio-filename-text">${file.name}</span><button class="audio-filename-clear" onclick="clearAudioFile()" type="button">✕</button></div>`;
+  wrap.classList.remove('hidden');
+
+  const warnEl = document.getElementById('audio-size-warn');
+  const mb = file.size / 1024 / 1024;
+  if (mb > 4) {
+    warnEl.innerHTML = `<div class="warn-msg">ファイルサイズが ${mb.toFixed(1)}MB あります。4MB を超えると処理できない場合があります。短い録音や圧縮済みのファイルを推奨します。</div>`;
+    warnEl.classList.remove('hidden');
+  } else {
+    warnEl.classList.add('hidden');
+  }
+
+  document.getElementById('transcribe-btn').disabled = false;
+}
+
+function clearAudioFile() {
+  selectedAudioFile = null;
+  document.getElementById('audio-file').value = '';
+  document.getElementById('audio-filename-wrap').innerHTML = '';
+  document.getElementById('audio-filename-wrap').classList.add('hidden');
+  document.getElementById('audio-size-warn').classList.add('hidden');
+  document.getElementById('transcribe-btn').disabled = true;
+}
+
+function selectType(type, btn) {
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  aState.a_type = type;
+  const descs = {
+    student: '生活面・勉強面・進路面・印象・今後の方針を整理します',
+    parent:  '家庭の様子・保護者の心配・要望・塾の対応方針を整理します',
+    general: '話した内容の要点・決定事項・次回アクションを整理します'
+  };
+  document.getElementById('type-desc').textContent = descs[type];
+}
+
+function updateCharCount() {
+  const len = document.getElementById('transcribe-text').value.length;
+  document.getElementById('char-count').textContent = len.toLocaleString() + ' 文字';
+}
+
+async function transcribeAudio() {
+  if (!selectedAudioFile) return;
+  const openAiKey = getOpenAiKey();
+  if (!openAiKey) {
+    document.getElementById('transcribe-progress').innerHTML = '<div class="error-msg">OpenAI APIキーを入力してください</div>';
+    return;
+  }
+
+  const btn = document.getElementById('transcribe-btn');
+  btn.disabled = true; btn.textContent = '文字起こし中...';
+  const prog = document.getElementById('transcribe-progress');
+  prog.innerHTML = '<div class="loading" style="padding:1rem">文字起こし中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
+
+  try {
+    const formData = new FormData();
+    formData.append('file', selectedAudioFile, selectedAudioFile.name);
+    formData.append('model', 'whisper-1');
+    if (aState.a_lang !== 'auto') formData.append('language', aState.a_lang);
+
+    const res = await fetch('/api/transcribe', {
+      method: 'POST',
+      headers: { 'x-openai-key': openAiKey },
+      body: formData,
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(typeof data.error === 'string' ? data.error : data.error.message || JSON.stringify(data.error));
+
+    const text = data.text || '';
+    document.getElementById('transcribe-text').value = text;
+    document.getElementById('transcribe-result-wrap').classList.remove('hidden');
+    updateCharCount();
+    prog.innerHTML = '<div class="success-msg" style="margin-top:8px">文字起こしが完了しました。内容を確認・編集してからまとめを生成してください。</div>';
+  } catch (e) {
+    prog.innerHTML = `<div class="error-msg">文字起こしに失敗しました：${e.message}</div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = '文字起こしを開始する';
+  }
+}
+
+async function generateAudioSummary() {
+  const text = document.getElementById('transcribe-text').value.trim();
+  if (!text) {
+    document.getElementById('audio-result-area').innerHTML = '<div class="error-msg">先に文字起こしを行うか、テキストを入力してください</div>';
+    return;
+  }
+
+  const btn = document.getElementById('audio-gen-btn');
+  btn.disabled = true; btn.textContent = '生成中...';
+  const ra = document.getElementById('audio-result-area');
+  ra.innerHTML = '<div class="loading">まとめを生成中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
+
+  const name = v('a-name') || '（名前未入力）';
+  const type = aState.a_type;
+
+  const promptMap = {
+    student: `あなたは学習塾「エイメイ学院」の講師です。以下は生徒との面談音声の文字起こしです。講師向けの面談記録まとめを作成してください。
+
+【文字起こし】
+${text}
+
+【条件】
+・対象生徒：${name}
+・【生活面】【勉強面】【進路面】【生徒の印象・強み】【今後の指導方針】の5セクション構成
+・文字起こしに出てきた具体的な発言や数字を活かす
+・講師が共有する内部記録として書く
+・300〜450字程度`,
+
+    parent: `あなたは学習塾「エイメイ学院」の講師です。以下は保護者との面談音声の文字起こしです。講師向けの面談記録まとめを作成してください。
+
+【文字起こし】
+${text}
+
+【条件】
+・対象生徒：${name}
+・【家庭での様子】【保護者の心配・相談事項】【塾への要望】【塾からの提案・対応方針】【次回アクション】の5セクション構成
+・文字起こしに出てきた具体的な発言や内容を活かす
+・講師が共有する内部記録として書く
+・300〜450字程度`,
+
+    general: `以下は会議・面談の音声文字起こしです。わかりやすい議事録まとめを作成してください。
+
+【文字起こし】
+${text}
+
+【条件】
+・${name !== '（名前未入力）' ? '関係者：' + name : ''}
+・【話し合われた内容】【決定事項・合意事項】【次回までのアクション】の3セクション構成
+・箇条書きを活用して読みやすく
+・重要な発言は「」で引用する
+・300〜400字程度`
+  };
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': getApiKey(), 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1200, messages: [{ role: 'user', content: promptMap[type] }] })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    generatedAudioSummary = data.content?.[0]?.text || '';
+    if (!generatedAudioSummary) throw new Error('レスポンスが空です');
+
+    ra.innerHTML = `<div class="result-box">${generatedAudioSummary}</div>
+      <div class="result-actions">
+        <button class="copy-btn" onclick="copyText(generatedAudioSummary,this)">コピーする</button>
+        <button class="sheet-btn" onclick="saveAudioToSheet()">シートに保存</button>
+      </div><div id="audio-sheet-msg"></div>`;
+  } catch (e) {
+    ra.innerHTML = `<div class="error-msg">生成に失敗しました：${e.message}</div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = 'まとめを生成する';
+  }
+}
+
+async function saveAudioToSheet() {
+  const today = new Date().toLocaleDateString('ja-JP');
+  const typeLabel = { student: '生徒面談', parent: '保護者面談', general: '汎用' }[aState.a_type];
+  const payload = { sheet: '音声記録', date: today, name: v('a-name') || '', type: typeLabel, summary: generatedAudioSummary };
+  const msg = document.getElementById('audio-sheet-msg');
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    msg.innerHTML = '<div class="success-msg">シートに保存しました！</div>';
+  } catch (e) {
+    msg.innerHTML = '<div class="error-msg">保存に失敗しました。</div>';
+  }
+}
+
 // ===== Init =====
 window.onload=()=>{
   const saved=localStorage.getItem('anthropic_api_key');
   if(saved)document.getElementById('api-key').value=saved;
+  const savedOai=localStorage.getItem('openai_api_key');
+  if(savedOai)document.getElementById('openai-key').value=savedOai;
+  aState.a_lang='ja';
   initCal();
 };
 </script>
