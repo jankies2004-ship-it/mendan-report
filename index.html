@@ -3,24 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>面談記録 → 保護者報告文</title>
+<title>エイメイ学院 面談・成績管理</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif;background:#f5f5f0;color:#222;font-size:16px}
 .app{max-width:720px;margin:0 auto;padding:1.5rem 1rem 4rem}
-.header{margin-bottom:1.5rem}
+.header{margin-bottom:1rem}
 .header h1{font-size:20px;font-weight:600;color:#222}
 .header p{font-size:13px;color:#666;margin-top:4px}
+
+/* Tab Nav */
+.tab-nav{display:flex;gap:4px;margin-bottom:1.5rem;background:#e8e8e3;padding:4px;border-radius:12px}
+.tab-btn{flex:1;padding:9px 4px;border:none;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;color:#666;background:transparent;transition:all 0.2s;white-space:nowrap}
+.tab-btn:hover{color:#333;background:rgba(255,255,255,0.5)}
+.tab-btn.active{background:#fff;color:#185FA5;box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+
+/* Screen */
+.screen{display:none}
+.screen.active{display:block}
+
+/* Step Bar */
 .step-bar{display:flex;gap:4px;margin-bottom:1.5rem}
 .step{flex:1;height:5px;border-radius:3px;background:#ddd;transition:background 0.3s}
 .step.done{background:#1D9E75}
 .step.active{background:#378ADD}
+
+/* Card */
 .card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
 .card-title{font-size:14px;font-weight:600;color:#555;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid #eee}
+
+/* Fields */
 .field{margin-bottom:1.1rem}
 .field label{font-size:13px;color:#555;display:block;margin-bottom:6px;font-weight:500}
 .field input[type=text]{width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit;background:#fff;color:#222}
 .field input[type=text]:focus{border-color:#378ADD}
+
+/* Choices & Radio */
 .choices{display:flex;flex-direction:column;gap:6px}
 .choice{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid #e0e0e0;border-radius:8px;cursor:pointer;transition:background 0.15s;user-select:none}
 .choice:hover{background:#f8f8f8}
@@ -32,8 +50,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 .radio-btn{padding:8px 14px;border:1px solid #ddd;border-radius:8px;cursor:pointer;font-size:13px;color:#333;transition:all 0.15s;user-select:none;background:#fff}
 .radio-btn:hover{background:#f5f5f5}
 .radio-btn.selected{background:#EBF4FF;border-color:#378ADD;color:#185FA5;font-weight:500}
+
+/* Textarea */
 .memo{width:100%;font-size:14px;padding:10px 12px;border:1px solid #ddd;border-radius:8px;resize:vertical;min-height:80px;font-family:inherit;color:#222;background:#fff;outline:none}
 .memo:focus{border-color:#378ADD}
+
+/* Buttons */
 .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem}
 .btn{padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit;font-weight:500;transition:all 0.15s}
 .btn-ghost{background:#fff;border:1px solid #ccc;color:#333}
@@ -43,6 +65,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 .btn-gen{background:#0F6E56;border:none;color:#fff;font-weight:600;width:100%;padding:14px;font-size:15px;border-radius:10px;cursor:pointer;font-family:inherit;margin-top:1rem;transition:background 0.15s}
 .btn-gen:hover{background:#085041}
 .btn-gen:disabled{background:#aaa;cursor:not-allowed}
+.btn-save{background:#1D9E75;border:none;color:#fff;font-weight:600;padding:14px;font-size:15px;border-radius:10px;cursor:pointer;font-family:inherit;margin-top:0.5rem;transition:background 0.15s;width:100%}
+.btn-save:hover{background:#0F6E56}
+.btn-save:disabled{background:#aaa;cursor:not-allowed}
+
+/* Result */
 .result-box{background:#f8f9fa;border:1px solid #e0e0e0;border-radius:10px;padding:1.25rem;margin-top:1rem;white-space:pre-wrap;font-size:14px;line-height:1.9;color:#222}
 .result-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .copy-btn,.sheet-btn{padding:9px 16px;border:1px solid #ccc;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;color:#333;font-family:inherit;font-weight:500;transition:all 0.15s}
@@ -50,21 +77,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 .sheet-btn{background:#1D9E75;border-color:#1D9E75;color:#fff}
 .sheet-btn:hover{background:#0F6E56}
 .sheet-btn:disabled{background:#aaa;border-color:#aaa;cursor:not-allowed}
+
+/* Tags */
 .section-tag{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;margin-bottom:10px;letter-spacing:0.02em}
 .tag-life{background:#EAF3DE;color:#3B6D11}
 .tag-study{background:#E6F1FB;color:#185FA5}
 .tag-future{background:#FFF3E0;color:#854F0B}
 .tag-base{background:#F1EFE8;color:#5F5E5A}
-.hidden{display:none}
-.loading{text-align:center;padding:2rem;color:#666;font-size:14px}
-.dot{display:inline-block;animation:blink 1.2s infinite}
-.dot:nth-child(2){animation-delay:0.2s}
-.dot:nth-child(3){animation-delay:0.4s}
-@keyframes blink{0%,80%,100%{opacity:0}40%{opacity:1}}
-.success-msg{color:#0F6E56;font-size:13px;padding:8px 12px;background:#EAF3DE;border-radius:8px;margin-top:8px}
-.error-msg{color:#A32D2D;font-size:13px;padding:8px 12px;background:#FCEBEB;border-radius:8px;margin-top:8px}
+.tag-parent{background:#F3E8FF;color:#6B21A8}
+.tag-grade{background:#FFF3E0;color:#854F0B}
 
-/* カレンダー */
+/* Calendar */
 .cal-wrap{position:relative}
 .cal-trigger{width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#222;cursor:pointer;text-align:left;font-family:inherit;display:flex;align-items:center;gap:8px}
 .cal-trigger:hover{border-color:#aaa}
@@ -88,376 +111,657 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 .cal-day.sat-col{color:#2980B9}
 .cal-day.selected.sun-col,.cal-day.selected.sat-col{color:#fff}
 
-/* API設定 */
+/* API Section */
 .api-section{background:#FFF8E1;border:1px solid #FFE082;border-radius:10px;padding:1rem;margin-bottom:1rem}
 .api-section label{font-size:13px;color:#555;display:block;margin-bottom:6px;font-weight:500}
 .api-section input{width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-family:monospace;background:#fff;color:#222;outline:none}
 .api-section input:focus{border-color:#378ADD}
 .api-note{font-size:12px;color:#888;margin-top:6px}
+
+/* Utils */
+.hidden{display:none}
+.loading{text-align:center;padding:2rem;color:#666;font-size:14px}
+.dot{display:inline-block;animation:blink 1.2s infinite}
+.dot:nth-child(2){animation-delay:0.2s}
+.dot:nth-child(3){animation-delay:0.4s}
+@keyframes blink{0%,80%,100%{opacity:0}40%{opacity:1}}
+.success-msg{color:#0F6E56;font-size:13px;padding:8px 12px;background:#EAF3DE;border-radius:8px;margin-top:8px}
+.error-msg{color:#A32D2D;font-size:13px;padding:8px 12px;background:#FCEBEB;border-radius:8px;margin-top:8px}
+
+/* Grade */
+.grade-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.grade-label{width:36px;font-size:14px;color:#333;font-weight:500;flex-shrink:0}
+.grade-score{width:72px;font-size:15px;font-weight:600;text-align:center;padding:8px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit;color:#222;background:#fff}
+.grade-score:focus{border-color:#378ADD}
+.grade-unit{font-size:13px;color:#888}
+.grade-total-box{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.grade-total-label{font-size:13px;color:#0369A1;font-weight:600}
+.grade-total-val{font-size:22px;font-weight:700;color:#0369A1}
+.rank-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.rank-input{width:72px;font-size:15px;text-align:center;padding:8px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit;color:#222;background:#fff}
+.rank-input:focus{border-color:#378ADD}
+
+/* Karte */
+.karte-search{display:flex;gap:8px;margin-bottom:1.5rem}
+.karte-search input{flex:1;font-size:15px;padding:11px 14px;border:1px solid #ddd;border-radius:10px;font-family:inherit;outline:none;background:#fff;color:#222}
+.karte-search input:focus{border-color:#378ADD}
+.karte-search-btn{padding:11px 20px;background:#185FA5;border:none;color:#fff;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.karte-search-btn:hover{background:#0C447C}
+.timeline{display:flex;flex-direction:column;gap:12px;margin-bottom:0}
+.tl-item{border-left:3px solid #ddd;padding-left:14px;position:relative}
+.tl-item::before{content:'';position:absolute;left:-7px;top:6px;width:11px;height:11px;border-radius:50%;background:#ddd;border:2px solid #fff}
+.tl-item.tl-student{border-color:#378ADD}
+.tl-item.tl-student::before{background:#378ADD}
+.tl-item.tl-parent{border-color:#A855F7}
+.tl-item.tl-parent::before{background:#A855F7}
+.tl-date{font-size:11px;color:#888;margin-bottom:3px}
+.tl-badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-bottom:5px}
+.tl-badge-s{background:#E6F1FB;color:#185FA5}
+.tl-badge-p{background:#F3E8FF;color:#6B21A8}
+.tl-content{font-size:13px;color:#333;line-height:1.6}
+.tl-quote{margin-top:5px;color:#666;font-size:12px;font-style:italic;line-height:1.5}
+.grade-table{width:100%;border-collapse:collapse;font-size:13px}
+.grade-table th{padding:6px 8px;text-align:center;font-weight:600;color:#555;border-bottom:1px solid #eee;background:#f8f8f5}
+.grade-table th:first-child{text-align:left}
+.grade-table td{padding:6px 8px;text-align:center;border-bottom:1px solid #f0f0f0}
+.grade-table td:first-child{text-align:left;color:#666;font-size:12px}
+.grade-table td.total-col{font-weight:700;color:#185FA5}
+.empty-state{text-align:center;padding:3rem 1rem;color:#999;font-size:14px;line-height:1.8}
+.karte-gen-btn{background:#185FA5;border:none;color:#fff;font-weight:600;width:100%;padding:14px;font-size:15px;border-radius:10px;cursor:pointer;font-family:inherit;margin-top:1rem;transition:background 0.15s}
+.karte-gen-btn:hover{background:#0C447C}
+.karte-gen-btn:disabled{background:#aaa;cursor:not-allowed}
+.karte-result{background:#f8f9fa;border:1px solid #e0e0e0;border-radius:10px;padding:1.25rem;margin-top:1rem;white-space:pre-wrap;font-size:14px;line-height:1.9;color:#222}
+.section-lbl{font-size:12px;font-weight:700;color:#888;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:8px}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="header">
-    <h1>面談記録 → 保護者報告文 作成</h1>
-    <p>面談しながら選択・記入してください。最後に報告文が自動生成されます。</p>
+    <h1>エイメイ学院 面談・成績管理</h1>
+    <p>面談記録・成績入力・生徒カルテの作成ができます。</p>
   </div>
 
-  <!-- API Key設定 -->
   <div class="api-section">
-    <label>Anthropic APIキー（初回のみ入力・このデバイスに保存されます）</label>
+    <label>Anthropic APIキー（初回のみ入力・このデバイスに保存）</label>
     <input type="password" id="api-key" placeholder="sk-ant-..." oninput="saveApiKey(this.value)">
-    <p class="api-note">APIキーは、このブラウザのlocalStorageにのみ保存されます。外部に送信されません。</p>
+    <p class="api-note">APIキーはブラウザのlocalStorageにのみ保存されます。</p>
   </div>
 
-  <div class="step-bar">
-    <div class="step active" id="s1"></div>
-    <div class="step" id="s2"></div>
-    <div class="step" id="s3"></div>
-    <div class="step" id="s4"></div>
-    <div class="step" id="s5"></div>
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('student',this)">生徒面談</button>
+    <button class="tab-btn" onclick="switchTab('parent',this)">保護者面談</button>
+    <button class="tab-btn" onclick="switchTab('grade',this)">成績入力</button>
+    <button class="tab-btn" onclick="switchTab('karte',this)">生徒カルテ</button>
   </div>
 
-  <!-- Step 1: 基本情報 -->
-  <div id="step1">
-    <div class="card">
-      <div class="card-title">基本情報</div>
-      <div class="field">
-        <label>生徒名</label>
-        <input type="text" id="name" placeholder="例：山田 太郎">
+  <!-- ===== 生徒面談 ===== -->
+  <div id="screen-student" class="screen active">
+    <div class="step-bar">
+      <div class="step active" id="s1"></div>
+      <div class="step" id="s2"></div>
+      <div class="step" id="s3"></div>
+      <div class="step" id="s4"></div>
+      <div class="step" id="s5"></div>
+    </div>
+
+    <div id="step1">
+      <div class="card">
+        <div class="card-title">基本情報</div>
+        <div class="field"><label>生徒名</label><input type="text" id="name" placeholder="例：山田 太郎"></div>
+        <div class="field">
+          <label>学年</label>
+          <div class="radio-group">
+            <div class="radio-btn" onclick="selectRadio('grade','中1',this)">中1</div>
+            <div class="radio-btn" onclick="selectRadio('grade','中2',this)">中2</div>
+            <div class="radio-btn" onclick="selectRadio('grade','中3',this)">中3</div>
+            <div class="radio-btn" onclick="selectRadio('grade','高1',this)">高1</div>
+            <div class="radio-btn" onclick="selectRadio('grade','高2',this)">高2</div>
+            <div class="radio-btn" onclick="selectRadio('grade','高3',this)">高3</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>面談日</label>
+          <div class="cal-wrap" id="cal-wrap-s">
+            <button class="cal-trigger" onclick="toggleCal('s',event)" type="button">
+              <span style="font-size:15px">📅</span><span id="cal-display-s" class="cal-placeholder">日付を選択</span>
+            </button>
+            <div class="cal-popup hidden" id="cal-popup-s">
+              <div class="cal-header">
+                <button class="cal-nav" onclick="changeMonth('s',-1)" type="button">‹</button>
+                <span class="cal-month-label" id="cal-title-s"></span>
+                <button class="cal-nav" onclick="changeMonth('s',1)" type="button">›</button>
+              </div>
+              <div class="cal-grid" id="cal-grid-s"></div>
+            </div>
+          </div>
+        </div>
       </div>
+      <div class="actions"><button class="btn btn-primary" onclick="goStep(2)">次へ →</button></div>
+    </div>
+
+    <div id="step2" class="hidden">
+      <div class="card">
+        <div class="section-tag tag-life">生活面</div>
+        <div class="card-title">最近の生活・気持ちについて</div>
+        <div class="field">
+          <label>学校生活の様子（あてはまるものすべて）</label>
+          <div class="choices">
+            <div class="choice" onclick="toggleCheck(this,'school_fun','s')"><input type="checkbox"><div class="choice-text">学校は楽しんでいる<div class="choice-sub">友達関係や行事など、前向きな発言あり</div></div></div>
+            <div class="choice" onclick="toggleCheck(this,'school_friend','s')"><input type="checkbox"><div class="choice-text">友達関係に悩みがある<div class="choice-sub">人間関係でストレスを感じている様子</div></div></div>
+            <div class="choice" onclick="toggleCheck(this,'school_tired','s')"><input type="checkbox"><div class="choice-text">学校が疲れる・しんどい<div class="choice-sub">体力的・精神的な消耗の訴えあり</div></div></div>
+            <div class="choice" onclick="toggleCheck(this,'club','s')"><input type="checkbox"><div class="choice-text">部活・課外活動が充実している<div class="choice-sub">エネルギーを注いでいるものがある</div></div></div>
+            <div class="choice" onclick="toggleCheck(this,'sleep','s')"><input type="checkbox"><div class="choice-text">睡眠・生活リズムが乱れている<div class="choice-sub">夜遅くなりがち、朝起きられないなど</div></div></div>
+          </div>
+        </div>
+        <div class="field"><label>いま一番楽しいこと・熱中していること</label><input type="text" id="enjoy" placeholder="例：ゲーム、YouTube、友達と遊ぶ、バスケ"></div>
+        <div class="field">
+          <label>最近のストレス・不安に感じていること</label>
+          <div class="choices">
+            <div class="choice" onclick="toggleCheck(this,'stress_grade','s')"><input type="checkbox"><div class="choice-text">成績・テストへの不安</div></div>
+            <div class="choice" onclick="toggleCheck(this,'stress_friend','s')"><input type="checkbox"><div class="choice-text">友人関係・グループへの不安</div></div>
+            <div class="choice" onclick="toggleCheck(this,'stress_home','s')"><input type="checkbox"><div class="choice-text">家族・家庭環境のこと</div></div>
+            <div class="choice" onclick="toggleCheck(this,'stress_self','s')"><input type="checkbox"><div class="choice-text">自分の将来・自信のなさ</div></div>
+            <div class="choice" onclick="toggleCheck(this,'stress_none','s')"><input type="checkbox"><div class="choice-text">特にない・話してくれなかった</div></div>
+          </div>
+        </div>
+        <div class="field"><label>生活面メモ</label><textarea class="memo" id="life_memo" placeholder="気になった発言や様子など自由に"></textarea></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="goStep(1)">← 戻る</button>
+        <button class="btn btn-primary" onclick="goStep(3)">次へ →</button>
+      </div>
+    </div>
+
+    <div id="step3" class="hidden">
+      <div class="card">
+        <div class="section-tag tag-study">勉強面</div>
+        <div class="card-title">学習状況・塾での様子</div>
+        <div class="field">
+          <label>授業への取り組み</label>
+          <div class="radio-group">
+            <div class="radio-btn" onclick="selectRadio('attitude','とても意欲的',this)">とても意欲的</div>
+            <div class="radio-btn" onclick="selectRadio('attitude','まあまあ',this)">まあまあ</div>
+            <div class="radio-btn" onclick="selectRadio('attitude','受け身気味',this)">受け身気味</div>
+            <div class="radio-btn" onclick="selectRadio('attitude','やる気が出ていない',this)">やる気が出ていない</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>勉強面の悩み（あてはまるものすべて）</label>
+          <div class="choices">
+            <div class="choice" onclick="toggleCheck(this,'study_method','s')"><input type="checkbox"><div class="choice-text">勉強の仕方がわからない</div></div>
+            <div class="choice" onclick="toggleCheck(this,'study_concentrate','s')"><input type="checkbox"><div class="choice-text">集中できない・続かない</div></div>
+            <div class="choice" onclick="toggleCheck(this,'study_time','s')"><input type="checkbox"><div class="choice-text">時間が取れない</div></div>
+            <div class="choice" onclick="toggleCheck(this,'study_weak','s')"><input type="checkbox"><div class="choice-text">苦手科目がある</div></div>
+            <div class="choice" onclick="toggleCheck(this,'study_test','s')"><input type="checkbox"><div class="choice-text">テスト本番に弱い</div></div>
+            <div class="choice" onclick="toggleCheck(this,'study_ok','s')"><input type="checkbox"><div class="choice-text">特に悩みはない</div></div>
+          </div>
+        </div>
+        <div class="field"><label>得意・好きな科目</label><input type="text" id="strong" placeholder="例：数学、英語、体育"></div>
+        <div class="field"><label>苦手・嫌いな科目</label><input type="text" id="weak_sub" placeholder="例：国語、理科"></div>
+        <div class="field">
+          <label>直近のテスト・成績の様子</label>
+          <div class="radio-group">
+            <div class="radio-btn" onclick="selectRadio('result','上がっている',this)">上がっている</div>
+            <div class="radio-btn" onclick="selectRadio('result','横ばい',this)">横ばい</div>
+            <div class="radio-btn" onclick="selectRadio('result','下がっている',this)">下がっている</div>
+            <div class="radio-btn" onclick="selectRadio('result','まだ未受験',this)">まだ未受験</div>
+          </div>
+        </div>
+        <div class="field"><label>勉強面メモ</label><textarea class="memo" id="study_memo" placeholder="指導上のポイントや気になった発言など"></textarea></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="goStep(2)">← 戻る</button>
+        <button class="btn btn-primary" onclick="goStep(4)">次へ →</button>
+      </div>
+    </div>
+
+    <div id="step4" class="hidden">
+      <div class="card">
+        <div class="section-tag tag-future">進路面</div>
+        <div class="card-title">将来・進路への意識</div>
+        <div class="field">
+          <label>進路への関心度</label>
+          <div class="radio-group">
+            <div class="radio-btn" onclick="selectRadio('career_interest','すでに考えている',this)">すでに考えている</div>
+            <div class="radio-btn" onclick="selectRadio('career_interest','なんとなく考えている',this)">なんとなく考えている</div>
+            <div class="radio-btn" onclick="selectRadio('career_interest','あまり考えていない',this)">あまり考えていない</div>
+            <div class="radio-btn" onclick="selectRadio('career_interest','全く考えていない',this)">全く考えていない</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>進路の方向性（現時点）</label>
+          <div class="choices">
+            <div class="choice" onclick="toggleCheck(this,'career_uni','s')"><input type="checkbox"><div class="choice-text">大学進学を考えている</div></div>
+            <div class="choice" onclick="toggleCheck(this,'career_short','s')"><input type="checkbox"><div class="choice-text">専門学校・短大を考えている</div></div>
+            <div class="choice" onclick="toggleCheck(this,'career_work','s')"><input type="checkbox"><div class="choice-text">就職を考えている</div></div>
+            <div class="choice" onclick="toggleCheck(this,'career_unknown','s')"><input type="checkbox"><div class="choice-text">まだわからない・決まっていない</div></div>
+            <div class="choice" onclick="toggleCheck(this,'career_dream','s')"><input type="checkbox"><div class="choice-text">やりたいこと・夢がある</div></div>
+          </div>
+        </div>
+        <div class="field"><label>具体的な志望校・志望職種（あれば）</label><input type="text" id="target" placeholder="例：〇〇高校、理系大学、保育士"></div>
+        <div class="field">
+          <label>進路への不安（あてはまるものすべて）</label>
+          <div class="choices">
+            <div class="choice" onclick="toggleCheck(this,'career_anx_self','s')"><input type="checkbox"><div class="choice-text">自分に何が向いているかわからない</div></div>
+            <div class="choice" onclick="toggleCheck(this,'career_anx_grade','s')"><input type="checkbox"><div class="choice-text">成績が届くか不安</div></div>
+            <div class="choice" onclick="toggleCheck(this,'career_anx_parent','s')"><input type="checkbox"><div class="choice-text">親の意見と自分の希望がちがう</div></div>
+            <div class="choice" onclick="toggleCheck(this,'career_anx_info','s')"><input type="checkbox"><div class="choice-text">情報が少なくてよくわからない</div></div>
+            <div class="choice" onclick="toggleCheck(this,'career_anx_none','s')"><input type="checkbox"><div class="choice-text">特に不安はない</div></div>
+          </div>
+        </div>
+        <div class="field"><label>進路面メモ</label><textarea class="memo" id="career_memo" placeholder="生徒の言葉や印象的なエピソードなど"></textarea></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="goStep(3)">← 戻る</button>
+        <button class="btn btn-primary" onclick="goStep(5)">次へ →</button>
+      </div>
+    </div>
+
+    <div id="step5" class="hidden">
+      <div class="card">
+        <div class="section-tag tag-base">特記事項</div>
+        <div class="card-title">講師からの所感・特記事項</div>
+        <div class="field"><label>この生徒のいいところ・光っていた点</label><textarea class="memo" id="good" placeholder="例：素直に話してくれた、責任感が強そう、ユーモアがある"></textarea></div>
+        <div class="field"><label>今後の指導方針・保護者へ伝えたいこと</label><textarea class="memo" id="policy" placeholder="例：自己肯定感を上げながら進めたい、まず苦手な数学から立て直す"></textarea></div>
+        <div class="field"><label>その他・特記事項</label><textarea class="memo" id="note" placeholder="その他気になること、家庭環境など"></textarea></div>
+      </div>
+      <div class="actions"><button class="btn btn-ghost" onclick="goStep(4)">← 戻る</button></div>
+      <button class="btn-gen" id="gen-btn" onclick="generateReport()">保護者向け報告文を生成する</button>
+      <div id="result-area"></div>
+    </div>
+  </div>
+
+  <!-- ===== 保護者面談 ===== -->
+  <div id="screen-parent" class="screen">
+    <div class="step-bar">
+      <div class="step active" id="ps1"></div>
+      <div class="step" id="ps2"></div>
+      <div class="step" id="ps3"></div>
+      <div class="step" id="ps4"></div>
+    </div>
+
+    <div id="pstep1">
+      <div class="card">
+        <div class="card-title">基本情報</div>
+        <div class="field"><label>生徒名</label><input type="text" id="p-name" placeholder="例：山田 太郎"></div>
+        <div class="field">
+          <label>学年</label>
+          <div class="radio-group">
+            <div class="radio-btn" onclick="selectRadio('p_grade','中1',this)">中1</div>
+            <div class="radio-btn" onclick="selectRadio('p_grade','中2',this)">中2</div>
+            <div class="radio-btn" onclick="selectRadio('p_grade','中3',this)">中3</div>
+            <div class="radio-btn" onclick="selectRadio('p_grade','高1',this)">高1</div>
+            <div class="radio-btn" onclick="selectRadio('p_grade','高2',this)">高2</div>
+            <div class="radio-btn" onclick="selectRadio('p_grade','高3',this)">高3</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>面談日</label>
+          <div class="cal-wrap" id="cal-wrap-p">
+            <button class="cal-trigger" onclick="toggleCal('p',event)" type="button">
+              <span style="font-size:15px">📅</span><span id="cal-display-p" class="cal-placeholder">日付を選択</span>
+            </button>
+            <div class="cal-popup hidden" id="cal-popup-p">
+              <div class="cal-header">
+                <button class="cal-nav" onclick="changeMonth('p',-1)" type="button">‹</button>
+                <span class="cal-month-label" id="cal-title-p"></span>
+                <button class="cal-nav" onclick="changeMonth('p',1)" type="button">›</button>
+              </div>
+              <div class="cal-grid" id="cal-grid-p"></div>
+            </div>
+          </div>
+        </div>
+        <div class="field"><label>保護者名</label><input type="text" id="p-parent-name" placeholder="例：山田 花子"></div>
+        <div class="field">
+          <label>続柄</label>
+          <div class="radio-group">
+            <div class="radio-btn" onclick="selectRadio('p_relation','お母様',this)">お母様</div>
+            <div class="radio-btn" onclick="selectRadio('p_relation','お父様',this)">お父様</div>
+            <div class="radio-btn" onclick="selectRadio('p_relation','両親',this)">両親</div>
+            <div class="radio-btn" onclick="selectRadio('p_relation','その他',this)">その他</div>
+          </div>
+        </div>
+      </div>
+      <div class="actions"><button class="btn btn-primary" onclick="pGoStep(2)">次へ →</button></div>
+    </div>
+
+    <div id="pstep2" class="hidden">
+      <div class="card">
+        <div class="section-tag tag-life">家庭での様子</div>
+        <div class="card-title">自宅・家庭環境について</div>
+        <div class="field">
+          <label>家での学習状況</label>
+          <div class="choices">
+            <div class="choice" onclick="toggleCheck(this,'home_study_yes','p')"><input type="checkbox"><div class="choice-text">自分から勉強している<div class="choice-sub">宿題・自習を自発的に取り組んでいる</div></div></div>
+            <div class="choice" onclick="toggleCheck(this,'home_study_push','p')"><input type="checkbox"><div class="choice-text">声をかければやる<div class="choice-sub">促せば机に向かう</div></div></div>
+            <div class="choice" onclick="toggleCheck(this,'home_study_no','p')"><input type="checkbox"><div class="choice-text">なかなか勉強しない<div class="choice-sub">促してもやらないことが多い</div></div></div>
+            <div class="choice" onclick="toggleCheck(this,'home_game','p')"><input type="checkbox"><div class="choice-text">ゲーム・スマホに時間を取られがち</div></div>
+            <div class="choice" onclick="toggleCheck(this,'home_busy','p')"><input type="checkbox"><div class="choice-text">部活・習い事で学習時間が少ない</div></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>生活リズムの様子</label>
+          <div class="radio-group">
+            <div class="radio-btn" onclick="selectRadio('p_rhythm','規則正しい',this)">規則正しい</div>
+            <div class="radio-btn" onclick="selectRadio('p_rhythm','やや乱れ気味',this)">やや乱れ気味</div>
+            <div class="radio-btn" onclick="selectRadio('p_rhythm','かなり乱れている',this)">かなり乱れている</div>
+          </div>
+        </div>
+        <div class="field">
+          <label>家庭の様子</label>
+          <div class="choices">
+            <div class="choice" onclick="toggleCheck(this,'fam_good','p')"><input type="checkbox"><div class="choice-text">家族の仲はよい・会話が多い</div></div>
+            <div class="choice" onclick="toggleCheck(this,'fam_tension','p')"><input type="checkbox"><div class="choice-text">子どもとの関係に緊張感がある</div></div>
+            <div class="choice" onclick="toggleCheck(this,'fam_parent_busy','p')"><input type="checkbox"><div class="choice-text">親が忙しく関わる時間が少ない</div></div>
+            <div class="choice" onclick="toggleCheck(this,'fam_sibling','p')"><input type="checkbox"><div class="choice-text">兄弟・きょうだいのこともある</div></div>
+          </div>
+        </div>
+        <div class="field"><label>家庭での様子メモ</label><textarea class="memo" id="p-home-memo" placeholder="保護者から聞いた家庭の状況など"></textarea></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="pGoStep(1)">← 戻る</button>
+        <button class="btn btn-primary" onclick="pGoStep(3)">次へ →</button>
+      </div>
+    </div>
+
+    <div id="pstep3" class="hidden">
+      <div class="card">
+        <div class="section-tag tag-parent">保護者の相談・要望</div>
+        <div class="card-title">塾への期待・心配していること</div>
+        <div class="field">
+          <label>保護者が心配していること（あてはまるものすべて）</label>
+          <div class="choices">
+            <div class="choice" onclick="toggleCheck(this,'pw_grade','p')"><input type="checkbox"><div class="choice-text">成績・学力の低下<div class="choice-sub">テスト結果や授業についていけているか</div></div></div>
+            <div class="choice" onclick="toggleCheck(this,'pw_method','p')"><input type="checkbox"><div class="choice-text">勉強の仕方がわかっていない</div></div>
+            <div class="choice" onclick="toggleCheck(this,'pw_career','p')"><input type="checkbox"><div class="choice-text">進路・志望校が決まっていない</div></div>
+            <div class="choice" onclick="toggleCheck(this,'pw_attitude','p')"><input type="checkbox"><div class="choice-text">やる気・モチベーションの低下</div></div>
+            <div class="choice" onclick="toggleCheck(this,'pw_mental','p')"><input type="checkbox"><div class="choice-text">精神面・メンタルが心配</div></div>
+            <div class="choice" onclick="toggleCheck(this,'pw_friend','p')"><input type="checkbox"><div class="choice-text">友人関係・学校生活が心配</div></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>塾への要望（あてはまるものすべて）</label>
+          <div class="choices">
+            <div class="choice" onclick="toggleCheck(this,'pr_result','p')"><input type="checkbox"><div class="choice-text">テストの点数を上げてほしい</div></div>
+            <div class="choice" onclick="toggleCheck(this,'pr_method','p')"><input type="checkbox"><div class="choice-text">勉強の仕方を教えてほしい</div></div>
+            <div class="choice" onclick="toggleCheck(this,'pr_mental','p')"><input type="checkbox"><div class="choice-text">やる気を引き出してほしい</div></div>
+            <div class="choice" onclick="toggleCheck(this,'pr_report','p')"><input type="checkbox"><div class="choice-text">こまめに状況を報告してほしい</div></div>
+            <div class="choice" onclick="toggleCheck(this,'pr_career','p')"><input type="checkbox"><div class="choice-text">進路について一緒に考えてほしい</div></div>
+          </div>
+        </div>
+        <div class="field"><label>保護者からのご相談・ご意見（自由記入）</label><textarea class="memo" id="p-request-memo" placeholder="面談中に出た具体的な相談・要望など"></textarea></div>
+        <div class="field"><label>塾からの提案・方針（面談で伝えた内容）</label><textarea class="memo" id="p-proposal-memo" placeholder="今後の指導方針、家庭でお願いしたいことなど"></textarea></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick="pGoStep(2)">← 戻る</button>
+        <button class="btn btn-primary" onclick="pGoStep(4)">次へ →</button>
+      </div>
+    </div>
+
+    <div id="pstep4" class="hidden">
+      <div class="card">
+        <div class="section-tag tag-base">講師メモ</div>
+        <div class="card-title">面談所感・次回アクション</div>
+        <div class="field"><label>保護者の印象・様子</label><textarea class="memo" id="p-impression" placeholder="例：とても心配されている様子、冷静に状況を把握されていた"></textarea></div>
+        <div class="field"><label>次回面談までのアクション</label><textarea class="memo" id="p-action" placeholder="例：数学の宿題チェックを強化、志望校資料を次回持参"></textarea></div>
+      </div>
+      <div class="actions"><button class="btn btn-ghost" onclick="pGoStep(3)">← 戻る</button></div>
+      <button class="btn-gen" id="p-gen-btn" onclick="generateParentMemo()">面談記録まとめ文を生成する</button>
+      <div id="p-result-area"></div>
+    </div>
+  </div>
+
+  <!-- ===== 成績入力 ===== -->
+  <div id="screen-grade" class="screen">
+    <div class="card">
+      <div class="section-tag tag-grade">成績入力</div>
+      <div class="card-title">テスト結果の記録</div>
+      <div class="field"><label>生徒名</label><input type="text" id="g-name" placeholder="例：山田 太郎"></div>
       <div class="field">
         <label>学年</label>
         <div class="radio-group">
-          <div class="radio-btn" onclick="selectRadio('grade','中1',this)">中1</div>
-          <div class="radio-btn" onclick="selectRadio('grade','中2',this)">中2</div>
-          <div class="radio-btn" onclick="selectRadio('grade','中3',this)">中3</div>
-          <div class="radio-btn" onclick="selectRadio('grade','高1',this)">高1</div>
-          <div class="radio-btn" onclick="selectRadio('grade','高2',this)">高2</div>
-          <div class="radio-btn" onclick="selectRadio('grade','高3',this)">高3</div>
+          <div class="radio-btn" onclick="selectRadio('g_grade','中1',this)">中1</div>
+          <div class="radio-btn" onclick="selectRadio('g_grade','中2',this)">中2</div>
+          <div class="radio-btn" onclick="selectRadio('g_grade','中3',this)">中3</div>
+          <div class="radio-btn" onclick="selectRadio('g_grade','高1',this)">高1</div>
+          <div class="radio-btn" onclick="selectRadio('g_grade','高2',this)">高2</div>
+          <div class="radio-btn" onclick="selectRadio('g_grade','高3',this)">高3</div>
         </div>
       </div>
       <div class="field">
-        <label>面談日</label>
-        <div class="cal-wrap" id="cal-wrap">
-          <button class="cal-trigger" onclick="toggleCal(event)" type="button">
-            <span style="font-size:15px">📅</span>
-            <span id="cal-display" class="cal-placeholder">日付を選択</span>
+        <label>テスト名</label>
+        <div class="radio-group" style="margin-bottom:8px">
+          <div class="radio-btn" onclick="selectRadio('g_test','中間テスト',this)">中間テスト</div>
+          <div class="radio-btn" onclick="selectRadio('g_test','期末テスト',this)">期末テスト</div>
+          <div class="radio-btn" onclick="selectRadio('g_test','実力テスト',this)">実力テスト</div>
+          <div class="radio-btn" onclick="selectRadio('g_test','模試',this)">模試</div>
+        </div>
+        <input type="text" id="g-test-custom" placeholder="上記以外の場合に記入（例：1学期期末）">
+      </div>
+      <div class="field">
+        <label>実施日</label>
+        <div class="cal-wrap" id="cal-wrap-g">
+          <button class="cal-trigger" onclick="toggleCal('g',event)" type="button">
+            <span style="font-size:15px">📅</span><span id="cal-display-g" class="cal-placeholder">日付を選択</span>
           </button>
-          <div class="cal-popup hidden" id="cal-popup">
+          <div class="cal-popup hidden" id="cal-popup-g">
             <div class="cal-header">
-              <button class="cal-nav" onclick="changeMonth(-1)" type="button">‹</button>
-              <span class="cal-month-label" id="cal-title"></span>
-              <button class="cal-nav" onclick="changeMonth(1)" type="button">›</button>
+              <button class="cal-nav" onclick="changeMonth('g',-1)" type="button">‹</button>
+              <span class="cal-month-label" id="cal-title-g"></span>
+              <button class="cal-nav" onclick="changeMonth('g',1)" type="button">›</button>
             </div>
-            <div class="cal-grid" id="cal-grid"></div>
+            <div class="cal-grid" id="cal-grid-g"></div>
           </div>
         </div>
       </div>
     </div>
-    <div class="actions"><button class="btn btn-primary" onclick="goStep(2)">次へ →</button></div>
+
+    <div class="card">
+      <div class="card-title">科目別得点（100点満点）</div>
+      <div class="grade-row"><div class="grade-label">国語</div><input type="number" class="grade-score" id="g-kokugo" min="0" max="100" placeholder="—" oninput="calcTotal()"><span class="grade-unit">点</span></div>
+      <div class="grade-row"><div class="grade-label">数学</div><input type="number" class="grade-score" id="g-math" min="0" max="100" placeholder="—" oninput="calcTotal()"><span class="grade-unit">点</span></div>
+      <div class="grade-row"><div class="grade-label">英語</div><input type="number" class="grade-score" id="g-english" min="0" max="100" placeholder="—" oninput="calcTotal()"><span class="grade-unit">点</span></div>
+      <div class="grade-row"><div class="grade-label">理科</div><input type="number" class="grade-score" id="g-rika" min="0" max="100" placeholder="—" oninput="calcTotal()"><span class="grade-unit">点</span></div>
+      <div class="grade-row"><div class="grade-label">社会</div><input type="number" class="grade-score" id="g-shakai" min="0" max="100" placeholder="—" oninput="calcTotal()"><span class="grade-unit">点</span></div>
+      <div class="grade-total-box"><span class="grade-total-label">5科合計</span><span class="grade-total-val" id="g-total">— 点</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">順位・コメント（任意）</div>
+      <div class="rank-row">
+        <div class="field" style="margin:0">
+          <label>クラス順位</label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" class="rank-input" id="g-class-rank" min="1" placeholder="—"><span style="font-size:13px;color:#666">位</span>
+          </div>
+        </div>
+        <div class="field" style="margin:0">
+          <label>学年順位</label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" class="rank-input" id="g-grade-rank" min="1" placeholder="—"><span style="font-size:13px;color:#666">位</span>
+          </div>
+        </div>
+      </div>
+      <div class="field"><label>コメント・前回比など</label><textarea class="memo" id="g-comment" placeholder="例：数学が前回より15点上がった。英語が課題。" style="min-height:60px"></textarea></div>
+    </div>
+
+    <button class="btn-save" id="g-save-btn" onclick="saveGrade()">成績をスプレッドシートに保存</button>
+    <div id="g-msg"></div>
   </div>
 
-  <!-- Step 2: 生活面 -->
-  <div id="step2" class="hidden">
-    <div class="card">
-      <div class="section-tag tag-life">生活面</div>
-      <div class="card-title">最近の生活・気持ちについて</div>
-      <div class="field">
-        <label>学校生活の様子（あてはまるものすべて）</label>
-        <div class="choices">
-          <div class="choice" onclick="toggleCheck(this,'school_fun')"><input type="checkbox"><div class="choice-text">学校は楽しんでいる<div class="choice-sub">友達関係や行事など、前向きな発言あり</div></div></div>
-          <div class="choice" onclick="toggleCheck(this,'school_friend')"><input type="checkbox"><div class="choice-text">友達関係に悩みがある<div class="choice-sub">人間関係でストレスを感じている様子</div></div></div>
-          <div class="choice" onclick="toggleCheck(this,'school_tired')"><input type="checkbox"><div class="choice-text">学校が疲れる・しんどい<div class="choice-sub">体力的・精神的な消耗の訴えあり</div></div></div>
-          <div class="choice" onclick="toggleCheck(this,'club')"><input type="checkbox"><div class="choice-text">部活・課外活動が充実している<div class="choice-sub">エネルギーを注いでいるものがある</div></div></div>
-          <div class="choice" onclick="toggleCheck(this,'sleep')"><input type="checkbox"><div class="choice-text">睡眠・生活リズムが乱れている<div class="choice-sub">夜遅くなりがち、朝起きられないなど</div></div></div>
-        </div>
-      </div>
-      <div class="field">
-        <label>いま一番楽しいこと・熱中していること</label>
-        <input type="text" id="enjoy" placeholder="例：ゲーム、YouTube、友達と遊ぶ、バスケ">
-      </div>
-      <div class="field">
-        <label>最近のストレス・不安に感じていること</label>
-        <div class="choices">
-          <div class="choice" onclick="toggleCheck(this,'stress_grade')"><input type="checkbox"><div class="choice-text">成績・テストへの不安</div></div>
-          <div class="choice" onclick="toggleCheck(this,'stress_friend')"><input type="checkbox"><div class="choice-text">友人関係・グループへの不安</div></div>
-          <div class="choice" onclick="toggleCheck(this,'stress_home')"><input type="checkbox"><div class="choice-text">家族・家庭環境のこと</div></div>
-          <div class="choice" onclick="toggleCheck(this,'stress_self')"><input type="checkbox"><div class="choice-text">自分の将来・自信のなさ</div></div>
-          <div class="choice" onclick="toggleCheck(this,'stress_none')"><input type="checkbox"><div class="choice-text">特にない・話してくれなかった</div></div>
-        </div>
-      </div>
-      <div class="field">
-        <label>生活面メモ</label>
-        <textarea class="memo" id="life_memo" placeholder="気になった発言や様子など自由に"></textarea>
-      </div>
+  <!-- ===== 生徒カルテ ===== -->
+  <div id="screen-karte" class="screen">
+    <div class="karte-search">
+      <input type="text" id="karte-name" placeholder="生徒名を入力（例：山田 太郎）" onkeydown="if(event.key==='Enter')searchKarte()">
+      <button class="karte-search-btn" onclick="searchKarte()">検索</button>
     </div>
-    <div class="actions">
-      <button class="btn btn-ghost" onclick="goStep(1)">← 戻る</button>
-      <button class="btn btn-primary" onclick="goStep(3)">次へ →</button>
-    </div>
-  </div>
-
-  <!-- Step 3: 勉強面 -->
-  <div id="step3" class="hidden">
-    <div class="card">
-      <div class="section-tag tag-study">勉強面</div>
-      <div class="card-title">学習状況・塾での様子</div>
-      <div class="field">
-        <label>授業への取り組み</label>
-        <div class="radio-group">
-          <div class="radio-btn" onclick="selectRadio('attitude','とても意欲的',this)">とても意欲的</div>
-          <div class="radio-btn" onclick="selectRadio('attitude','まあまあ',this)">まあまあ</div>
-          <div class="radio-btn" onclick="selectRadio('attitude','受け身気味',this)">受け身気味</div>
-          <div class="radio-btn" onclick="selectRadio('attitude','やる気が出ていない',this)">やる気が出ていない</div>
-        </div>
-      </div>
-      <div class="field">
-        <label>勉強面の悩み（あてはまるものすべて）</label>
-        <div class="choices">
-          <div class="choice" onclick="toggleCheck(this,'study_method')"><input type="checkbox"><div class="choice-text">勉強の仕方がわからない</div></div>
-          <div class="choice" onclick="toggleCheck(this,'study_concentrate')"><input type="checkbox"><div class="choice-text">集中できない・続かない</div></div>
-          <div class="choice" onclick="toggleCheck(this,'study_time')"><input type="checkbox"><div class="choice-text">時間が取れない</div></div>
-          <div class="choice" onclick="toggleCheck(this,'study_weak')"><input type="checkbox"><div class="choice-text">苦手科目がある</div></div>
-          <div class="choice" onclick="toggleCheck(this,'study_test')"><input type="checkbox"><div class="choice-text">テスト本番に弱い</div></div>
-          <div class="choice" onclick="toggleCheck(this,'study_ok')"><input type="checkbox"><div class="choice-text">特に悩みはない</div></div>
-        </div>
-      </div>
-      <div class="field">
-        <label>得意・好きな科目</label>
-        <input type="text" id="strong" placeholder="例：数学、英語、体育">
-      </div>
-      <div class="field">
-        <label>苦手・嫌いな科目</label>
-        <input type="text" id="weak_sub" placeholder="例：国語、理科">
-      </div>
-      <div class="field">
-        <label>直近のテスト・成績の様子</label>
-        <div class="radio-group">
-          <div class="radio-btn" onclick="selectRadio('result','上がっている',this)">上がっている</div>
-          <div class="radio-btn" onclick="selectRadio('result','横ばい',this)">横ばい</div>
-          <div class="radio-btn" onclick="selectRadio('result','下がっている',this)">下がっている</div>
-          <div class="radio-btn" onclick="selectRadio('result','まだ未受験',this)">まだ未受験</div>
-        </div>
-      </div>
-      <div class="field">
-        <label>勉強面メモ</label>
-        <textarea class="memo" id="study_memo" placeholder="指導上のポイントや気になった発言など"></textarea>
-      </div>
-    </div>
-    <div class="actions">
-      <button class="btn btn-ghost" onclick="goStep(2)">← 戻る</button>
-      <button class="btn btn-primary" onclick="goStep(4)">次へ →</button>
+    <div id="karte-area">
+      <div class="empty-state">生徒名を入力して「検索」を押すと<br>過去の面談・成績記録が表示されます</div>
     </div>
   </div>
 
-  <!-- Step 4: 進路面 -->
-  <div id="step4" class="hidden">
-    <div class="card">
-      <div class="section-tag tag-future">進路面</div>
-      <div class="card-title">将来・進路への意識</div>
-      <div class="field">
-        <label>進路への関心度</label>
-        <div class="radio-group">
-          <div class="radio-btn" onclick="selectRadio('career_interest','すでに考えている',this)">すでに考えている</div>
-          <div class="radio-btn" onclick="selectRadio('career_interest','なんとなく考えている',this)">なんとなく考えている</div>
-          <div class="radio-btn" onclick="selectRadio('career_interest','あまり考えていない',this)">あまり考えていない</div>
-          <div class="radio-btn" onclick="selectRadio('career_interest','全く考えていない',this)">全く考えていない</div>
-        </div>
-      </div>
-      <div class="field">
-        <label>進路の方向性（現時点）</label>
-        <div class="choices">
-          <div class="choice" onclick="toggleCheck(this,'career_uni')"><input type="checkbox"><div class="choice-text">大学進学を考えている</div></div>
-          <div class="choice" onclick="toggleCheck(this,'career_short')"><input type="checkbox"><div class="choice-text">専門学校・短大を考えている</div></div>
-          <div class="choice" onclick="toggleCheck(this,'career_work')"><input type="checkbox"><div class="choice-text">就職を考えている</div></div>
-          <div class="choice" onclick="toggleCheck(this,'career_unknown')"><input type="checkbox"><div class="choice-text">まだわからない・決まっていない</div></div>
-          <div class="choice" onclick="toggleCheck(this,'career_dream')"><input type="checkbox"><div class="choice-text">やりたいこと・夢がある</div></div>
-        </div>
-      </div>
-      <div class="field">
-        <label>具体的な志望校・志望職種（あれば）</label>
-        <input type="text" id="target" placeholder="例：〇〇高校、理系大学、保育士">
-      </div>
-      <div class="field">
-        <label>進路への不安（あてはまるものすべて）</label>
-        <div class="choices">
-          <div class="choice" onclick="toggleCheck(this,'career_anx_self')"><input type="checkbox"><div class="choice-text">自分に何が向いているかわからない</div></div>
-          <div class="choice" onclick="toggleCheck(this,'career_anx_grade')"><input type="checkbox"><div class="choice-text">成績が届くか不安</div></div>
-          <div class="choice" onclick="toggleCheck(this,'career_anx_parent')"><input type="checkbox"><div class="choice-text">親の意見と自分の希望がちがう</div></div>
-          <div class="choice" onclick="toggleCheck(this,'career_anx_info')"><input type="checkbox"><div class="choice-text">情報が少なくてよくわからない</div></div>
-          <div class="choice" onclick="toggleCheck(this,'career_anx_none')"><input type="checkbox"><div class="choice-text">特に不安はない</div></div>
-        </div>
-      </div>
-      <div class="field">
-        <label>進路面メモ</label>
-        <textarea class="memo" id="career_memo" placeholder="生徒の言葉や印象的なエピソードなど"></textarea>
-      </div>
-    </div>
-    <div class="actions">
-      <button class="btn btn-ghost" onclick="goStep(3)">← 戻る</button>
-      <button class="btn btn-primary" onclick="goStep(5)">次へ →</button>
-    </div>
-  </div>
-
-  <!-- Step 5: 特記・生成 -->
-  <div id="step5" class="hidden">
-    <div class="card">
-      <div class="section-tag tag-base">特記事項</div>
-      <div class="card-title">講師からの所感・特記事項</div>
-      <div class="field">
-        <label>この生徒のいいところ・光っていた点</label>
-        <textarea class="memo" id="good" placeholder="例：素直に話してくれた、責任感が強そう、ユーモアがある"></textarea>
-      </div>
-      <div class="field">
-        <label>今後の指導方針・保護者へ伝えたいこと</label>
-        <textarea class="memo" id="policy" placeholder="例：自己肯定感を上げながら進めたい、まず苦手な数学から立て直す"></textarea>
-      </div>
-      <div class="field">
-        <label>その他・特記事項</label>
-        <textarea class="memo" id="note" placeholder="その他気になること、家庭環境など"></textarea>
-      </div>
-    </div>
-    <div class="actions">
-      <button class="btn btn-ghost" onclick="goStep(4)">← 戻る</button>
-    </div>
-    <button class="btn-gen" id="gen-btn" onclick="generateReport()">保護者向け報告文を生成する</button>
-    <div id="result-area"></div>
-  </div>
 </div>
-
 <script>
-// ===== 設定 =====
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwtLtrArQ1ECX0cNLh85rMJ6MaV3t-A3qDNxuPpbgg-LjTU8mMDOfdDEN2jZqzs5LP5zw/exec';
 
 // ===== State =====
-const state = { grade:'', attitude:'', result:'', career_interest:'', checks:new Set(), selectedDate:null };
-let calYear, calMonth, generatedReport = '';
+const sState = { grade:'', attitude:'', result:'', career_interest:'', checks:new Set(), selectedDate:null };
+const pState = { p_grade:'', p_relation:'', p_rhythm:'', checks:new Set(), selectedDate:null };
+const gState = { g_grade:'', g_test:'', selectedDate:null };
 
-// ===== APIキー =====
+let generatedReport = '', generatedParentMemo = '', generatedKarte = '', karteData = null;
+
+// ===== API Key =====
 function saveApiKey(val) { localStorage.setItem('anthropic_api_key', val); }
 function getApiKey() { return document.getElementById('api-key').value || localStorage.getItem('anthropic_api_key') || ''; }
-window.onload = () => {
-  const saved = localStorage.getItem('anthropic_api_key');
-  if (saved) document.getElementById('api-key').value = saved;
-  initCal();
+
+// ===== Calendar (generic, keyed by 's'|'p'|'g') =====
+const cals = {
+  s: { year:0, month:0 },
+  p: { year:0, month:0 },
+  g: { year:0, month:0 }
 };
 
-// ===== カレンダー =====
+function calState(key) { return key==='p' ? pState : key==='g' ? gState : sState; }
+
 function initCal() {
-  const t = new Date(); calYear = t.getFullYear(); calMonth = t.getMonth(); renderCal();
+  const t = new Date();
+  ['s','p','g'].forEach(k => { cals[k].year = t.getFullYear(); cals[k].month = t.getMonth(); renderCal(k); });
 }
-function renderCal() {
+
+function renderCal(key) {
+  const c = cals[key];
   const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  document.getElementById('cal-title').textContent = calYear + '年 ' + months[calMonth];
-  const grid = document.getElementById('cal-grid');
+  document.getElementById('cal-title-'+key).textContent = c.year+'年 '+months[c.month];
+  const grid = document.getElementById('cal-grid-'+key);
   grid.innerHTML = '';
-  ['日','月','火','水','木','金','土'].forEach((d,i) => {
-    const el = document.createElement('div');
-    el.className = 'cal-dow' + (i===0?' sun':i===6?' sat':'');
-    el.textContent = d; grid.appendChild(el);
+  ['日','月','火','水','木','金','土'].forEach((d,i)=>{
+    const el=document.createElement('div');
+    el.className='cal-dow'+(i===0?' sun':i===6?' sat':'');
+    el.textContent=d; grid.appendChild(el);
   });
-  const first = new Date(calYear, calMonth, 1).getDay();
-  const last = new Date(calYear, calMonth+1, 0).getDate();
-  const today = new Date();
-  for (let i=0;i<first;i++) {
-    const el=document.createElement('button'); el.className='cal-day empty'; el.type='button'; grid.appendChild(el);
-  }
-  for (let d=1;d<=last;d++) {
-    const el = document.createElement('button'); el.type='button';
-    const dow = (first+d-1)%7;
-    let cls = 'cal-day';
-    if (dow===0) cls+=' sun-col'; if (dow===6) cls+=' sat-col';
-    if (today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d) cls+=' today';
-    if (state.selectedDate&&state.selectedDate.y===calYear&&state.selectedDate.m===calMonth&&state.selectedDate.d===d) cls+=' selected';
+  const first=new Date(c.year,c.month,1).getDay();
+  const last=new Date(c.year,c.month+1,0).getDate();
+  const today=new Date();
+  for(let i=0;i<first;i++){const el=document.createElement('button');el.className='cal-day empty';el.type='button';grid.appendChild(el);}
+  for(let d=1;d<=last;d++){
+    const el=document.createElement('button'); el.type='button';
+    const dow=(first+d-1)%7;
+    let cls='cal-day';
+    if(dow===0)cls+=' sun-col'; if(dow===6)cls+=' sat-col';
+    if(today.getFullYear()===c.year&&today.getMonth()===c.month&&today.getDate()===d)cls+=' today';
+    const sel=calState(key).selectedDate;
+    if(sel&&sel.y===c.year&&sel.m===c.month&&sel.d===d)cls+=' selected';
     el.className=cls; el.textContent=d;
-    el.onclick=()=>selectDate(calYear,calMonth,d);
+    el.onclick=(()=>{const dy=d;return()=>selectDate(key,c.year,c.month,dy);})();
     grid.appendChild(el);
   }
 }
-function selectDate(y,m,d) {
-  state.selectedDate={y,m,d};
+
+function selectDate(key,y,m,d){
+  calState(key).selectedDate={y,m,d};
   const months=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  const disp = y+'年'+months[m]+d+'日';
-  const dispEl = document.getElementById('cal-display');
-  dispEl.textContent=disp; dispEl.classList.remove('cal-placeholder');
-  document.getElementById('cal-popup').classList.add('hidden');
-  renderCal();
+  const el=document.getElementById('cal-display-'+key);
+  el.textContent=y+'年'+months[m]+d+'日'; el.classList.remove('cal-placeholder');
+  document.getElementById('cal-popup-'+key).classList.add('hidden');
+  renderCal(key);
 }
-function toggleCal(e) { e.stopPropagation(); document.getElementById('cal-popup').classList.toggle('hidden'); }
-function changeMonth(dir) {
-  calMonth+=dir;
-  if(calMonth>11){calMonth=0;calYear++;} if(calMonth<0){calMonth=11;calYear--;}
-  renderCal();
+
+function toggleCal(key,e){
+  e.stopPropagation();
+  document.getElementById('cal-popup-'+key).classList.toggle('hidden');
 }
-document.addEventListener('click', e => {
-  const wrap=document.getElementById('cal-wrap');
-  if(wrap&&!wrap.contains(e.target)) document.getElementById('cal-popup').classList.add('hidden');
+
+function changeMonth(key,dir){
+  cals[key].month+=dir;
+  if(cals[key].month>11){cals[key].month=0;cals[key].year++;}
+  if(cals[key].month<0){cals[key].month=11;cals[key].year--;}
+  renderCal(key);
+}
+
+document.addEventListener('click',e=>{
+  ['s','p','g'].forEach(k=>{
+    const popup=document.getElementById('cal-popup-'+k);
+    const wrap=document.getElementById('cal-wrap-'+k);
+    if(popup&&!popup.classList.contains('hidden')&&wrap&&!wrap.contains(e.target))
+      popup.classList.add('hidden');
+  });
 });
 
-// ===== ステップ移動 =====
-function goStep(n) {
-  for(let i=1;i<=5;i++) {
-    document.getElementById('step'+i).classList.toggle('hidden', i!==n);
+function getDateStr(st){ const d=st.selectedDate; if(!d)return'（日付未選択）'; const m=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']; return d.y+'年'+m[d.m]+d.d+'日'; }
+
+// ===== Tab =====
+function switchTab(name,btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ===== Shared helpers =====
+function toggleCheck(el,key,ns){
+  const cb=el.querySelector('input');
+  const target=ns==='p'?pState.checks:sState.checks;
+  if(el.classList.contains('selected')){el.classList.remove('selected');cb.checked=false;target.delete(key);}
+  else{el.classList.add('selected');cb.checked=true;target.add(key);}
+}
+
+function selectRadio(field,val,el){
+  el.parentElement.querySelectorAll('.radio-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  if(field.startsWith('p_'))pState[field]=val;
+  else if(field.startsWith('g_'))gState[field]=val;
+  else sState[field]=val;
+}
+
+function v(id){return(document.getElementById(id)||{}).value||'';}
+
+// ===== 生徒面談 steps =====
+function goStep(n){
+  for(let i=1;i<=5;i++){
+    document.getElementById('step'+i).classList.toggle('hidden',i!==n);
     const s=document.getElementById('s'+i);
     s.classList.remove('active','done');
-    if(i<n) s.classList.add('done'); else if(i===n) s.classList.add('active');
+    if(i<n)s.classList.add('done');else if(i===n)s.classList.add('active');
   }
   window.scrollTo(0,0);
 }
 
-// ===== チェック・ラジオ =====
-function toggleCheck(el, key) {
-  const cb=el.querySelector('input');
-  if(el.classList.contains('selected')){ el.classList.remove('selected'); cb.checked=false; state.checks.delete(key); }
-  else { el.classList.add('selected'); cb.checked=true; state.checks.add(key); }
-}
-function selectRadio(field, val, el) {
-  el.parentElement.querySelectorAll('.radio-btn').forEach(b=>b.classList.remove('selected'));
-  el.classList.add('selected'); state[field]=val;
-}
-
-function v(id) { return (document.getElementById(id)||{}).value||''; }
-function getDateStr() {
-  if(!state.selectedDate) return '（日付未選択）';
-  const months=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  return state.selectedDate.y+'年'+months[state.selectedDate.m]+state.selectedDate.d+'日';
+// ===== 保護者面談 steps =====
+function pGoStep(n){
+  for(let i=1;i<=4;i++){
+    document.getElementById('pstep'+i).classList.toggle('hidden',i!==n);
+    const s=document.getElementById('ps'+i);
+    s.classList.remove('active','done');
+    if(i<n)s.classList.add('done');else if(i===n)s.classList.add('active');
+  }
+  window.scrollTo(0,0);
 }
 
-// ===== 報告文生成 =====
-async function generateReport() {
-let apiKey = getApiKey();  if (!apiKey) { apiKey = ''; }
+// ===== 生徒面談: 報告文生成 =====
+async function generateReport(){
+  const btn=document.getElementById('gen-btn');
+  btn.disabled=true; btn.textContent='生成中...';
+  const ra=document.getElementById('result-area');
+  ra.innerHTML='<div class="loading">報告文を生成中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
 
-  const btn = document.getElementById('gen-btn');
-  btn.disabled = true; btn.textContent = '生成中...';
-  const ra = document.getElementById('result-area');
-  ra.innerHTML = '<div class="loading">報告文を生成中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
-
-  const payload = {
-    date: getDateStr(), name: v('name')||'お子様', grade: state.grade,
-    checks: [...state.checks].join(','), enjoy: v('enjoy'), life_memo: v('life_memo'),
-    attitude: state.attitude, strong: v('strong'), weak: v('weak_sub'),
-    result: state.result, study_memo: v('study_memo'),
-    career_interest: state.career_interest, target: v('target'), career_memo: v('career_memo'),
-    good: v('good'), policy: v('policy'), note: v('note'), report: ''
-  };
-
-  const prompt = `あなたは学習塾「エイメイ学院」の塾長です。中高生との面談記録をもとに、保護者向けの温かい報告文を書いてください。
+  const prompt=`あなたは学習塾「エイメイ学院」の塾長です。中高生との面談記録をもとに、保護者向けの温かい報告文を書いてください。
 
 【面談情報】
-生徒名：${payload.name}　学年：${payload.grade}　面談日：${payload.date}
+生徒名：${v('name')||'お子様'}　学年：${sState.grade}　面談日：${getDateStr(sState)}
 
 【生活面】
-チェック：${payload.checks}　楽しいこと：${payload.enjoy}　メモ：${payload.life_memo}
+チェック：${[...sState.checks].join(',')}　楽しいこと：${v('enjoy')}　メモ：${v('life_memo')}
 
 【勉強面】
-授業態度：${payload.attitude}　得意：${payload.strong}　苦手：${payload.weak}　成績：${payload.result}　メモ：${payload.study_memo}
+授業態度：${sState.attitude}　得意：${v('strong')}　苦手：${v('weak_sub')}　成績：${sState.result}　メモ：${v('study_memo')}
 
 【進路面】
-関心度：${payload.career_interest}　志望：${payload.target}　メモ：${payload.career_memo}
+関心度：${sState.career_interest}　志望：${v('target')}　メモ：${v('career_memo')}
 
 【講師所感】
-いいところ：${payload.good}　方針：${payload.policy}　特記：${payload.note}
+いいところ：${v('good')}　方針：${v('policy')}　特記：${v('note')}
 
 【条件】
 ・保護者へのお手紙形式、「保護者様へ」で書き始める
@@ -465,70 +769,279 @@ let apiKey = getApiKey();  if (!apiKey) { apiKey = ''; }
 ・生活・勉強・進路の順で自然な流れ
 ・ネガティブも「成長の余地」として前向きに表現
 ・最後は温かく前向きな一言で締める
-・短い文・体言止めを適度に使い読みやすく
 ・400〜500字程度`;
 
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:1000, messages:[{role:'user',content:prompt}] })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    generatedReport = data.content?.[0]?.text || '';     if (!generatedReport) throw new Error('レスポンス: ' + JSON.stringify(data));
-    payload.report = generatedReport;
-
-    ra.innerHTML = `<div class="result-box">${generatedReport}</div>
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    generatedReport=data.content?.[0]?.text||'';
+    if(!generatedReport)throw new Error('レスポンスが空です');
+    ra.innerHTML=`<div class="result-box">${generatedReport}</div>
       <div class="result-actions">
-        <button class="copy-btn" onclick="copyReport()">コピーする</button>
-        <button class="sheet-btn" id="save-btn" onclick="saveToSheet()">スプレッドシートに保存</button>
-      </div>
-      <div id="sheet-msg"></div>`;
-  } catch(e) {
-    ra.innerHTML = `<div class="error-msg">生成に失敗しました：${e.message}</div>`;
-  } finally {
-    btn.disabled=false; btn.textContent='保護者向け報告文を生成する';
-  }
+        <button class="copy-btn" onclick="copyText(generatedReport,this)">コピーする</button>
+        <button class="sheet-btn" id="s-save-btn" onclick="saveStudentToSheet()">スプレッドシートに保存</button>
+      </div><div id="s-sheet-msg"></div>`;
+  }catch(e){
+    ra.innerHTML=`<div class="error-msg">生成に失敗しました：${e.message}</div>`;
+  }finally{btn.disabled=false;btn.textContent='保護者向け報告文を生成する';}
 }
 
-// ===== コピー =====
-function copyReport() {
-  navigator.clipboard.writeText(generatedReport).then(()=>{
-    document.querySelector('.copy-btn').textContent='コピーしました！';
-    setTimeout(()=>{ const b=document.querySelector('.copy-btn'); if(b) b.textContent='コピーする'; },2000);
-  });
-}
-
-// ===== スプレッドシート保存 =====
-async function saveToSheet() {
-  const btn = document.getElementById('save-btn');
-  const msg = document.getElementById('sheet-msg');
+async function saveStudentToSheet(){
+  const btn=document.getElementById('s-save-btn');
+  const msg=document.getElementById('s-sheet-msg');
   btn.disabled=true; btn.textContent='保存中...';
-
-  const payload = {
-    date: getDateStr(), name: v('name')||'お子様', grade: state.grade,
-    checks: [...state.checks].join(','), enjoy: v('enjoy'), life_memo: v('life_memo'),
-    attitude: state.attitude, strong: v('strong'), weak: v('weak_sub'),
-    result: state.result, study_memo: v('study_memo'),
-    career_interest: state.career_interest, target: v('target'), career_memo: v('career_memo'),
-    good: v('good'), policy: v('policy'), note: v('note'), report: generatedReport
-  };
-
-  try {
-    await fetch(GAS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    msg.innerHTML = '<div class="success-msg">スプレッドシートに保存しました！</div>';
+  const payload={sheet:'生徒面談',date:getDateStr(sState),name:v('name')||'お子様',grade:sState.grade,checks:[...sState.checks].join(','),enjoy:v('enjoy'),life_memo:v('life_memo'),attitude:sState.attitude,strong:v('strong'),weak:v('weak_sub'),result:sState.result,study_memo:v('study_memo'),career_interest:sState.career_interest,target:v('target'),career_memo:v('career_memo'),good:v('good'),policy:v('policy'),note:v('note'),report:generatedReport};
+  try{
+    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    msg.innerHTML='<div class="success-msg">スプレッドシートに保存しました！</div>';
     btn.textContent='保存済み';
-  } catch(e) {
-    msg.innerHTML = '<div class="error-msg">保存に失敗しました。もう一度お試しください。</div>';
+  }catch(e){
+    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
     btn.disabled=false; btn.textContent='スプレッドシートに保存';
   }
 }
+
+// ===== 保護者面談: まとめ文生成 =====
+async function generateParentMemo(){
+  const btn=document.getElementById('p-gen-btn');
+  btn.disabled=true; btn.textContent='生成中...';
+  const ra=document.getElementById('p-result-area');
+  ra.innerHTML='<div class="loading">まとめ文を生成中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
+
+  const prompt=`あなたは学習塾「エイメイ学院」の講師です。保護者面談の記録をもとに、講師向けの面談まとめ文を作成してください。
+
+【面談情報】
+生徒名：${v('p-name')||'（未入力）'}　学年：${pState.p_grade}　面談日：${getDateStr(pState)}
+保護者名：${v('p-parent-name')||'（未入力）'}　続柄：${pState.p_relation}
+
+【家庭での様子】
+生活リズム：${pState.p_rhythm}
+チェック項目：${[...pState.checks].join(',')}
+メモ：${v('p-home-memo')}
+
+【保護者の相談・要望】
+要望メモ：${v('p-request-memo')}
+塾からの提案：${v('p-proposal-memo')}
+
+【講師メモ】
+保護者の印象：${v('p-impression')}
+次回アクション：${v('p-action')}
+
+【条件】
+・講師・スタッフが共有する内部記録として書く
+・「${v('p-name')||'生徒'}さん保護者面談まとめ（${getDateStr(pState)}）」で始める
+・家庭状況→保護者の心配・要望→今後の対応方針の順で整理
+・箇条書きを適度に使い読みやすく
+・最後に「次回面談に向けてのアクション」を明記
+・300〜400字程度`;
+
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    generatedParentMemo=data.content?.[0]?.text||'';
+    if(!generatedParentMemo)throw new Error('レスポンスが空です');
+    ra.innerHTML=`<div class="result-box">${generatedParentMemo}</div>
+      <div class="result-actions">
+        <button class="copy-btn" onclick="copyText(generatedParentMemo,this)">コピーする</button>
+        <button class="sheet-btn" id="p-save-btn" onclick="saveParentToSheet()">スプレッドシートに保存</button>
+      </div><div id="p-sheet-msg"></div>`;
+  }catch(e){
+    ra.innerHTML=`<div class="error-msg">生成に失敗しました：${e.message}</div>`;
+  }finally{btn.disabled=false;btn.textContent='面談記録まとめ文を生成する';}
+}
+
+async function saveParentToSheet(){
+  const btn=document.getElementById('p-save-btn');
+  const msg=document.getElementById('p-sheet-msg');
+  btn.disabled=true; btn.textContent='保存中...';
+  const payload={sheet:'保護者面談',date:getDateStr(pState),name:v('p-name'),grade:pState.p_grade,parent_name:v('p-parent-name'),relation:pState.p_relation,rhythm:pState.p_rhythm,checks:[...pState.checks].join(','),home_memo:v('p-home-memo'),request_memo:v('p-request-memo'),proposal_memo:v('p-proposal-memo'),impression:v('p-impression'),action:v('p-action'),memo:generatedParentMemo};
+  try{
+    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    msg.innerHTML='<div class="success-msg">スプレッドシートに保存しました！</div>';
+    btn.textContent='保存済み';
+  }catch(e){
+    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    btn.disabled=false; btn.textContent='スプレッドシートに保存';
+  }
+}
+
+// ===== 成績: 合計 =====
+function calcTotal(){
+  const ids=['g-kokugo','g-math','g-english','g-rika','g-shakai'];
+  let total=0,count=0;
+  ids.forEach(id=>{const val=parseInt(v(id));if(!isNaN(val)){total+=val;count++;}});
+  document.getElementById('g-total').textContent=count>0?total+' 点':'— 点';
+}
+
+// ===== 成績: 保存 =====
+async function saveGrade(){
+  const btn=document.getElementById('g-save-btn');
+  const msg=document.getElementById('g-msg');
+  const name=v('g-name');
+  if(!name){msg.innerHTML='<div class="error-msg">生徒名を入力してください</div>';return;}
+  btn.disabled=true; btn.textContent='保存中...';
+
+  const ids=['g-kokugo','g-math','g-english','g-rika','g-shakai'];
+  const labels=['国語','数学','英語','理科','社会'];
+  let total=0,count=0;
+  const scores={};
+  ids.forEach((id,i)=>{const val=v(id);scores[labels[i]]=val;const num=parseInt(val);if(!isNaN(num)){total+=num;count++;}});
+
+  const payload={sheet:'成績',date:getDateStr(gState),name,grade:gState.g_grade,test:v('g-test-custom')||gState.g_test,...scores,total:count>0?total:'',class_rank:v('g-class-rank'),grade_rank:v('g-grade-rank'),comment:v('g-comment')};
+
+  try{
+    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    msg.innerHTML='<div class="success-msg">スプレッドシートに保存しました！</div>';
+    btn.textContent='保存済み';
+  }catch(e){
+    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    btn.disabled=false; btn.textContent='成績をスプレッドシートに保存';
+  }
+}
+
+// ===== カルテ: 検索 =====
+async function searchKarte(){
+  const name=v('karte-name').trim();
+  if(!name)return;
+  const area=document.getElementById('karte-area');
+  area.innerHTML='<div class="loading">データを取得中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
+  try{
+    const res=await fetch('/api/karte?name='+encodeURIComponent(name));
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    karteData=await res.json();
+    renderKarte(karteData,name);
+  }catch(e){
+    area.innerHTML=`<div class="error-msg">データ取得に失敗しました。<br><small>${e.message}</small></div>`;
+  }
+}
+
+function renderKarte(data,name){
+  const area=document.getElementById('karte-area');
+  const hasData=(data.student&&data.student.length)||(data.parent&&data.parent.length)||(data.grade&&data.grade.length);
+  if(!hasData){area.innerHTML=`<div class="empty-state">「${name}」の記録が見つかりませんでした。<br>氏名の表記を確認してください。</div>`;return;}
+
+  let html='';
+
+  // 成績表
+  const grades=data.grade||[];
+  if(grades.length){
+    const sorted=[...grades].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    html+=`<div class="card"><div class="card-title">${name} さんの成績履歴</div>
+      <div style="overflow-x:auto">
+      <table class="grade-table">
+        <tr><th>日付</th><th>テスト</th><th>国</th><th>数</th><th>英</th><th>理</th><th>社</th><th>合計</th></tr>`;
+    sorted.forEach(g=>{
+      html+=`<tr><td>${g.date||''}</td><td>${g.test||''}</td><td>${g['国語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['英語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="total-col">${g.total||'—'}</td></tr>`;
+    });
+    html+=`</table></div></div>`;
+  }
+
+  // タイムライン（面談のみ）
+  const items=[];
+  (data.student||[]).forEach(r=>items.push({type:'s',date:r.date||'',data:r}));
+  (data.parent||[]).forEach(r=>items.push({type:'p',date:r.date||'',data:r}));
+  items.sort((a,b)=>b.date.localeCompare(a.date));
+
+  if(items.length){
+    html+=`<div class="card"><div class="card-title">面談履歴</div><div class="timeline">`;
+    items.forEach(item=>{
+      const d=item.data;
+      const cls=item.type==='s'?'tl-student':'tl-parent';
+      const badge=item.type==='s'?'tl-badge-s':'tl-badge-p';
+      const label=item.type==='s'?'生徒面談':'保護者面談';
+      let content='';
+      if(item.type==='s'){
+        const parts=[d.attitude&&`授業：${d.attitude}`,d.strong&&`得意：${d.strong}`,d.weak&&`苦手：${d.weak}`,d.result&&`成績推移：${d.result}`].filter(Boolean);
+        content=parts.join(' / ');
+        if(d.report)content+=`<div class="tl-quote">"${d.report.slice(0,80)}…"</div>`;
+      }else{
+        const parts=[d.relation&&`${d.relation}`,d.rhythm&&`リズム：${d.rhythm}`].filter(Boolean);
+        content=parts.join(' / ');
+        if(d.memo)content+=`<div class="tl-quote">"${d.memo.slice(0,80)}…"</div>`;
+      }
+      html+=`<div class="tl-item ${cls}"><div class="tl-date">${item.date}</div><span class="tl-badge ${badge}">${label}</span><div class="tl-content">${content||'記録なし'}</div></div>`;
+    });
+    html+=`</div></div>`;
+  }
+
+  html+=`<button class="karte-gen-btn" id="karte-gen-btn" onclick="generateKarte('${name.replace(/'/g,'\\\'')}')" >AIカルテ文を生成する</button><div id="karte-result-area"></div>`;
+  area.innerHTML=html;
+}
+
+async function generateKarte(name){
+  const btn=document.getElementById('karte-gen-btn');
+  btn.disabled=true; btn.textContent='生成中...';
+  const ra=document.getElementById('karte-result-area');
+  ra.innerHTML='<div class="loading">カルテ文を生成中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
+
+  const d=karteData||{};
+  const sm=(d.student||[]).map(r=>`[${r.date}] 態度:${r.attitude||'—'} 得意:${r.strong||'—'} 苦手:${r.weak||'—'} 成績:${r.result||'—'} 生活:${r.checks||'—'} ${r.life_memo||''} ${r.study_memo||''} ${r.career_memo||''}`).join('\n');
+  const pm=(d.parent||[]).map(r=>`[${r.date}] ${r.relation||''} リズム:${r.rhythm||'—'} ${r.home_memo||''} ${r.request_memo||''}`).join('\n');
+  const gm=(d.grade||[]).map(r=>`[${r.date}] ${r.test||''}: 国${r['国語']||'?'} 数${r['数学']||'?'} 英${r['英語']||'?'} 理${r['理科']||'?'} 社${r['社会']||'?'} 計${r.total||'?'} ${r.comment||''}`).join('\n');
+
+  const prompt=`あなたは学習塾「エイメイ学院」のベテラン講師です。以下の記録をもとに、${name}さんの総合的な生徒カルテ文を作成してください。
+
+【生徒面談記録】
+${sm||'記録なし'}
+
+【保護者面談記録】
+${pm||'記録なし'}
+
+【成績推移】
+${gm||'記録なし'}
+
+【条件】
+・講師・スタッフが共有する内部資料として書く
+・【生徒プロフィール】【学習状況と成績推移】【家庭環境・保護者との連携】【今後の指導方針】の4セクション構成
+・複数回の記録がある場合は変化・成長を読み取って記述する
+・課題は具体的に、強みも明記する
+・指導上の注意点・配慮事項も含める
+・500〜700字程度`;
+
+  try{
+    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    generatedKarte=data.content?.[0]?.text||'';
+    if(!generatedKarte)throw new Error('レスポンスが空です');
+    ra.innerHTML=`<div class="karte-result">${generatedKarte}</div>
+      <div class="result-actions" style="margin-top:10px">
+        <button class="copy-btn" onclick="copyText(generatedKarte,this)">コピーする</button>
+        <button class="sheet-btn" onclick="saveKarteToSheet('${name.replace(/'/g,'\\\'')}')" >カルテをシートに保存</button>
+      </div><div id="karte-sheet-msg"></div>`;
+  }catch(e){
+    ra.innerHTML=`<div class="error-msg">生成に失敗しました：${e.message}</div>`;
+  }finally{btn.disabled=false;btn.textContent='AIカルテ文を生成する';}
+}
+
+async function saveKarteToSheet(name){
+  const msg=document.getElementById('karte-sheet-msg');
+  const today=new Date().toLocaleDateString('ja-JP');
+  const payload={sheet:'カルテ',date:today,name,karte:generatedKarte};
+  try{
+    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    msg.innerHTML='<div class="success-msg">カルテをシートに保存しました！</div>';
+  }catch(e){
+    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+  }
+}
+
+// ===== Clipboard =====
+function copyText(text,btn){
+  navigator.clipboard.writeText(text).then(()=>{
+    const orig=btn.textContent; btn.textContent='コピーしました！';
+    setTimeout(()=>{if(btn)btn.textContent=orig;},2000);
+  });
+}
+
+// ===== Init =====
+window.onload=()=>{
+  const saved=localStorage.getItem('anthropic_api_key');
+  if(saved)document.getElementById('api-key').value=saved;
+  initCal();
+};
 </script>
 </body>
 </html>
