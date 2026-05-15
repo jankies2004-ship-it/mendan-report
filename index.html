@@ -117,12 +117,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 .cal-day.sat-col{color:#2980B9}
 .cal-day.selected.sun-col,.cal-day.selected.sat-col{color:#fff}
 
-/* API Section */
-.api-section{background:#FFF8E1;border:1px solid #FFE082;border-radius:10px;padding:1rem;margin-bottom:1rem}
-.api-section label{font-size:13px;color:#555;display:block;margin-bottom:6px;font-weight:500}
-.api-section input{width:100%;font-size:13px;padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-family:monospace;background:#fff;color:#222;outline:none}
-.api-section input:focus{border-color:#378ADD}
-.api-note{font-size:12px;color:#888;margin-top:6px}
 
 /* Utils */
 .hidden{display:none}
@@ -289,13 +283,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
   <div class="header">
     <h1>エイメイ学院 面談・成績管理</h1>
     <p>面談記録・成績入力・生徒カルテの作成ができます。</p>
-    <button id="api-key-toggle" onclick="toggleApiSection()" style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.5);border-radius:8px;color:#fff;font-size:12px;padding:4px 10px;cursor:pointer">🔑 APIキー</button>
-  </div>
-
-  <div class="api-section" id="api-section" style="display:none">
-    <label>Gemini APIキー（初回のみ入力・このデバイスに保存）</label>
-    <input type="password" id="api-key" placeholder="AIza..." oninput="saveApiKey(this.value)">
-    <p class="api-note">APIキーはブラウザのlocalStorageにのみ保存されます。</p>
   </div>
 
   <div class="tab-nav">
@@ -815,15 +802,12 @@ const gState = { g_grade:'', g_test:'' };
 
 let generatedReport = '', generatedParentMemo = '', generatedKarte = '', karteData = null, karteSchool = '';
 
-// ===== API Key =====
-function saveApiKey(val) { localStorage.setItem('gemini_api_key', val); }
-function toggleApiSection(){ const s=document.getElementById('api-section'); s.style.display=s.style.display==='none'?'':'none'; }
-function getApiKey() { return document.getElementById('api-key').value || localStorage.getItem('gemini_api_key') || ''; }
+// ===== Gemini =====
 async function callGemini(prompt){
-  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${getApiKey()}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+  const res=await fetch('/api/gemini',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
   const data=await res.json();
-  if(data.error)throw new Error(data.error.message||'Gemini APIエラー');
-  return data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+  if(data.error)throw new Error(data.error);
+  return data.text||'';
 }
 
 // ===== Calendar (generic, keyed by 's'|'p'|'g') =====
@@ -1649,15 +1633,14 @@ function closeA4Backdrop(e){
 
 // ===== Init =====
 window.onload=()=>{
-  const saved=localStorage.getItem('gemini_api_key');
-  if(saved){ document.getElementById('api-key').value=saved; }
+
   initCal();
 
   // 生徒モード
   if(new URLSearchParams(location.search).get('mode')==='student'){
     document.querySelector('.header h1').textContent='成績入力フォーム';
     document.querySelector('.header p').textContent='テスト結果を入力して「スプレッドシートに保存」を押してください。';
-    document.querySelector('.api-section').style.display='none';
+
     document.querySelector('.tab-nav').style.display='none';
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById('screen-grade').classList.add('active');
