@@ -1196,6 +1196,29 @@ function renderKarte(data,name){
     });
   }
 
+  // 内申点まとめ（独立カード）
+  if(notices.length){
+    const jt=['音楽','美術','保健体育','技術家庭'];
+    const calcW=(row,g,mult)=>{const s5=nc5.map(s=>parseInt(row[`${g}_${s}_年`]||'')).filter(v=>!isNaN(v));const sj=jt.map(s=>parseInt(row[`${g}_${s}_年`]||'')).filter(v=>!isNaN(v));if(!s5.length&&!sj.length)return null;return s5.reduce((a,b)=>a+b,0)+sj.reduce((a,b)=>a+b,0)*mult;};
+    // 学年ごとに最新エントリを使用
+    const gData={};
+    ['中1','中2','中3'].forEach(g=>{const e=notices.find(nc=>ncSubjs.some(s=>nc[`${g}_${s}_年`]));if(e)gData[g]=e;});
+    const activeGs=Object.keys(gData);
+    if(activeGs.length){
+      html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>内申点まとめ</div><div class="card-body hidden">`;
+      html+=`<div style="overflow-x:auto"><table class="grade-table">`;
+      html+=`<tr><th>計算方法</th>${activeGs.map(g=>`<th>${g}</th>`).join('')}<th style="background:#1D9E75;color:#fff">総合計</th></tr>`;
+      [1,2,3].forEach(mult=>{
+        const vals=activeGs.map(g=>calcW(gData[g],g,mult));
+        const total=vals.filter(v=>v!==null).reduce((a,b)=>a+b,0);
+        html+=`<tr><td style="font-weight:700">9科(1:1:${mult})</td>`;
+        html+=vals.map(v=>`<td class="total-col">${v!==null?v:'—'}</td>`).join('');
+        html+=`<td class="total-col" style="font-weight:700;font-size:15px;background:#e8f5e9">${total||'—'}</td></tr>`;
+      });
+      html+=`</table></div></div></div>`;
+    }
+  }
+
   // 志望校
   const targets=(data.target||[]).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const targetsWithData=targets.filter(t=>[t['第一志望'],t['第二志望'],t['第三志望'],t['第四志望']].some(Boolean));
