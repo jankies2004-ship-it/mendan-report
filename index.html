@@ -1152,7 +1152,7 @@ function renderKarte(data,name){
       if(!isNaN(p)&&c!==p){const d=c-p,col=d>0?'#185FA5':'#e53e3e',s=d>0?'+':'';return`${td}${c}<br><span style="font-size:10px;color:${col};font-weight:700">${s}${d}</span></td>`;}
       return`${td}${c}</td>`;
     };
-    html+=`<div class="card"><div class="card-title" onclick="toggleCard(this)"><span class="card-toggle">▼</span>${name} さんの成績履歴</div><div class="card-body">
+    html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>${name} さんの成績履歴</div><div class="card-body hidden">
       <div style="overflow-x:auto">
       <table class="grade-table">
         <tr><th>テスト</th><th>国</th><th>数</th><th>英</th><th>理</th><th>社</th><th>合計</th><th>学年順位</th></tr>`;
@@ -1175,7 +1175,7 @@ function renderKarte(data,name){
   if(notices.length){
     const calcSum=(row,g,subjs,term)=>{const vs=subjs.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));return vs.length?vs.reduce((a,b)=>a+b,0):'—';};
     notices.forEach(nc=>{
-      html+=`<div class="card"><div class="card-title" onclick="toggleCard(this)"><span class="card-toggle">▼</span>通知表（5段階評定）</div><div class="card-body">`;
+      html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>通知表（5段階評定）</div><div class="card-body hidden">`;
       ['中1','中2','中3'].forEach(g=>{
         const hasG=ncSubjs.some(s=>nc[`${g}_${s}_1学期`]||nc[`${g}_${s}_2学期`]||nc[`${g}_${s}_3学期`]||nc[`${g}_${s}_年`]);
         if(!hasG)return;
@@ -1197,15 +1197,22 @@ function renderKarte(data,name){
 
   // 志望校
   const targets=(data.target||[]).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  if(targets.length){
-    const t=targets[0];
-    const schools=[t['第一志望'],t['第二志望'],t['第三志望'],t['第四志望']].filter(Boolean);
-    if(schools.length){
-      html+=`<div class="card"><div class="card-title" onclick="toggleCard(this)"><span class="card-toggle">▼</span>志望校</div><div class="card-body">`;
-      html+=`<ol style="margin:0;padding-left:1.4em;line-height:2">`;
-      schools.forEach(s=>{ html+=`<li style="font-size:14px;font-weight:600">${s}</li>`; });
-      html+=`</ol></div></div>`;
-    }
+  const targetsWithData=targets.filter(t=>[t['第一志望'],t['第二志望'],t['第三志望'],t['第四志望']].some(Boolean));
+  if(targetsWithData.length){
+    html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>志望校</div><div class="card-body hidden">`;
+    targetsWithData.forEach((t,idx)=>{
+      const d=t.date||'';
+      const label=idx===0?`<span style="font-size:11px;background:#1D9E75;color:#fff;border-radius:4px;padding:1px 6px;margin-left:6px">最新</span>`:'';
+      html+=`<div style="margin-bottom:${idx<targetsWithData.length-1?'16px':'0'}">`;
+      html+=`<div style="font-size:12px;color:#888;margin-bottom:6px;font-weight:600">${d} 時点${label}</div>`;
+      html+=`<ol style="margin:0;padding-left:1.4em;line-height:1.9">`;
+      [t['第一志望'],t['第二志望'],t['第三志望'],t['第四志望']].filter(Boolean).forEach(s=>{
+        html+=`<li style="font-size:14px;font-weight:600">${s}</li>`;
+      });
+      html+=`</ol></div>`;
+      if(idx<targetsWithData.length-1) html+=`<hr style="border:none;border-top:1px dashed #ddd;margin:0 0 12px">`;
+    });
+    html+=`</div></div>`;
   }
 
   // タイムライン（生徒面談・保護者面談・音声まとめ）
@@ -1216,7 +1223,7 @@ function renderKarte(data,name){
   items.sort((a,b)=>b.date.localeCompare(a.date));
 
   if(items.length){
-    html+=`<div class="card"><div class="card-title" onclick="toggleCard(this)"><span class="card-toggle">▼</span>面談・音声まとめ記録</div><div class="card-body"><div class="timeline">`;
+    html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>面談・音声まとめ記録</div><div class="card-body hidden"><div class="timeline">`;
     items.forEach(item=>{
       const d=item.data;
       const cls=item.type==='s'?'tl-student':item.type==='p'?'tl-parent':'tl-audio';
