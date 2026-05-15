@@ -1127,7 +1127,7 @@ function renderKarte(data,name){
   if(grades.length){
     const testOrder={'1学期中間':1,'1学期期末':2,'2学期中間':3,'2学期期末':4,'学年末':5,'3学期':5};
     const gradeOrder={'中1':1,'中2':2,'中3':3};
-    const sortKey=r=>{const g=gradeOrder[String(r['学年']||'').trim()]||0;const t=(r.test||'').replace(/^中[123]-/,'');return g*100+(testOrder[t]||0);};
+    const sortKey=r=>{const m=String(r.test||'').match(/^(中[123])/);const g=m?gradeOrder[m[1]]||0:0;const t=String(r.test||'').replace(/^中[123]-/,'');return g*100+(testOrder[t]||0);};
     const sorted=[...grades].sort((a,b)=>sortKey(b)-sortKey(a));
     const prev=sorted[1];
     const dcell=(cur,pre,cls='')=>{
