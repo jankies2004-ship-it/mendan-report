@@ -8,7 +8,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif;background:#f5f5f0;color:#222;font-size:16px}
 .app{max-width:720px;margin:0 auto;padding:1.5rem 1rem 4rem}
-.header{margin-bottom:1rem}
+.header{margin-bottom:1rem;position:relative}
 .header h1{font-size:20px;font-weight:600;color:#222}
 .header p{font-size:13px;color:#666;margin-top:4px}
 
@@ -289,9 +289,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
   <div class="header">
     <h1>エイメイ学院 面談・成績管理</h1>
     <p>面談記録・成績入力・生徒カルテの作成ができます。</p>
+    <button id="api-key-toggle" onclick="toggleApiSection()" style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.5);border-radius:8px;color:#fff;font-size:12px;padding:4px 10px;cursor:pointer;display:none">🔑 APIキー</button>
   </div>
 
-  <div class="api-section">
+  <div class="api-section" id="api-section">
     <label>Gemini APIキー（初回のみ入力・このデバイスに保存）</label>
     <input type="password" id="api-key" placeholder="AIza..." oninput="saveApiKey(this.value)">
     <p class="api-note">APIキーはブラウザのlocalStorageにのみ保存されます。</p>
@@ -815,7 +816,9 @@ const gState = { g_grade:'', g_test:'' };
 let generatedReport = '', generatedParentMemo = '', generatedKarte = '', karteData = null, karteSchool = '';
 
 // ===== API Key =====
-function saveApiKey(val) { localStorage.setItem('gemini_api_key', val); }
+function saveApiKey(val) { localStorage.setItem('gemini_api_key', val); if(val)hideApiSection(); }
+function hideApiSection(){ document.getElementById('api-section').style.display='none'; document.getElementById('api-key-toggle').style.display='block'; }
+function toggleApiSection(){ const s=document.getElementById('api-section'); s.style.display=s.style.display==='none'?'':'none'; }
 function getApiKey() { return document.getElementById('api-key').value || localStorage.getItem('gemini_api_key') || ''; }
 async function callGemini(prompt){
   const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${getApiKey()}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
@@ -1648,7 +1651,7 @@ function closeA4Backdrop(e){
 // ===== Init =====
 window.onload=()=>{
   const saved=localStorage.getItem('gemini_api_key');
-  if(saved)document.getElementById('api-key').value=saved;
+  if(saved){ document.getElementById('api-key').value=saved; hideApiSection(); }
   initCal();
 
   // 生徒モード
