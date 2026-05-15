@@ -289,10 +289,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
   <div class="header">
     <h1>エイメイ学院 面談・成績管理</h1>
     <p>面談記録・成績入力・生徒カルテの作成ができます。</p>
-    <button id="api-key-toggle" onclick="toggleApiSection()" style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.5);border-radius:8px;color:#fff;font-size:12px;padding:4px 10px;cursor:pointer;display:none">🔑 APIキー</button>
+    <button id="api-key-toggle" onclick="toggleApiSection()" style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,0.25);border:1px solid rgba(255,255,255,0.5);border-radius:8px;color:#fff;font-size:12px;padding:4px 10px;cursor:pointer">🔑 APIキー</button>
   </div>
 
-  <div class="api-section" id="api-section">
+  <div class="api-section" id="api-section" style="display:none">
     <label>Gemini APIキー（初回のみ入力・このデバイスに保存）</label>
     <input type="password" id="api-key" placeholder="AIza..." oninput="saveApiKey(this.value)">
     <p class="api-note">APIキーはブラウザのlocalStorageにのみ保存されます。</p>
@@ -816,8 +816,7 @@ const gState = { g_grade:'', g_test:'' };
 let generatedReport = '', generatedParentMemo = '', generatedKarte = '', karteData = null, karteSchool = '';
 
 // ===== API Key =====
-function saveApiKey(val) { localStorage.setItem('gemini_api_key', val); if(val)hideApiSection(); }
-function hideApiSection(){ document.getElementById('api-section').style.display='none'; document.getElementById('api-key-toggle').style.display='block'; }
+function saveApiKey(val) { localStorage.setItem('gemini_api_key', val); }
 function toggleApiSection(){ const s=document.getElementById('api-section'); s.style.display=s.style.display==='none'?'':'none'; }
 function getApiKey() { return document.getElementById('api-key').value || localStorage.getItem('gemini_api_key') || ''; }
 async function callGemini(prompt){
@@ -1651,7 +1650,7 @@ function closeA4Backdrop(e){
 // ===== Init =====
 window.onload=()=>{
   const saved=localStorage.getItem('gemini_api_key');
-  if(saved){ document.getElementById('api-key').value=saved; hideApiSection(); }
+  if(saved){ document.getElementById('api-key').value=saved; }
   initCal();
 
   // 生徒モード
