@@ -1177,11 +1177,21 @@ function renderKarte(data,name){
         [['3科合計',nc3],['5科合計',nc5]].forEach(([label,subjs])=>{
           html+=`<tr style="background:#f0f9ff"><td style="font-weight:700;font-size:11px">${label}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'1学期')}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'2学期')}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'3学期')}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'年')}</td></tr>`;
         });
-        [1,2,3].forEach(mult=>{
-          html+=`<tr style="background:#e8f5e9"><td style="font-weight:700;font-size:11px">9科(1:1:${mult})</td><td class="total-col" style="font-weight:700">${calcWeighted(nc,g,'1学期',mult)}</td><td class="total-col" style="font-weight:700">${calcWeighted(nc,g,'2学期',mult)}</td><td class="total-col" style="font-weight:700">${calcWeighted(nc,g,'3学期',mult)}</td><td class="total-col" style="font-weight:700">${calcWeighted(nc,g,'年',mult)}</td></tr>`;
-        });
         html+=`</table></div>`;
       });
+      // 9科まとめ（独立）
+      const activeGs=['中1','中2','中3'].filter(g=>ncSubjs.some(s=>nc[`${g}_${s}_年`]));
+      if(activeGs.length){
+        const multi=activeGs.length>1;
+        html+=`<div style="margin-top:14px;border-top:2px solid #c8e6c9;padding-top:10px"><div style="font-size:12px;font-weight:700;color:#2e7d32;margin-bottom:6px">9科まとめ（学年評定）</div><div style="overflow-x:auto"><table class="grade-table" style="font-size:12px"><tr><th>計算方法</th>${activeGs.map(g=>`<th>${g}</th>`).join('')}${multi?'<th style="background:#a5d6a7">合計</th>':''}</tr>`;
+        [1,2,3].forEach(mult=>{
+          const vals=activeGs.map(g=>calcWeighted(nc,g,'年',mult));
+          const nums=vals.filter(v=>v!=='—').map(Number);
+          const total=nums.length?nums.reduce((a,b)=>a+b,0):'—';
+          html+=`<tr style="background:#e8f5e9"><td style="font-weight:700;font-size:11px">9科(1:1:${mult})</td>${vals.map(v=>`<td class="total-col" style="font-weight:700">${v}</td>`).join('')}${multi?`<td class="total-col" style="font-weight:700;background:#a5d6a7">${total}</td>`:''}</tr>`;
+        });
+        html+=`</table></div></div>`;
+      }
       html+=`</div></div>`;
     });
   }
@@ -1562,11 +1572,21 @@ function showA4Preview(name){
         [['3科合計',a4s3],['5科合計',a4s5]].forEach(([label,subjs])=>{
           html+=`<tr style="background:#f0f9ff"><td style="font-weight:700">${label}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'1学期')}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'2学期')}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'3学期')}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'年')}</td></tr>`;
         });
-        [1,2,3].forEach(mult=>{
-          html+=`<tr style="background:#e8f5e9"><td style="font-weight:700">9科(1:1:${mult})</td><td class="atot" style="font-weight:700">${a4Weighted(nc,g,'1学期',mult)}</td><td class="atot" style="font-weight:700">${a4Weighted(nc,g,'2学期',mult)}</td><td class="atot" style="font-weight:700">${a4Weighted(nc,g,'3学期',mult)}</td><td class="atot" style="font-weight:700">${a4Weighted(nc,g,'年',mult)}</td></tr>`;
-        });
         html+=`</table>`;
       });
+      // 9科まとめ（独立）
+      const a4ActiveGs=['中1','中2','中3'].filter(g=>a4Subjs.some(s=>nc[`${g}_${s}_年`]));
+      if(a4ActiveGs.length){
+        const a4multi=a4ActiveGs.length>1;
+        html+=`<div style="margin-top:10px;border-top:2px solid #a5d6a7;padding-top:8px"><div style="font-size:10px;font-weight:700;color:#2e7d32;margin-bottom:4px">9科まとめ（学年評定）</div><table class="a4-gtbl"><tr><th>計算</th>${a4ActiveGs.map(g=>`<th>${g}</th>`).join('')}${a4multi?'<th>合計</th>':''}</tr>`;
+        [1,2,3].forEach(mult=>{
+          const vals=a4ActiveGs.map(g=>a4Weighted(nc,g,'年',mult));
+          const nums=vals.filter(v=>v!=='—').map(Number);
+          const total=nums.length?nums.reduce((a,b)=>a+b,0):'—';
+          html+=`<tr style="background:#e8f5e9"><td style="font-weight:700">9科(1:1:${mult})</td>${vals.map(v=>`<td class="atot" style="font-weight:700">${v}</td>`).join('')}${a4multi?`<td class="atot" style="font-weight:700;background:#a5d6a7">${total}</td>`:''}</tr>`;
+        });
+        html+=`</table></div>`;
+      }
       html+=`</div>`;
     });
   }
