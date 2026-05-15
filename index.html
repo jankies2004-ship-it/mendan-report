@@ -1160,6 +1160,8 @@ function renderKarte(data,name){
   const notices=(data.notice||[]).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   if(notices.length){
     const calcSum=(row,g,subjs,term)=>{const vs=subjs.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));return vs.length?vs.reduce((a,b)=>a+b,0):'—';};
+    const jitsugi=['音楽','美術','保健体育','技術家庭'];
+    const calcWeighted=(row,g,term,mult)=>{const s5=nc5.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));const sj=jitsugi.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));if(!s5.length&&!sj.length)return'—';return s5.reduce((a,b)=>a+b,0)+sj.reduce((a,b)=>a+b,0)*mult;};
     notices.forEach(nc=>{
       html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>通知表（5段階評定）</div><div class="card-body hidden">`;
       ['中1','中2','中3'].forEach(g=>{
@@ -1172,8 +1174,11 @@ function renderKarte(data,name){
           html+=`<tr><td>${s}</td><td>${v1||'—'}</td><td>${v2||'—'}</td><td>${v3||'—'}</td><td class="total-col">${vy||'—'}</td></tr>`;
         });
         html+=`<tr><td colspan="5" style="padding:2px 0;border-top:2px solid #ddd"></td></tr>`;
-        [['3科合計',nc3],['5科合計',nc5],['9科合計',ncSubjs]].forEach(([label,subjs])=>{
+        [['3科合計',nc3],['5科合計',nc5]].forEach(([label,subjs])=>{
           html+=`<tr style="background:#f0f9ff"><td style="font-weight:700;font-size:11px">${label}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'1学期')}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'2学期')}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'3学期')}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'年')}</td></tr>`;
+        });
+        [1,2,3].forEach(mult=>{
+          html+=`<tr style="background:#e8f5e9"><td style="font-weight:700;font-size:11px">9科(1:1:${mult})</td><td class="total-col" style="font-weight:700">${calcWeighted(nc,g,'1学期',mult)}</td><td class="total-col" style="font-weight:700">${calcWeighted(nc,g,'2学期',mult)}</td><td class="total-col" style="font-weight:700">${calcWeighted(nc,g,'3学期',mult)}</td><td class="total-col" style="font-weight:700">${calcWeighted(nc,g,'年',mult)}</td></tr>`;
         });
         html+=`</table></div>`;
       });
@@ -1540,6 +1545,8 @@ function showA4Preview(name){
   const a4Notices=[...(d.notice||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   if(a4Notices.length){
     const a4Sum=(row,g,subjs,term)=>{const vs=subjs.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));return vs.length?vs.reduce((a,b)=>a+b,0):'—';};
+    const a4Jitsugi=['音楽','美術','保健体育','技術家庭'];
+    const a4Weighted=(row,g,term,mult)=>{const s5=a4s5.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));const sj=a4Jitsugi.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));if(!s5.length&&!sj.length)return'—';return s5.reduce((a,b)=>a+b,0)+sj.reduce((a,b)=>a+b,0)*mult;};
     a4Notices.forEach(nc=>{
       html+=`<div class="a4-sec"><div class="a4-sec-title">通知表（5段階評定）</div>`;
       ['中1','中2','中3'].forEach(g=>{
@@ -1552,8 +1559,11 @@ function showA4Preview(name){
           html+=`<tr><td>${s}</td><td>${v1||'—'}</td><td>${v2||'—'}</td><td>${v3||'—'}</td><td class="atot">${vy||'—'}</td></tr>`;
         });
         html+=`<tr><td colspan="5" style="padding:2px 0;border-top:2px solid #ddd"></td></tr>`;
-        [['3科合計',a4s3],['5科合計',a4s5],['9科合計',a4Subjs]].forEach(([label,subjs])=>{
+        [['3科合計',a4s3],['5科合計',a4s5]].forEach(([label,subjs])=>{
           html+=`<tr style="background:#f0f9ff"><td style="font-weight:700">${label}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'1学期')}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'2学期')}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'3学期')}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'年')}</td></tr>`;
+        });
+        [1,2,3].forEach(mult=>{
+          html+=`<tr style="background:#e8f5e9"><td style="font-weight:700">9科(1:1:${mult})</td><td class="atot" style="font-weight:700">${a4Weighted(nc,g,'1学期',mult)}</td><td class="atot" style="font-weight:700">${a4Weighted(nc,g,'2学期',mult)}</td><td class="atot" style="font-weight:700">${a4Weighted(nc,g,'3学期',mult)}</td><td class="atot" style="font-weight:700">${a4Weighted(nc,g,'年',mult)}</td></tr>`;
         });
         html+=`</table>`;
       });
