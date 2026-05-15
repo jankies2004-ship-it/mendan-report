@@ -1134,9 +1134,9 @@ function renderKarte(data,name){
     html+=`<div class="card"><div class="card-title">${name} さんの成績履歴</div>
       <div style="overflow-x:auto">
       <table class="grade-table">
-        <tr><th>日付</th><th>テスト</th><th>国</th><th>数</th><th>英</th><th>理</th><th>社</th><th>合計</th></tr>`;
+        <tr><th>テスト</th><th>国</th><th>数</th><th>英</th><th>理</th><th>社</th><th>合計</th></tr>`;
     sorted.forEach(g=>{
-      html+=`<tr><td>${g.date||''}</td><td>${g.test||''}</td><td>${g['国語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['英語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="total-col">${g.total||'—'}</td></tr>`;
+      html+=`<tr><td>${g.test||''}</td><td>${g['国語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['英語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="total-col">${g.total||'—'}</td></tr>`;
     });
     html+=`</table></div></div>`;
   }
@@ -1482,9 +1482,9 @@ function showA4Preview(name){
   const grades=[...(d.grade||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   html+=`<div class="a4-sec"><div class="a4-sec-title">成績推移</div>`;
   if(grades.length){
-    html+=`<table class="a4-gtbl"><tr><th>日付</th><th>テスト</th><th>国語</th><th>数学</th><th>英語</th><th>理科</th><th>社会</th><th>合計</th></tr>`;
+    html+=`<table class="a4-gtbl"><tr><th>テスト</th><th>国語</th><th>数学</th><th>英語</th><th>理科</th><th>社会</th><th>合計</th></tr>`;
     grades.forEach(g=>{
-      html+=`<tr><td>${g.date||''}</td><td>${g.test||''}</td><td>${g['国語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['英語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="atot">${g.total||'—'}</td></tr>`;
+      html+=`<tr><td>${g.test||''}</td><td>${g['国語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['英語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="atot">${g.total||'—'}</td></tr>`;
     });
     html+=`</table>`;
   }else{html+=`<div class="a4-empty">記録なし</div>`;}
