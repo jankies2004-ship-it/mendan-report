@@ -1131,12 +1131,25 @@ function renderKarte(data,name){
   const grades=data.grade||[];
   if(grades.length){
     const sorted=[...grades].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    const prev=sorted[1];
+    const dcell=(cur,pre,cls='')=>{
+      const c=parseInt(cur),p=parseInt(pre);
+      const td=`<td${cls?` class="${cls}"`:''}>`;
+
+      if(isNaN(c))return`${td}—</td>`;
+      if(!isNaN(p)&&c!==p){const d=c-p,col=d>0?'#185FA5':'#e53e3e',s=d>0?'+':'';return`${td}${c}<br><span style="font-size:10px;color:${col};font-weight:700">${s}${d}</span></td>`;}
+      return`${td}${c}</td>`;
+    };
     html+=`<div class="card"><div class="card-title">${name} さんの成績履歴</div>
       <div style="overflow-x:auto">
       <table class="grade-table">
         <tr><th>テスト</th><th>国</th><th>数</th><th>英</th><th>理</th><th>社</th><th>合計</th></tr>`;
-    sorted.forEach(g=>{
-      html+=`<tr><td>${g.test||''}</td><td>${g['国語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['英語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="total-col">${g.total||'—'}</td></tr>`;
+    sorted.forEach((g,idx)=>{
+      if(idx===0&&prev){
+        html+=`<tr><td>${g.test||''}</td>${dcell(g['国語'],prev['国語'])}${dcell(g['数学'],prev['数学'])}${dcell(g['英語'],prev['英語'])}${dcell(g['理科'],prev['理科'])}${dcell(g['社会'],prev['社会'])}${dcell(g.total,prev.total,'total-col')}</tr>`;
+      }else{
+        html+=`<tr><td>${g.test||''}</td><td>${g['国語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['英語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="total-col">${g.total||'—'}</td></tr>`;
+      }
     });
     html+=`</table></div></div>`;
   }
@@ -1149,7 +1162,7 @@ function renderKarte(data,name){
   if(notices.length){
     const calcSum=(row,g,subjs,term)=>{const vs=subjs.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));return vs.length?vs.reduce((a,b)=>a+b,0):'—';};
     notices.forEach(nc=>{
-      html+=`<div class="card"><div class="card-title">通知表（5段階評定）　${nc.date||''}</div>`;
+      html+=`<div class="card"><div class="card-title">通知表（5段階評定）</div>`;
       ['中1','中2','中3'].forEach(g=>{
         const hasG=ncSubjs.some(s=>nc[`${g}_${s}_1学期`]||nc[`${g}_${s}_2学期`]||nc[`${g}_${s}_3学期`]||nc[`${g}_${s}_年`]);
         if(!hasG)return;
@@ -1482,9 +1495,21 @@ function showA4Preview(name){
   const grades=[...(d.grade||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   html+=`<div class="a4-sec"><div class="a4-sec-title">成績推移</div>`;
   if(grades.length){
+    const a4prev=grades[1];
+    const a4dc=(cur,pre,cls='')=>{
+      const c=parseInt(cur),p=parseInt(pre);
+      const td=`<td${cls?` class="${cls}"`:''}>`;
+      if(isNaN(c))return`${td}—</td>`;
+      if(!isNaN(p)&&c!==p){const d=c-p,col=d>0?'#185FA5':'#e53e3e',s=d>0?'+':'';return`${td}${c}<span style="font-size:9px;color:${col};font-weight:700;margin-left:2px">${s}${d}</span></td>`;}
+      return`${td}${c}</td>`;
+    };
     html+=`<table class="a4-gtbl"><tr><th>テスト</th><th>国語</th><th>数学</th><th>英語</th><th>理科</th><th>社会</th><th>合計</th></tr>`;
-    grades.forEach(g=>{
-      html+=`<tr><td>${g.test||''}</td><td>${g['国語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['英語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="atot">${g.total||'—'}</td></tr>`;
+    grades.forEach((g,idx)=>{
+      if(idx===0&&a4prev){
+        html+=`<tr><td>${g.test||''}</td>${a4dc(g['国語'],a4prev['国語'])}${a4dc(g['数学'],a4prev['数学'])}${a4dc(g['英語'],a4prev['英語'])}${a4dc(g['理科'],a4prev['理科'])}${a4dc(g['社会'],a4prev['社会'])}${a4dc(g.total,a4prev.total,'atot')}</tr>`;
+      }else{
+        html+=`<tr><td>${g.test||''}</td><td>${g['国語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['英語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="atot">${g.total||'—'}</td></tr>`;
+      }
     });
     html+=`</table>`;
   }else{html+=`<div class="a4-empty">記録なし</div>`;}
@@ -1498,7 +1523,7 @@ function showA4Preview(name){
   if(a4Notices.length){
     const a4Sum=(row,g,subjs,term)=>{const vs=subjs.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));return vs.length?vs.reduce((a,b)=>a+b,0):'—';};
     a4Notices.forEach(nc=>{
-      html+=`<div class="a4-sec"><div class="a4-sec-title">通知表（5段階評定）　${nc.date||''}</div>`;
+      html+=`<div class="a4-sec"><div class="a4-sec-title">通知表（5段階評定）</div>`;
       ['中1','中2','中3'].forEach(g=>{
         const hasG=a4Subjs.some(s=>nc[`${g}_${s}_1学期`]||nc[`${g}_${s}_2学期`]||nc[`${g}_${s}_3学期`]||nc[`${g}_${s}_年`]);
         if(!hasG)return;
