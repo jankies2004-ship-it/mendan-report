@@ -1090,7 +1090,7 @@ async function saveGrade(){
   const scores={};
   ids.forEach((id,i)=>{const val=v(id);scores[labels[i]]=val;const num=parseInt(val);if(!isNaN(num)){total+=num;count++;}});
 
-  const payload={sheet:'成績',date:new Date().toLocaleDateString('ja-JP'),name,school:v('g-school'),grade:gState.g_grade,test:gState.g_test,test_round:v('g-test-round'),...scores,total:count>0?total:'',class_rank:v('g-class-rank'),grade_rank:v('g-grade-rank'),'国語偏差値':v('g-hensa-ko'),'数学偏差値':v('g-hensa-su'),'英語偏差値':v('g-hensa-ei'),'理科偏差値':v('g-hensa-ri'),'社会偏差値':v('g-hensa-sh'),'3科偏差値':v('g-hensa-3k'),'5科偏差値':v('g-hensa-5k'),comment:v('g-comment')};
+  const payload={sheet:'成績',date:new Date().toLocaleDateString('ja-JP'),name,school:v('g-school'),grade:gState.g_grade,test:gState.g_grade&&gState.g_test?`${gState.g_grade}-${gState.g_test}`:gState.g_test,test_round:v('g-test-round'),...scores,total:count>0?total:'',class_rank:v('g-class-rank'),grade_rank:v('g-grade-rank'),'国語偏差値':v('g-hensa-ko'),'数学偏差値':v('g-hensa-su'),'英語偏差値':v('g-hensa-ei'),'理科偏差値':v('g-hensa-ri'),'社会偏差値':v('g-hensa-sh'),'3科偏差値':v('g-hensa-3k'),'5科偏差値':v('g-hensa-5k'),comment:v('g-comment')};
 
   try{
     await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
