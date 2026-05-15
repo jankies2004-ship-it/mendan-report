@@ -1143,8 +1143,11 @@ function renderKarte(data,name){
 
   // 通知表
   const ncSubjs=['国語','数学','英語','理科','社会','音楽','美術','保健体育','技術家庭'];
+  const nc3=['国語','数学','英語'];
+  const nc5=['国語','数学','英語','理科','社会'];
   const notices=(data.notice||[]).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   if(notices.length){
+    const calcSum=(row,g,subjs,term)=>{const vs=subjs.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));return vs.length?vs.reduce((a,b)=>a+b,0):'—';};
     notices.forEach(nc=>{
       html+=`<div class="card"><div class="card-title">通知表（5段階評定）　${nc.date||''}</div>`;
       ['中1','中2','中3'].forEach(g=>{
@@ -1155,6 +1158,10 @@ function renderKarte(data,name){
           const v1=nc[`${g}_${s}_1学期`]||'',v2=nc[`${g}_${s}_2学期`]||'',v3=nc[`${g}_${s}_3学期`]||'',vy=nc[`${g}_${s}_年`]||'';
           if(!v1&&!v2&&!v3&&!vy)return;
           html+=`<tr><td>${s}</td><td>${v1||'—'}</td><td>${v2||'—'}</td><td>${v3||'—'}</td><td class="total-col">${vy||'—'}</td></tr>`;
+        });
+        html+=`<tr><td colspan="5" style="padding:2px 0;border-top:2px solid #ddd"></td></tr>`;
+        [['3科合計',nc3],['5科合計',nc5],['9科合計',ncSubjs]].forEach(([label,subjs])=>{
+          html+=`<tr style="background:#f0f9ff"><td style="font-weight:700;font-size:11px">${label}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'1学期')}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'2学期')}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'3学期')}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'年')}</td></tr>`;
         });
         html+=`</table></div>`;
       });
@@ -1485,8 +1492,11 @@ function showA4Preview(name){
 
   // 通知表
   const a4Subjs=['国語','数学','英語','理科','社会','音楽','美術','保健体育','技術家庭'];
+  const a4s3=['国語','数学','英語'];
+  const a4s5=['国語','数学','英語','理科','社会'];
   const a4Notices=[...(d.notice||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   if(a4Notices.length){
+    const a4Sum=(row,g,subjs,term)=>{const vs=subjs.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));return vs.length?vs.reduce((a,b)=>a+b,0):'—';};
     a4Notices.forEach(nc=>{
       html+=`<div class="a4-sec"><div class="a4-sec-title">通知表（5段階評定）　${nc.date||''}</div>`;
       ['中1','中2','中3'].forEach(g=>{
@@ -1497,6 +1507,10 @@ function showA4Preview(name){
           const v1=nc[`${g}_${s}_1学期`]||'',v2=nc[`${g}_${s}_2学期`]||'',v3=nc[`${g}_${s}_3学期`]||'',vy=nc[`${g}_${s}_年`]||'';
           if(!v1&&!v2&&!v3&&!vy)return;
           html+=`<tr><td>${s}</td><td>${v1||'—'}</td><td>${v2||'—'}</td><td>${v3||'—'}</td><td class="atot">${vy||'—'}</td></tr>`;
+        });
+        html+=`<tr><td colspan="5" style="padding:2px 0;border-top:2px solid #ddd"></td></tr>`;
+        [['3科合計',a4s3],['5科合計',a4s5],['9科合計',a4Subjs]].forEach(([label,subjs])=>{
+          html+=`<tr style="background:#f0f9ff"><td style="font-weight:700">${label}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'1学期')}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'2学期')}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'3学期')}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'年')}</td></tr>`;
         });
         html+=`</table>`;
       });
