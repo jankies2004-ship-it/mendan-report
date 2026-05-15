@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>成績入力フォーム | エイメイ学院</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif;background:#f5f5f0;color:#222;font-size:16px}
+.app{max-width:600px;margin:0 auto;padding:1.5rem 1rem 4rem}
+.header{margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:2px solid #378ADD}
+.header h1{font-size:20px;font-weight:700;color:#185FA5}
+.header p{font-size:13px;color:#666;margin-top:4px}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+.card-title{font-size:14px;font-weight:600;color:#555;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid #eee}
+.field{margin-bottom:1rem}
+.field label{font-size:13px;color:#555;display:block;margin-bottom:6px;font-weight:500}
+.field input[type=text]{width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit;background:#fff;color:#222}
+.field input[type=text]:focus{border-color:#378ADD}
+.field select{width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit;background:#fff;color:#222;cursor:pointer}
+.field select:focus{border-color:#378ADD}
+.grade-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.grade-label{font-size:14px;color:#333;font-weight:500;width:50px;flex-shrink:0}
+.grade-score{width:80px;font-size:16px;padding:8px 10px;border:1px solid #ddd;border-radius:8px;text-align:center;font-family:inherit;outline:none}
+.grade-score:focus{border-color:#378ADD}
+.grade-unit{font-size:13px;color:#888}
+.grade-total-box{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.grade-total-label{font-size:14px;color:#0369a1;font-weight:600}
+.grade-total-val{font-size:20px;font-weight:700;color:#0369a1}
+.rank-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+.rank-input{width:80px;font-size:16px;padding:8px 10px;border:1px solid #ddd;border-radius:8px;text-align:center;font-family:inherit;outline:none}
+.rank-input:focus{border-color:#378ADD}
+.memo{width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;resize:vertical;min-height:70px;font-family:inherit;outline:none;line-height:1.6}
+.memo:focus{border-color:#378ADD}
+.nc-table{width:100%;border-collapse:collapse;font-size:12px}
+.nc-table th{background:#f5f5f0;padding:5px 3px;text-align:center;font-weight:600;color:#555;border:1px solid #e0e0e0;white-space:nowrap}
+.nc-table td{padding:4px 2px;text-align:center;border:1px solid #e0e0e0}
+.nc-table td:first-child{font-weight:500;color:#333;text-align:left;padding-left:8px;font-size:12px;white-space:nowrap}
+.nc-input{width:40px;font-size:13px;padding:4px 2px;border:1px solid #ddd;border-radius:4px;text-align:center;font-family:inherit;outline:none;background:#fff}
+.nc-input:focus{border-color:#378ADD}
+.btn-save{width:100%;padding:14px;background:#185FA5;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;transition:background 0.15s}
+.btn-save:hover{background:#1a6fc0}
+.btn-save:disabled{background:#aaa;cursor:not-allowed}
+.btn-green{background:#1D9E75}
+.btn-green:hover{background:#188f68}
+.success-msg{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px 14px;color:#166534;font-size:13px;margin-top:8px}
+.error-msg{background:#FFF5F5;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;color:#991b1b;font-size:13px;margin-top:8px}
+.section-divider{border:none;border-top:2px dashed #ddd;margin:1.5rem 0}
+.tab-btns{display:flex;gap:6px;margin-bottom:12px}
+.tab-btn{flex:1;padding:8px;background:#f5f5f0;border:1px solid #ddd;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:#555;transition:background 0.15s}
+.tab-btn.active{background:#185FA5;color:#fff;border-color:#185FA5}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <h1>成績入力フォーム</h1>
+    <p>テスト結果・通知表・志望校を入力して、それぞれ「保存」ボタンを押してください。</p>
+  </div>
+
+  <!-- 基本情報 -->
+  <div class="card">
+    <div class="card-title">基本情報</div>
+    <div class="field"><label>生徒名 <span style="color:#e53e3e">*</span></label><input type="text" id="g-name" placeholder="例：山田 太郎"></div>
+    <div class="field"><label>校舎名</label>
+      <select id="g-school">
+        <option value="">-- 校舎を選択 --</option>
+        <optgroup label="エイメイ学院"><option>みずほ台校舎</option><option>鶴瀬校舎</option><option>ふじみ野校舎</option><option>トナリエふじみ野校舎</option><option>富士見羽沢校舎</option><option>水谷校舎</option></optgroup>
+        <optgroup label="明成個別"><option>鶴瀬東校舎</option><option>鶴瀬西校舎</option><option>三芳藤久保校舎</option><option>ふじみ野大井校舎</option><option>トナリエふじみ野校舎（個別）</option><option>ふじみ野西口校舎</option><option>ふじみ野上福岡校舎</option><option>新河岸校舎</option><option>南古谷校舎</option><option>川越南大塚校舎</option><option>志木校舎</option><option>朝霞台校舎</option></optgroup>
+        <optgroup label="Elena個別女子"><option>水谷校舎（Elena）</option><option>ふじみ野西口校舎（Elena）</option></optgroup>
+        <optgroup label="EIMEI予備校"><option>鶴瀬校舎（予備校）</option><option>ふじみ野駅前校舎</option></optgroup>
+        <optgroup label="Luce個別指導"><option>みずほ台校舎（Luce）</option><option>鶴瀬校舎（Luce）</option></optgroup>
+      </select>
+    </div>
+    <div class="field" style="margin-bottom:0"><label>学年</label>
+      <select id="g-grade">
+        <option value="">-- 学年を選択 --</option>
+        <optgroup label="小学生"><option>小1</option><option>小2</option><option>小3</option><option>小4</option><option>小5</option><option>小6</option></optgroup>
+        <optgroup label="中学生"><option>中1</option><option>中2</option><option>中3</option></optgroup>
+        <optgroup label="高校生"><option>高1</option><option>高2</option><option>高3</option><option>既卒</option></optgroup>
+      </select>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- テスト結果 -->
+  <div class="card">
+    <div class="card-title">テスト結果</div>
+    <div class="field"><label>テスト名</label>
+      <select id="g-test">
+        <option value="">-- テストを選択 --</option>
+        <option>1学期中間</option><option>1学期期末</option><option>2学期中間</option><option>2学期期末</option><option>学年末</option><option>塾内テスト</option><option>北辰テスト</option>
+      </select>
+    </div>
+    <div class="field"><label>北辰実施回（北辰テストの場合）</label>
+      <select id="g-test-round">
+        <option value="">-- 実施回を選択 --</option>
+        <option>第1回</option><option>第2回</option><option>第3回</option><option>第4回</option><option>第5回</option><option>第6回</option><option>第7回</option><option>第8回</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">科目別得点（100点満点）</div>
+    <div class="grade-row"><div class="grade-label">国語</div><input type="number" class="grade-score" id="g-kokugo" min="0" max="100" placeholder="—" oninput="calcTotal()"><span class="grade-unit">点</span></div>
+    <div class="grade-row"><div class="grade-label">数学</div><input type="number" class="grade-score" id="g-math" min="0" max="100" placeholder="—" oninput="calcTotal()"><span class="grade-unit">点</span></div>
+    <div class="grade-row"><div class="grade-label">英語</div><input type="number" class="grade-score" id="g-english" min="0" max="100" placeholder="—" oninput="calcTotal()"><span class="grade-unit">点</span></div>
+    <div class="grade-row"><div class="grade-label">理科</div><input type="number" class="grade-score" id="g-rika" min="0" max="100" placeholder="—" oninput="calcTotal()"><span class="grade-unit">点</span></div>
+    <div class="grade-row"><div class="grade-label">社会</div><input type="number" class="grade-score" id="g-shakai" min="0" max="100" placeholder="—" oninput="calcTotal()"><span class="grade-unit">点</span></div>
+    <div class="grade-total-box"><span class="grade-total-label">5科合計</span><span class="grade-total-val" id="g-total">— 点</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">順位・コメント（任意）</div>
+    <div class="rank-row">
+      <div class="field" style="margin:0"><label>クラス順位</label><div style="display:flex;align-items:center;gap:6px"><input type="number" class="rank-input" id="g-class-rank" min="1" placeholder="—"><span style="font-size:13px;color:#666">位</span></div></div>
+      <div class="field" style="margin:0"><label>学年順位</label><div style="display:flex;align-items:center;gap:6px"><input type="number" class="rank-input" id="g-grade-rank" min="1" placeholder="—"><span style="font-size:13px;color:#666">位</span></div></div>
+    </div>
+    <div class="field" style="margin-bottom:0"><label>コメント（任意）</label><textarea class="memo" id="g-comment" placeholder="例：数学が前回より15点上がった。英語が課題。"></textarea></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">偏差値（任意）</div>
+    <div class="grade-row"><div class="grade-label">国語</div><input type="number" class="grade-score" id="g-hensa-ko" min="0" max="99" placeholder="—"><span class="grade-unit"></span></div>
+    <div class="grade-row"><div class="grade-label">数学</div><input type="number" class="grade-score" id="g-hensa-su" min="0" max="99" placeholder="—"><span class="grade-unit"></span></div>
+    <div class="grade-row"><div class="grade-label">英語</div><input type="number" class="grade-score" id="g-hensa-ei" min="0" max="99" placeholder="—"><span class="grade-unit"></span></div>
+    <div class="grade-row"><div class="grade-label">理科</div><input type="number" class="grade-score" id="g-hensa-ri" min="0" max="99" placeholder="—"><span class="grade-unit"></span></div>
+    <div class="grade-row"><div class="grade-label">社会</div><input type="number" class="grade-score" id="g-hensa-sh" min="0" max="99" placeholder="—"><span class="grade-unit"></span></div>
+    <div style="border-top:1px solid #eee;margin:10px 0 12px"></div>
+    <div class="grade-row"><div class="grade-label" style="width:44px;font-size:13px">3科</div><input type="number" class="grade-score" id="g-hensa-3k" min="0" max="99" placeholder="—"><span class="grade-unit" style="font-size:12px">偏差値</span></div>
+    <div class="grade-row"><div class="grade-label" style="width:44px;font-size:13px">5科</div><input type="number" class="grade-score" id="g-hensa-5k" min="0" max="99" placeholder="—"><span class="grade-unit" style="font-size:12px">偏差値</span></div>
+  </div>
+
+  <button class="btn-save" id="g-save-btn" onclick="saveGrade()">テスト結果を保存する</button>
+  <div id="g-msg"></div>
+
+  <hr class="section-divider">
+
+  <!-- 志望校 -->
+  <div class="card">
+    <div class="card-title">志望校（任意）</div>
+    <div class="field"><label>第一志望</label><input type="text" id="g-school1" placeholder="例：○○高校"></div>
+    <div class="field"><label>第二志望</label><input type="text" id="g-school2" placeholder=""></div>
+    <div class="field"><label>第三志望</label><input type="text" id="g-school3" placeholder=""></div>
+    <div class="field" style="margin-bottom:0"><label>第四志望</label><input type="text" id="g-school4" placeholder=""></div>
+  </div>
+  <button class="btn-save btn-green" id="g-school-save-btn" onclick="saveTargetSchools()">志望校を保存する</button>
+  <div id="g-school-msg"></div>
+
+  <hr class="section-divider">
+
+  <!-- 通知表 -->
+  <div class="card">
+    <div class="card-title">通知表（5段階評定）</div>
+    <div class="tab-btns">
+      <button class="tab-btn active" id="nc-tabBtn-g1" onclick="showGradeTab('g1')">中1</button>
+      <button class="tab-btn" id="nc-tabBtn-g2" onclick="showGradeTab('g2')">中2</button>
+      <button class="tab-btn" id="nc-tabBtn-g3" onclick="showGradeTab('g3')">中3</button>
+    </div>
+    <div id="nc-tab-g1" style="overflow-x:auto">
+      <table class="nc-table">
+        <thead><tr><th style="width:60px">科目</th><th>1学期</th><th>2学期</th><th>3学期</th><th>学年評定</th></tr></thead>
+        <tbody>
+          <tr><td>国語</td><td><input class="nc-input" id="nc-g1-ko-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ko-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ko-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ko-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>数学</td><td><input class="nc-input" id="nc-g1-su-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-su-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-su-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-su-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>英語</td><td><input class="nc-input" id="nc-g1-ei-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ei-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ei-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ei-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>理科</td><td><input class="nc-input" id="nc-g1-ri-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ri-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ri-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ri-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>社会</td><td><input class="nc-input" id="nc-g1-sh-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-sh-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-sh-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-sh-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>音楽</td><td><input class="nc-input" id="nc-g1-mu-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-mu-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-mu-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-mu-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>美術</td><td><input class="nc-input" id="nc-g1-ar-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ar-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ar-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ar-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>保健体育</td><td><input class="nc-input" id="nc-g1-pe-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-pe-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-pe-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-pe-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>技術・家庭</td><td><input class="nc-input" id="nc-g1-te-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-te-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-te-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-te-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="nc-tab-g2" style="overflow-x:auto;display:none">
+      <table class="nc-table">
+        <thead><tr><th style="width:60px">科目</th><th>1学期</th><th>2学期</th><th>3学期</th><th>学年評定</th></tr></thead>
+        <tbody>
+          <tr><td>国語</td><td><input class="nc-input" id="nc-g2-ko-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ko-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ko-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ko-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>数学</td><td><input class="nc-input" id="nc-g2-su-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-su-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-su-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-su-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>英語</td><td><input class="nc-input" id="nc-g2-ei-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ei-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ei-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ei-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>理科</td><td><input class="nc-input" id="nc-g2-ri-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ri-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ri-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ri-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>社会</td><td><input class="nc-input" id="nc-g2-sh-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-sh-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-sh-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-sh-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>音楽</td><td><input class="nc-input" id="nc-g2-mu-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-mu-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-mu-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-mu-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>美術</td><td><input class="nc-input" id="nc-g2-ar-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ar-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ar-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ar-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>保健体育</td><td><input class="nc-input" id="nc-g2-pe-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-pe-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-pe-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-pe-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>技術・家庭</td><td><input class="nc-input" id="nc-g2-te-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-te-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-te-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-te-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div id="nc-tab-g3" style="overflow-x:auto;display:none">
+      <table class="nc-table">
+        <thead><tr><th style="width:60px">科目</th><th>1学期</th><th>2学期</th><th>3学期</th><th>学年評定</th></tr></thead>
+        <tbody>
+          <tr><td>国語</td><td><input class="nc-input" id="nc-g3-ko-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ko-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ko-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ko-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>数学</td><td><input class="nc-input" id="nc-g3-su-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-su-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-su-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-su-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>英語</td><td><input class="nc-input" id="nc-g3-ei-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ei-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ei-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ei-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>理科</td><td><input class="nc-input" id="nc-g3-ri-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ri-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ri-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ri-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>社会</td><td><input class="nc-input" id="nc-g3-sh-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-sh-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-sh-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-sh-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>音楽</td><td><input class="nc-input" id="nc-g3-mu-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-mu-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-mu-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-mu-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>美術</td><td><input class="nc-input" id="nc-g3-ar-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ar-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ar-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ar-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>保健体育</td><td><input class="nc-input" id="nc-g3-pe-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-pe-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-pe-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-pe-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          <tr><td>技術・家庭</td><td><input class="nc-input" id="nc-g3-te-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-te-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-te-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-te-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <button class="btn-save btn-green" id="g-nc-save-btn" onclick="saveReportCard()">通知表を保存する</button>
+  <div id="g-nc-msg"></div>
+
+</div>
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwtLtrArQ1ECX0cNLh85rMJ6MaV3t-A3qDNxuPpbgg-LjTU8mMDOfdDEN2jZqzs5LP5zw/exec';
+
+function v(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
+
+function calcTotal(){
+  const ids=['g-kokugo','g-math','g-english','g-rika','g-shakai'];
+  let total=0,count=0;
+  ids.forEach(id=>{const val=parseInt(v(id));if(!isNaN(val)){total+=val;count++;}});
+  document.getElementById('g-total').textContent=count>0?total+' 点':'— 点';
+}
+
+function requireName(msgId){
+  const name=v('g-name');
+  if(!name){document.getElementById(msgId).innerHTML='<div class="error-msg">生徒名を入力してください</div>';return null;}
+  return name;
+}
+
+async function saveGrade(){
+  const name=requireName('g-msg'); if(!name)return;
+  const btn=document.getElementById('g-save-btn');
+  const msg=document.getElementById('g-msg');
+  btn.disabled=true; btn.textContent='保存中...';
+  const ids=['g-kokugo','g-math','g-english','g-rika','g-shakai'];
+  const labels=['国語','数学','英語','理科','社会'];
+  let total=0,count=0;
+  const scores={};
+  ids.forEach((id,i)=>{const val=v(id);scores[labels[i]]=val;const num=parseInt(val);if(!isNaN(num)){total+=num;count++;}});
+  const payload={sheet:'成績',date:new Date().toLocaleDateString('ja-JP'),name,school:v('g-school'),grade:v('g-grade'),test:v('g-test'),test_round:v('g-test-round'),...scores,total:count>0?total:'',class_rank:v('g-class-rank'),grade_rank:v('g-grade-rank'),'国語偏差値':v('g-hensa-ko'),'数学偏差値':v('g-hensa-su'),'英語偏差値':v('g-hensa-ei'),'理科偏差値':v('g-hensa-ri'),'社会偏差値':v('g-hensa-sh'),'3科偏差値':v('g-hensa-3k'),'5科偏差値':v('g-hensa-5k'),comment:v('g-comment')};
+  try{
+    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    msg.innerHTML='<div class="success-msg">テスト結果を保存しました！</div>';
+    btn.textContent='保存済み';
+  }catch(e){
+    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    btn.disabled=false; btn.textContent='テスト結果を保存する';
+  }
+}
+
+async function saveTargetSchools(){
+  const name=requireName('g-school-msg'); if(!name)return;
+  const btn=document.getElementById('g-school-save-btn');
+  const msg=document.getElementById('g-school-msg');
+  btn.disabled=true; btn.textContent='保存中...';
+  const payload={sheet:'志望校',date:new Date().toLocaleDateString('ja-JP'),name,school:v('g-school'),grade:v('g-grade'),school1:v('g-school1'),school2:v('g-school2'),school3:v('g-school3'),school4:v('g-school4')};
+  try{
+    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    msg.innerHTML='<div class="success-msg">志望校を保存しました！</div>';
+    btn.textContent='保存済み';
+  }catch(e){
+    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    btn.disabled=false; btn.textContent='志望校を保存する';
+  }
+}
+
+function showGradeTab(grade){
+  ['g1','g2','g3'].forEach(g=>{
+    document.getElementById('nc-tab-'+g).style.display=g===grade?'block':'none';
+    document.getElementById('nc-tabBtn-'+g).classList.toggle('active',g===grade);
+  });
+}
+
+async function saveReportCard(){
+  const name=requireName('g-nc-msg'); if(!name)return;
+  const btn=document.getElementById('g-nc-save-btn');
+  const msg=document.getElementById('g-nc-msg');
+  btn.disabled=true; btn.textContent='保存中...';
+  const nc=(id)=>v(id)||'';
+  const grades=[['g1','中1'],['g2','中2'],['g3','中3']];
+  const subjects=[['ko','国語'],['su','数学'],['ei','英語'],['ri','理科'],['sh','社会'],['mu','音楽'],['ar','美術'],['pe','保健体育'],['te','技術家庭']];
+  const terms=[['1','1学期'],['2','2学期'],['3','3学期'],['y','年']];
+  const payload={sheet:'通知表',date:new Date().toLocaleDateString('ja-JP'),name,school:v('g-school'),grade:v('g-grade')};
+  grades.forEach(([gId,gName])=>{
+    subjects.forEach(([sId,sName])=>{
+      terms.forEach(([tId,tName])=>{
+        payload[`${gName}_${sName}_${tName}`]=nc(`nc-${gId}-${sId}-${tId}`);
+      });
+    });
+  });
+  try{
+    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    msg.innerHTML='<div class="success-msg">通知表を保存しました！</div>';
+    btn.textContent='保存済み';
+  }catch(e){
+    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    btn.disabled=false; btn.textContent='通知表を保存する';
+  }
+}
+</script>
+</body>
+</html>

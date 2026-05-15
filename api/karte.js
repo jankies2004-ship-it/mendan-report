@@ -7,9 +7,10 @@ export default async function handler(req, res) {
 
   const name = req.query.name;
   if (!name) { res.status(400).json({ error: 'name is required' }); return; }
+  const school = req.query.school || '';
 
   try {
-    const url = `${GAS_URL}?action=getStudent&name=${encodeURIComponent(name)}`;
+    const url = `${GAS_URL}?action=getStudent&name=${encodeURIComponent(name)}${school ? '&school=' + encodeURIComponent(school) : ''}`;
     const gasRes = await fetch(url, { redirect: 'follow' });
     const data = await gasRes.json();
     res.status(200).json(data);

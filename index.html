@@ -37,6 +37,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 .field label{font-size:13px;color:#555;display:block;margin-bottom:6px;font-weight:500}
 .field input[type=text]{width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit;background:#fff;color:#222}
 .field input[type=text]:focus{border-color:#378ADD}
+.field select{width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit;background:#fff;color:#222;cursor:pointer}
+.field select:focus{border-color:#378ADD}
+.karte-search select{font-size:14px;padding:11px 10px;border:1px solid #ddd;border-radius:10px;font-family:inherit;outline:none;background:#fff;color:#222;cursor:pointer;flex:0 0 150px}
 
 /* Choices & Radio */
 .choices{display:flex;flex-direction:column;gap:6px}
@@ -135,6 +138,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 .grade-score:focus{border-color:#378ADD}
 .grade-unit{font-size:13px;color:#888}
 .grade-total-box{background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.nc-table{width:100%;border-collapse:collapse;font-size:12px}
+.nc-table th{background:#f5f5f0;padding:5px 3px;text-align:center;font-weight:600;color:#555;border:1px solid #e0e0e0;white-space:nowrap}
+.nc-table td{padding:4px 2px;text-align:center;border:1px solid #e0e0e0}
+.nc-table td:first-child{font-weight:500;color:#333;text-align:left;padding-left:8px;font-size:12px;white-space:nowrap}
+.nc-input{width:40px;font-size:13px;padding:4px 2px;border:1px solid #ddd;border-radius:4px;text-align:center;font-family:inherit;outline:none;background:#fff}
+.nc-input:focus{border-color:#378ADD}
+.nc-grade-btns{display:flex;gap:6px;margin-bottom:12px}
+.nc-grade-btn{flex:1;padding:8px;background:#f5f5f0;border:1px solid #ddd;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:#555;transition:background 0.15s}
+.nc-grade-btn.active{background:#185FA5;color:#fff;border-color:#185FA5}
 .grade-total-label{font-size:13px;color:#0369A1;font-weight:600}
 .grade-total-val{font-size:22px;font-weight:700;color:#0369A1}
 .rank-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
@@ -199,6 +211,74 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 .warn-msg{color:#854F0B;font-size:12px;padding:7px 10px;background:#FFF3E0;border:1px solid #FDE68A;border-radius:7px;margin-top:6px}
 .step-label{font-size:13px;font-weight:700;color:#185FA5;margin-bottom:8px;display:flex;align-items:center;gap:6px}
 .step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#185FA5;color:#fff;font-size:11px;font-weight:700;flex-shrink:0}
+
+/* Record */
+.or-divider{text-align:center;position:relative;margin:14px 0;color:#bbb;font-size:12px}
+.or-divider::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:#e8e8e8}
+.or-divider span{position:relative;background:#fff;padding:0 12px}
+.btn-record{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border:2px solid #ddd;border-radius:10px;background:#fff;font-size:14px;font-weight:600;color:#333;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-record:hover:not(:disabled){border-color:#7C3AED;color:#7C3AED;background:#F5F0FF}
+.btn-record.recording{border-color:#DC2626;color:#DC2626;background:#FFF5F5}
+.btn-record:disabled{opacity:0.5;cursor:not-allowed}
+.record-icon{font-size:18px;line-height:1;transition:all 0.2s}
+.record-pulse{display:inline-block;width:10px;height:10px;border-radius:50%;background:#DC2626;animation:rpulse 1.2s infinite}
+@keyframes rpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+.record-timer{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;font-size:15px;font-weight:700;color:#DC2626;letter-spacing:0.05em}
+
+/* Audio timeline badge */
+.tl-item.tl-audio{border-color:#1D9E75}
+.tl-item.tl-audio::before{background:#1D9E75}
+.tl-badge-a{background:#EAF3DE;color:#0F6E56}
+
+/* A4 overlay */
+.a4-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;overflow-y:auto;padding:12px 0 40px;display:none}
+.a4-overlay.open{display:block}
+.a4-topbar{position:sticky;top:0;z-index:1001;display:flex;justify-content:flex-end;gap:8px;padding:8px 16px;max-width:860px;margin:0 auto}
+.a4-close-btn{padding:8px 16px;border-radius:8px;background:#fff;border:none;font-size:13px;font-weight:600;cursor:pointer;color:#333;box-shadow:0 2px 8px rgba(0,0,0,0.18)}
+.a4-print-btn2{padding:8px 16px;border-radius:8px;background:#185FA5;border:none;font-size:13px;font-weight:600;cursor:pointer;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,0.2)}
+.a4-page{width:794px;background:#fff;margin:0 auto;padding:40px 48px;box-shadow:0 4px 40px rgba(0,0,0,0.25)}
+@media(max-width:860px){.a4-page{width:100%;padding:24px 18px}}
+.a4-logo{font-size:10px;letter-spacing:0.12em;color:#999;font-weight:600;margin-bottom:6px}
+.a4-name-row{display:flex;align-items:baseline;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.a4-name{font-size:22px;font-weight:700;color:#111}
+.a4-grade-chip{font-size:14px;color:#555;font-weight:500}
+.a4-created{font-size:11px;color:#bbb}
+.a4-rule{border:none;border-top:2px solid #222;margin:10px 0 20px}
+.a4-sec{margin-bottom:22px}
+.a4-sec-title{font-size:10px;font-weight:700;letter-spacing:0.1em;color:#888;border-bottom:1px solid #e0e0e0;padding-bottom:5px;margin-bottom:12px}
+.a4-gtbl{width:100%;border-collapse:collapse;font-size:12px}
+.a4-gtbl th{padding:5px 8px;text-align:center;font-weight:600;color:#444;border-bottom:2px solid #ddd;background:#f8f8f8;white-space:nowrap}
+.a4-gtbl th:first-child{text-align:left}
+.a4-gtbl td{padding:5px 8px;text-align:center;border-bottom:1px solid #f0f0f0;color:#333}
+.a4-gtbl td:first-child{text-align:left;color:#666;font-size:11px}
+.a4-gtbl td.atot{font-weight:700;color:#185FA5}
+.a4-tl{display:flex;flex-direction:column}
+.a4-tl-row{display:flex;gap:10px}
+.a4-tl-left{display:flex;flex-direction:column;align-items:center;width:14px;flex-shrink:0;padding-top:4px}
+.a4-tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.a4-tl-dot.ds{background:#378ADD}
+.a4-tl-dot.dp{background:#A855F7}
+.a4-tl-dot.da{background:#1D9E75}
+.a4-tl-vline{width:2px;background:#eee;flex:1;min-height:8px;margin-top:2px}
+.a4-tl-body{flex:1;padding-bottom:14px}
+.a4-tl-dt{font-size:10px;color:#bbb;margin-bottom:2px}
+.a4-tl-tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 8px;border-radius:10px;margin-bottom:5px}
+.a4-tl-tag.ts{background:#E6F1FB;color:#185FA5}
+.a4-tl-tag.tp{background:#F3E8FF;color:#6B21A8}
+.a4-tl-tag.ta{background:#EAF3DE;color:#0F6E56}
+.a4-tl-detail{font-size:12px;color:#333;line-height:1.65}
+.a4-tl-sub{font-size:11px;color:#555;font-style:italic;margin-top:5px;line-height:1.6;padding-left:8px;border-left:2px solid #ddd;white-space:pre-wrap}
+.a4-karte{font-size:12px;color:#222;line-height:1.9;white-space:pre-wrap}
+.a4-empty{text-align:center;color:#ccc;font-size:12px;padding:12px;font-style:italic}
+.a4-preview-btn{background:#185FA5;border:none;color:#fff;font-weight:600;padding:14px;font-size:15px;border-radius:10px;cursor:pointer;font-family:inherit;transition:background 0.15s;flex:1}
+.a4-preview-btn:hover{background:#0C447C}
+@media print{
+  html,body{margin:0;padding:0}
+  body>*{display:none!important}
+  .a4-overlay{display:block!important;position:static!important;padding:0!important;background:transparent!important;overflow:visible!important}
+  .a4-topbar{display:none!important}
+  .a4-page{width:100%!important;padding:15mm 18mm!important;box-shadow:none!important;margin:0!important;min-height:auto!important}
+}
 </style>
 </head>
 <body>
@@ -219,7 +299,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
     <button class="tab-btn" onclick="switchTab('parent',this)">保護者面談</button>
     <button class="tab-btn" onclick="switchTab('grade',this)">成績入力</button>
     <button class="tab-btn" onclick="switchTab('karte',this)">生徒カルテ</button>
-    <button class="tab-btn" onclick="switchTab('audio',this)">音声まとめ</button>
+    <button class="tab-btn" onclick="switchTab('audio',this)">テキストまとめ</button>
   </div>
 
   <!-- ===== 生徒面談 ===== -->
@@ -236,16 +316,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
       <div class="card">
         <div class="card-title">基本情報</div>
         <div class="field"><label>生徒名</label><input type="text" id="name" placeholder="例：山田 太郎"></div>
+        <div class="field"><label>校舎名</label><select id="school"><option value="">-- 校舎を選択 --</option><optgroup label="エイメイ学院"><option>みずほ台校舎</option><option>鶴瀬校舎</option><option>ふじみ野校舎</option><option>トナリエふじみ野校舎</option><option>富士見羽沢校舎</option><option>水谷校舎</option></optgroup><optgroup label="明成個別"><option>鶴瀬東校舎</option><option>鶴瀬西校舎</option><option>三芳藤久保校舎</option><option>ふじみ野大井校舎</option><option>トナリエふじみ野校舎（個別）</option><option>ふじみ野西口校舎</option><option>ふじみ野上福岡校舎</option><option>新河岸校舎</option><option>南古谷校舎</option><option>川越南大塚校舎</option><option>志木校舎</option><option>朝霞台校舎</option></optgroup><optgroup label="Elena個別女子"><option>水谷校舎（Elena）</option><option>ふじみ野西口校舎（Elena）</option></optgroup><optgroup label="EIMEI予備校"><option>鶴瀬校舎（予備校）</option><option>ふじみ野駅前校舎</option></optgroup><optgroup label="Luce個別指導"><option>みずほ台校舎（Luce）</option><option>鶴瀬校舎（Luce）</option></optgroup></select></div>
         <div class="field">
           <label>学年</label>
-          <div class="radio-group">
-            <div class="radio-btn" onclick="selectRadio('grade','中1',this)">中1</div>
-            <div class="radio-btn" onclick="selectRadio('grade','中2',this)">中2</div>
-            <div class="radio-btn" onclick="selectRadio('grade','中3',this)">中3</div>
-            <div class="radio-btn" onclick="selectRadio('grade','高1',this)">高1</div>
-            <div class="radio-btn" onclick="selectRadio('grade','高2',this)">高2</div>
-            <div class="radio-btn" onclick="selectRadio('grade','高3',this)">高3</div>
-          </div>
+          <select onchange="sState.grade=this.value"><option value="">-- 学年を選択 --</option><optgroup label="小学生"><option>小1</option><option>小2</option><option>小3</option><option>小4</option><option>小5</option><option>小6</option></optgroup><optgroup label="中学生"><option>中1</option><option>中2</option><option>中3</option></optgroup><optgroup label="高校生"><option>高1</option><option>高2</option><option>高3</option><option>既卒</option></optgroup></select>
         </div>
         <div class="field">
           <label>面談日</label>
@@ -412,16 +486,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
       <div class="card">
         <div class="card-title">基本情報</div>
         <div class="field"><label>生徒名</label><input type="text" id="p-name" placeholder="例：山田 太郎"></div>
+        <div class="field"><label>校舎名</label><select id="p-school"><option value="">-- 校舎を選択 --</option><optgroup label="エイメイ学院"><option>みずほ台校舎</option><option>鶴瀬校舎</option><option>ふじみ野校舎</option><option>トナリエふじみ野校舎</option><option>富士見羽沢校舎</option><option>水谷校舎</option></optgroup><optgroup label="明成個別"><option>鶴瀬東校舎</option><option>鶴瀬西校舎</option><option>三芳藤久保校舎</option><option>ふじみ野大井校舎</option><option>トナリエふじみ野校舎（個別）</option><option>ふじみ野西口校舎</option><option>ふじみ野上福岡校舎</option><option>新河岸校舎</option><option>南古谷校舎</option><option>川越南大塚校舎</option><option>志木校舎</option><option>朝霞台校舎</option></optgroup><optgroup label="Elena個別女子"><option>水谷校舎（Elena）</option><option>ふじみ野西口校舎（Elena）</option></optgroup><optgroup label="EIMEI予備校"><option>鶴瀬校舎（予備校）</option><option>ふじみ野駅前校舎</option></optgroup><optgroup label="Luce個別指導"><option>みずほ台校舎（Luce）</option><option>鶴瀬校舎（Luce）</option></optgroup></select></div>
         <div class="field">
           <label>学年</label>
-          <div class="radio-group">
-            <div class="radio-btn" onclick="selectRadio('p_grade','中1',this)">中1</div>
-            <div class="radio-btn" onclick="selectRadio('p_grade','中2',this)">中2</div>
-            <div class="radio-btn" onclick="selectRadio('p_grade','中3',this)">中3</div>
-            <div class="radio-btn" onclick="selectRadio('p_grade','高1',this)">高1</div>
-            <div class="radio-btn" onclick="selectRadio('p_grade','高2',this)">高2</div>
-            <div class="radio-btn" onclick="selectRadio('p_grade','高3',this)">高3</div>
-          </div>
+          <select onchange="pState.p_grade=this.value"><option value="">-- 学年を選択 --</option><optgroup label="小学生"><option>小1</option><option>小2</option><option>小3</option><option>小4</option><option>小5</option><option>小6</option></optgroup><optgroup label="中学生"><option>中1</option><option>中2</option><option>中3</option></optgroup><optgroup label="高校生"><option>高1</option><option>高2</option><option>高3</option><option>既卒</option></optgroup></select>
         </div>
         <div class="field">
           <label>面談日</label>
@@ -439,7 +507,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
             </div>
           </div>
         </div>
-        <div class="field"><label>保護者名</label><input type="text" id="p-parent-name" placeholder="例：山田 花子"></div>
         <div class="field">
           <label>続柄</label>
           <div class="radio-group">
@@ -545,42 +612,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
       <div class="section-tag tag-grade">成績入力</div>
       <div class="card-title">テスト結果の記録</div>
       <div class="field"><label>生徒名</label><input type="text" id="g-name" placeholder="例：山田 太郎"></div>
+      <div class="field"><label>校舎名</label><select id="g-school"><option value="">-- 校舎を選択 --</option><optgroup label="エイメイ学院"><option>みずほ台校舎</option><option>鶴瀬校舎</option><option>ふじみ野校舎</option><option>トナリエふじみ野校舎</option><option>富士見羽沢校舎</option><option>水谷校舎</option></optgroup><optgroup label="明成個別"><option>鶴瀬東校舎</option><option>鶴瀬西校舎</option><option>三芳藤久保校舎</option><option>ふじみ野大井校舎</option><option>トナリエふじみ野校舎（個別）</option><option>ふじみ野西口校舎</option><option>ふじみ野上福岡校舎</option><option>新河岸校舎</option><option>南古谷校舎</option><option>川越南大塚校舎</option><option>志木校舎</option><option>朝霞台校舎</option></optgroup><optgroup label="Elena個別女子"><option>水谷校舎（Elena）</option><option>ふじみ野西口校舎（Elena）</option></optgroup><optgroup label="EIMEI予備校"><option>鶴瀬校舎（予備校）</option><option>ふじみ野駅前校舎</option></optgroup><optgroup label="Luce個別指導"><option>みずほ台校舎（Luce）</option><option>鶴瀬校舎（Luce）</option></optgroup></select></div>
       <div class="field">
         <label>学年</label>
-        <div class="radio-group">
-          <div class="radio-btn" onclick="selectRadio('g_grade','中1',this)">中1</div>
-          <div class="radio-btn" onclick="selectRadio('g_grade','中2',this)">中2</div>
-          <div class="radio-btn" onclick="selectRadio('g_grade','中3',this)">中3</div>
-          <div class="radio-btn" onclick="selectRadio('g_grade','高1',this)">高1</div>
-          <div class="radio-btn" onclick="selectRadio('g_grade','高2',this)">高2</div>
-          <div class="radio-btn" onclick="selectRadio('g_grade','高3',this)">高3</div>
-        </div>
+        <select onchange="gState.g_grade=this.value"><option value="">-- 学年を選択 --</option><optgroup label="小学生"><option>小1</option><option>小2</option><option>小3</option><option>小4</option><option>小5</option><option>小6</option></optgroup><optgroup label="中学生"><option>中1</option><option>中2</option><option>中3</option></optgroup><optgroup label="高校生"><option>高1</option><option>高2</option><option>高3</option><option>既卒</option></optgroup></select>
       </div>
       <div class="field">
         <label>テスト名</label>
-        <div class="radio-group" style="margin-bottom:8px">
-          <div class="radio-btn" onclick="selectRadio('g_test','中間テスト',this)">中間テスト</div>
-          <div class="radio-btn" onclick="selectRadio('g_test','期末テスト',this)">期末テスト</div>
-          <div class="radio-btn" onclick="selectRadio('g_test','実力テスト',this)">実力テスト</div>
-          <div class="radio-btn" onclick="selectRadio('g_test','模試',this)">模試</div>
-        </div>
-        <input type="text" id="g-test-custom" placeholder="上記以外の場合に記入（例：1学期期末）">
+        <select onchange="gState.g_test=this.value"><option value="">-- テストを選択 --</option><option>1学期中間</option><option>1学期期末</option><option>2学期中間</option><option>2学期期末</option><option>学年末</option><option>塾内テスト</option><option>北辰テスト</option></select>
       </div>
       <div class="field">
-        <label>実施日</label>
-        <div class="cal-wrap" id="cal-wrap-g">
-          <button class="cal-trigger" onclick="toggleCal('g',event)" type="button">
-            <span style="font-size:15px">📅</span><span id="cal-display-g" class="cal-placeholder">日付を選択</span>
-          </button>
-          <div class="cal-popup hidden" id="cal-popup-g">
-            <div class="cal-header">
-              <button class="cal-nav" onclick="changeMonth('g',-1)" type="button">‹</button>
-              <span class="cal-month-label" id="cal-title-g"></span>
-              <button class="cal-nav" onclick="changeMonth('g',1)" type="button">›</button>
-            </div>
-            <div class="cal-grid" id="cal-grid-g"></div>
-          </div>
-        </div>
+        <label>北辰実施回（任意）</label>
+        <select id="g-test-round" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit;background:#fff;color:#222;cursor:pointer">
+          <option value="">-- 実施回を選択 --</option>
+          <option>第1回</option><option>第2回</option><option>第3回</option><option>第4回</option>
+          <option>第5回</option><option>第6回</option><option>第7回</option><option>第8回</option>
+        </select>
       </div>
     </div>
 
@@ -613,55 +660,102 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
       <div class="field"><label>コメント・前回比など</label><textarea class="memo" id="g-comment" placeholder="例：数学が前回より15点上がった。英語が課題。" style="min-height:60px"></textarea></div>
     </div>
 
-    <button class="btn-save" id="g-save-btn" onclick="saveGrade()">成績をスプレッドシートに保存</button>
-    <div id="g-msg"></div>
-  </div>
-
-  <!-- ===== 音声まとめ ===== -->
-  <div id="screen-audio" class="screen">
-
-    <!-- OpenAI APIキー -->
-    <div class="audio-openai-key">
-      <label>OpenAI APIキー（Whisper文字起こし用・このデバイスに保存）</label>
-      <input type="password" id="openai-key" placeholder="sk-..." oninput="saveOpenAiKey(this.value)">
-      <p class="api-note" style="margin-top:6px">音声文字起こしにはOpenAIのAPIキーが別途必要です。</p>
+    <div class="card">
+      <div class="card-title">偏差値（任意）</div>
+      <div class="grade-row"><div class="grade-label">国語</div><input type="number" class="grade-score" id="g-hensa-ko" min="0" max="99" placeholder="—"><span class="grade-unit"></span></div>
+      <div class="grade-row"><div class="grade-label">数学</div><input type="number" class="grade-score" id="g-hensa-su" min="0" max="99" placeholder="—"><span class="grade-unit"></span></div>
+      <div class="grade-row"><div class="grade-label">英語</div><input type="number" class="grade-score" id="g-hensa-ei" min="0" max="99" placeholder="—"><span class="grade-unit"></span></div>
+      <div class="grade-row"><div class="grade-label">理科</div><input type="number" class="grade-score" id="g-hensa-ri" min="0" max="99" placeholder="—"><span class="grade-unit"></span></div>
+      <div class="grade-row"><div class="grade-label">社会</div><input type="number" class="grade-score" id="g-hensa-sh" min="0" max="99" placeholder="—"><span class="grade-unit"></span></div>
+      <div style="border-top:1px solid #eee;margin:10px 0 12px"></div>
+      <div class="grade-row"><div class="grade-label" style="width:44px;font-size:13px">3科</div><input type="number" class="grade-score" id="g-hensa-3k" min="0" max="99" placeholder="—"><span class="grade-unit" style="font-size:12px">偏差値</span></div>
+      <div class="grade-row"><div class="grade-label" style="width:44px;font-size:13px">5科</div><input type="number" class="grade-score" id="g-hensa-5k" min="0" max="99" placeholder="—"><span class="grade-unit" style="font-size:12px">偏差値</span></div>
     </div>
 
-    <!-- STEP 1: 文字起こし -->
+    <button class="btn-save" id="g-save-btn" onclick="saveGrade()">テスト結果を保存</button>
+    <div id="g-msg"></div>
+
+    <!-- 志望校 -->
+    <div class="card" style="margin-top:1.5rem">
+      <div class="card-title">志望校（任意）</div>
+      <div class="field"><label>第一志望</label><input type="text" id="g-school1" placeholder="例：○○高校" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit"></div>
+      <div class="field"><label>第二志望</label><input type="text" id="g-school2" placeholder="" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit"></div>
+      <div class="field"><label>第三志望</label><input type="text" id="g-school3" placeholder="" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit"></div>
+      <div class="field" style="margin-bottom:0"><label>第四志望</label><input type="text" id="g-school4" placeholder="" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit"></div>
+    </div>
+    <button class="btn-save" id="g-school-save-btn" onclick="saveTargetSchools()" style="background:#1D9E75">志望校を保存</button>
+    <div id="g-school-msg"></div>
+
+    <!-- 通知表 -->
+    <div class="card" style="margin-top:1.5rem">
+      <div class="card-title">通知表（5段階評定）</div>
+      <div class="nc-grade-btns">
+        <button class="nc-grade-btn active" id="nc-tabBtn-g1" onclick="showGradeTab('g1')">中1</button>
+        <button class="nc-grade-btn" id="nc-tabBtn-g2" onclick="showGradeTab('g2')">中2</button>
+        <button class="nc-grade-btn" id="nc-tabBtn-g3" onclick="showGradeTab('g3')">中3</button>
+      </div>
+      <div id="nc-tab-g1" style="overflow-x:auto">
+        <table class="nc-table">
+          <thead><tr><th style="width:60px">科目</th><th>1学期</th><th>2学期</th><th>3学期</th><th>学年評定</th></tr></thead>
+          <tbody>
+            <tr><td>国語</td><td><input class="nc-input" id="nc-g1-ko-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ko-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ko-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ko-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>数学</td><td><input class="nc-input" id="nc-g1-su-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-su-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-su-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-su-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>英語</td><td><input class="nc-input" id="nc-g1-ei-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ei-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ei-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ei-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>理科</td><td><input class="nc-input" id="nc-g1-ri-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ri-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ri-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ri-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>社会</td><td><input class="nc-input" id="nc-g1-sh-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-sh-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-sh-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-sh-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>音楽</td><td><input class="nc-input" id="nc-g1-mu-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-mu-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-mu-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-mu-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>美術</td><td><input class="nc-input" id="nc-g1-ar-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ar-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ar-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-ar-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>保健体育</td><td><input class="nc-input" id="nc-g1-pe-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-pe-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-pe-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-pe-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>技術・家庭</td><td><input class="nc-input" id="nc-g1-te-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-te-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-te-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g1-te-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="nc-tab-g2" style="overflow-x:auto;display:none">
+        <table class="nc-table">
+          <thead><tr><th style="width:60px">科目</th><th>1学期</th><th>2学期</th><th>3学期</th><th>学年評定</th></tr></thead>
+          <tbody>
+            <tr><td>国語</td><td><input class="nc-input" id="nc-g2-ko-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ko-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ko-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ko-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>数学</td><td><input class="nc-input" id="nc-g2-su-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-su-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-su-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-su-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>英語</td><td><input class="nc-input" id="nc-g2-ei-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ei-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ei-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ei-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>理科</td><td><input class="nc-input" id="nc-g2-ri-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ri-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ri-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ri-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>社会</td><td><input class="nc-input" id="nc-g2-sh-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-sh-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-sh-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-sh-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>音楽</td><td><input class="nc-input" id="nc-g2-mu-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-mu-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-mu-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-mu-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>美術</td><td><input class="nc-input" id="nc-g2-ar-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ar-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ar-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-ar-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>保健体育</td><td><input class="nc-input" id="nc-g2-pe-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-pe-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-pe-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-pe-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>技術・家庭</td><td><input class="nc-input" id="nc-g2-te-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-te-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-te-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g2-te-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="nc-tab-g3" style="overflow-x:auto;display:none">
+        <table class="nc-table">
+          <thead><tr><th style="width:60px">科目</th><th>1学期</th><th>2学期</th><th>3学期</th><th>学年評定</th></tr></thead>
+          <tbody>
+            <tr><td>国語</td><td><input class="nc-input" id="nc-g3-ko-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ko-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ko-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ko-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>数学</td><td><input class="nc-input" id="nc-g3-su-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-su-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-su-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-su-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>英語</td><td><input class="nc-input" id="nc-g3-ei-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ei-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ei-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ei-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>理科</td><td><input class="nc-input" id="nc-g3-ri-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ri-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ri-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ri-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>社会</td><td><input class="nc-input" id="nc-g3-sh-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-sh-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-sh-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-sh-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>音楽</td><td><input class="nc-input" id="nc-g3-mu-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-mu-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-mu-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-mu-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>美術</td><td><input class="nc-input" id="nc-g3-ar-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ar-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ar-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-ar-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>保健体育</td><td><input class="nc-input" id="nc-g3-pe-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-pe-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-pe-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-pe-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+            <tr><td>技術・家庭</td><td><input class="nc-input" id="nc-g3-te-1" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-te-2" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-te-3" type="number" min="1" max="5" placeholder="—"></td><td><input class="nc-input" id="nc-g3-te-y" type="number" min="1" max="5" placeholder="—"></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <button class="btn-save" id="g-nc-save-btn" onclick="saveReportCard()" style="background:#1D9E75">通知表を保存</button>
+    <div id="g-nc-msg"></div>
+  </div>
+
+  <!-- ===== テキストまとめ ===== -->
+  <div id="screen-audio" class="screen">
+
+    <!-- STEP 1: テキスト入力 -->
     <div class="card">
-      <div class="step-label"><span class="step-num">1</span>音声ファイルを文字起こし</div>
-
-      <div class="audio-drop" id="audio-drop"
-           ondragover="event.preventDefault();this.classList.add('drag-over')"
-           ondragleave="this.classList.remove('drag-over')"
-           ondrop="handleDrop(event)">
-        <input type="file" id="audio-file" accept="audio/*,video/mp4,.m4a,.mp3,.wav,.webm,.ogg" onchange="handleFileSelect(this)">
-        <div class="audio-drop-icon">🎙️</div>
-        <div class="audio-drop-text">音声ファイルをドラッグ＆ドロップ</div>
-        <div class="audio-drop-sub">またはクリックして選択　mp3 / m4a / wav / webm 対応</div>
-      </div>
-      <div id="audio-filename-wrap" class="hidden"></div>
-      <div id="audio-size-warn" class="hidden"></div>
-
-      <div class="field" style="margin-top:12px;margin-bottom:0">
-        <label>音声の言語</label>
-        <div class="radio-group">
-          <div class="radio-btn selected" onclick="selectRadio('a_lang','ja',this)" id="lang-ja">日本語</div>
-          <div class="radio-btn" onclick="selectRadio('a_lang','en',this)">英語</div>
-          <div class="radio-btn" onclick="selectRadio('a_lang','auto',this)">自動検出</div>
-        </div>
-      </div>
-
-      <button class="btn-transcribe" id="transcribe-btn" onclick="transcribeAudio()" disabled>
-        文字起こしを開始する
-      </button>
-      <div id="transcribe-progress"></div>
-
-      <div id="transcribe-result-wrap" class="hidden" style="margin-top:12px">
-        <label style="font-size:13px;color:#555;font-weight:500;display:block;margin-bottom:6px">文字起こし結果（編集できます）</label>
-        <textarea class="transcribe-result" id="transcribe-text" placeholder="文字起こし結果がここに表示されます" oninput="updateCharCount()"></textarea>
-        <div class="char-count" id="char-count">0 文字</div>
-      </div>
+      <div class="step-label"><span class="step-num">1</span>テキストを貼り付ける</div>
+      <label style="font-size:13px;color:#555;font-weight:500;display:block;margin-bottom:6px">面談メモや文字起こしテキストを貼り付けてください</label>
+      <textarea class="transcribe-result" id="transcribe-text" placeholder="ここにテキストを貼り付けてください" oninput="updateCharCount()" style="min-height:200px"></textarea>
+      <div class="char-count" id="char-count">0 文字</div>
     </div>
 
     <!-- STEP 2: まとめ生成 -->
@@ -671,6 +765,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
       <div class="field">
         <label>生徒名（任意）</label>
         <input type="text" id="a-name" placeholder="例：山田 太郎">
+      </div>
+      <div class="field">
+        <label>校舎名（任意）</label>
+        <select id="a-school"><option value="">-- 校舎を選択 --</option><optgroup label="エイメイ学院"><option>みずほ台校舎</option><option>鶴瀬校舎</option><option>ふじみ野校舎</option><option>トナリエふじみ野校舎</option><option>富士見羽沢校舎</option><option>水谷校舎</option></optgroup><optgroup label="明成個別"><option>鶴瀬東校舎</option><option>鶴瀬西校舎</option><option>三芳藤久保校舎</option><option>ふじみ野大井校舎</option><option>トナリエふじみ野校舎（個別）</option><option>ふじみ野西口校舎</option><option>ふじみ野上福岡校舎</option><option>新河岸校舎</option><option>南古谷校舎</option><option>川越南大塚校舎</option><option>志木校舎</option><option>朝霞台校舎</option></optgroup><optgroup label="Elena個別女子"><option>水谷校舎（Elena）</option><option>ふじみ野西口校舎（Elena）</option></optgroup><optgroup label="EIMEI予備校"><option>鶴瀬校舎（予備校）</option><option>ふじみ野駅前校舎</option></optgroup><optgroup label="Luce個別指導"><option>みずほ台校舎（Luce）</option><option>鶴瀬校舎（Luce）</option></optgroup></select>
       </div>
 
       <div class="field">
@@ -693,7 +791,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
   <!-- ===== 生徒カルテ ===== -->
   <div id="screen-karte" class="screen">
     <div class="karte-search">
-      <input type="text" id="karte-name" placeholder="生徒名を入力（例：山田 太郎）" onkeydown="if(event.key==='Enter')searchKarte()">
+      <select id="karte-school"><option value="">すべての校舎</option><optgroup label="エイメイ学院"><option>みずほ台校舎</option><option>鶴瀬校舎</option><option>ふじみ野校舎</option><option>トナリエふじみ野校舎</option><option>富士見羽沢校舎</option><option>水谷校舎</option></optgroup><optgroup label="明成個別"><option>鶴瀬東校舎</option><option>鶴瀬西校舎</option><option>三芳藤久保校舎</option><option>ふじみ野大井校舎</option><option>トナリエふじみ野校舎（個別）</option><option>ふじみ野西口校舎</option><option>ふじみ野上福岡校舎</option><option>新河岸校舎</option><option>南古谷校舎</option><option>川越南大塚校舎</option><option>志木校舎</option><option>朝霞台校舎</option></optgroup><optgroup label="Elena個別女子"><option>水谷校舎（Elena）</option><option>ふじみ野西口校舎（Elena）</option></optgroup><optgroup label="EIMEI予備校"><option>鶴瀬校舎（予備校）</option><option>ふじみ野駅前校舎</option></optgroup><optgroup label="Luce個別指導"><option>みずほ台校舎（Luce）</option><option>鶴瀬校舎（Luce）</option></optgroup></select>
+      <input type="text" id="karte-name" placeholder="生徒名（例：山田 太郎）" onkeydown="if(event.key==='Enter')searchKarte()">
       <button class="karte-search-btn" onclick="searchKarte()">検索</button>
     </div>
     <div id="karte-area">
@@ -708,9 +807,9 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwtLtrArQ1ECX0cNLh85rMJ
 // ===== State =====
 const sState = { grade:'', attitude:'', result:'', career_interest:'', checks:new Set(), selectedDate:null };
 const pState = { p_grade:'', p_relation:'', p_rhythm:'', checks:new Set(), selectedDate:null };
-const gState = { g_grade:'', g_test:'', selectedDate:null };
+const gState = { g_grade:'', g_test:'' };
 
-let generatedReport = '', generatedParentMemo = '', generatedKarte = '', karteData = null;
+let generatedReport = '', generatedParentMemo = '', generatedKarte = '', karteData = null, karteSchool = '';
 
 // ===== API Key =====
 function saveApiKey(val) { localStorage.setItem('anthropic_api_key', val); }
@@ -851,7 +950,7 @@ async function generateReport(){
   const prompt=`あなたは学習塾「エイメイ学院」の塾長です。中高生との面談記録をもとに、保護者向けの温かい報告文を書いてください。
 
 【面談情報】
-生徒名：${v('name')||'お子様'}　学年：${sState.grade}　面談日：${getDateStr(sState)}
+生徒名：${v('name')||'お子様'}　校舎：${v('school')||'—'}　学年：${sState.grade}　面談日：${getDateStr(sState)}
 
 【生活面】
 チェック：${[...sState.checks].join(',')}　楽しいこと：${v('enjoy')}　メモ：${v('life_memo')}
@@ -893,7 +992,7 @@ async function saveStudentToSheet(){
   const btn=document.getElementById('s-save-btn');
   const msg=document.getElementById('s-sheet-msg');
   btn.disabled=true; btn.textContent='保存中...';
-  const payload={sheet:'生徒面談',date:getDateStr(sState),name:v('name')||'お子様',grade:sState.grade,checks:[...sState.checks].join(','),enjoy:v('enjoy'),life_memo:v('life_memo'),attitude:sState.attitude,strong:v('strong'),weak:v('weak_sub'),result:sState.result,study_memo:v('study_memo'),career_interest:sState.career_interest,target:v('target'),career_memo:v('career_memo'),good:v('good'),policy:v('policy'),note:v('note'),report:generatedReport};
+  const payload={sheet:'生徒面談',date:getDateStr(sState),name:v('name')||'お子様',school:v('school'),grade:sState.grade,checks:[...sState.checks].join(','),enjoy:v('enjoy'),life_memo:v('life_memo'),attitude:sState.attitude,strong:v('strong'),weak:v('weak_sub'),result:sState.result,study_memo:v('study_memo'),career_interest:sState.career_interest,target:v('target'),career_memo:v('career_memo'),good:v('good'),policy:v('policy'),note:v('note'),report:generatedReport};
   try{
     await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     msg.innerHTML='<div class="success-msg">スプレッドシートに保存しました！</div>';
@@ -914,8 +1013,8 @@ async function generateParentMemo(){
   const prompt=`あなたは学習塾「エイメイ学院」の講師です。保護者面談の記録をもとに、講師向けの面談まとめ文を作成してください。
 
 【面談情報】
-生徒名：${v('p-name')||'（未入力）'}　学年：${pState.p_grade}　面談日：${getDateStr(pState)}
-保護者名：${v('p-parent-name')||'（未入力）'}　続柄：${pState.p_relation}
+生徒名：${v('p-name')||'（未入力）'}　校舎：${v('p-school')||'—'}　学年：${pState.p_grade}　面談日：${getDateStr(pState)}
+続柄：${pState.p_relation}
 
 【家庭での様子】
 生活リズム：${pState.p_rhythm}
@@ -958,7 +1057,7 @@ async function saveParentToSheet(){
   const btn=document.getElementById('p-save-btn');
   const msg=document.getElementById('p-sheet-msg');
   btn.disabled=true; btn.textContent='保存中...';
-  const payload={sheet:'保護者面談',date:getDateStr(pState),name:v('p-name'),grade:pState.p_grade,parent_name:v('p-parent-name'),relation:pState.p_relation,rhythm:pState.p_rhythm,checks:[...pState.checks].join(','),home_memo:v('p-home-memo'),request_memo:v('p-request-memo'),proposal_memo:v('p-proposal-memo'),impression:v('p-impression'),action:v('p-action'),memo:generatedParentMemo};
+  const payload={sheet:'保護者面談',date:getDateStr(pState),name:v('p-name'),school:v('p-school'),grade:pState.p_grade,relation:pState.p_relation,rhythm:pState.p_rhythm,checks:[...pState.checks].join(','),home_memo:v('p-home-memo'),request_memo:v('p-request-memo'),proposal_memo:v('p-proposal-memo'),impression:v('p-impression'),action:v('p-action'),memo:generatedParentMemo};
   try{
     await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     msg.innerHTML='<div class="success-msg">スプレッドシートに保存しました！</div>';
@@ -991,7 +1090,7 @@ async function saveGrade(){
   const scores={};
   ids.forEach((id,i)=>{const val=v(id);scores[labels[i]]=val;const num=parseInt(val);if(!isNaN(num)){total+=num;count++;}});
 
-  const payload={sheet:'成績',date:getDateStr(gState),name,grade:gState.g_grade,test:v('g-test-custom')||gState.g_test,...scores,total:count>0?total:'',class_rank:v('g-class-rank'),grade_rank:v('g-grade-rank'),comment:v('g-comment')};
+  const payload={sheet:'成績',date:new Date().toLocaleDateString('ja-JP'),name,school:v('g-school'),grade:gState.g_grade,test:gState.g_test,test_round:v('g-test-round'),...scores,total:count>0?total:'',class_rank:v('g-class-rank'),grade_rank:v('g-grade-rank'),'国語偏差値':v('g-hensa-ko'),'数学偏差値':v('g-hensa-su'),'英語偏差値':v('g-hensa-ei'),'理科偏差値':v('g-hensa-ri'),'社会偏差値':v('g-hensa-sh'),'3科偏差値':v('g-hensa-3k'),'5科偏差値':v('g-hensa-5k'),comment:v('g-comment')};
 
   try{
     await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
@@ -1007,10 +1106,12 @@ async function saveGrade(){
 async function searchKarte(){
   const name=v('karte-name').trim();
   if(!name)return;
+  karteSchool=v('karte-school').trim();
   const area=document.getElementById('karte-area');
   area.innerHTML='<div class="loading">データを取得中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
   try{
-    const res=await fetch('/api/karte?name='+encodeURIComponent(name));
+    const q='/api/karte?name='+encodeURIComponent(name)+(karteSchool?'&school='+encodeURIComponent(karteSchool):'');
+    const res=await fetch(q);
     if(!res.ok)throw new Error('HTTP '+res.status);
     karteData=await res.json();
     renderKarte(karteData,name);
@@ -1021,7 +1122,7 @@ async function searchKarte(){
 
 function renderKarte(data,name){
   const area=document.getElementById('karte-area');
-  const hasData=(data.student&&data.student.length)||(data.parent&&data.parent.length)||(data.grade&&data.grade.length);
+  const hasData=(data.student&&data.student.length)||(data.parent&&data.parent.length)||(data.grade&&data.grade.length)||(data.audio&&data.audio.length)||(data.notice&&data.notice.length);
   if(!hasData){area.innerHTML=`<div class="empty-state">「${name}」の記録が見つかりませんでした。<br>氏名の表記を確認してください。</div>`;return;}
 
   let html='';
@@ -1040,35 +1141,64 @@ function renderKarte(data,name){
     html+=`</table></div></div>`;
   }
 
-  // タイムライン（面談のみ）
+  // 通知表
+  const ncSubjs=['国語','数学','英語','理科','社会','音楽','美術','保健体育','技術家庭'];
+  const notices=(data.notice||[]).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(notices.length){
+    notices.forEach(nc=>{
+      html+=`<div class="card"><div class="card-title">通知表（5段階評定）　${nc.date||''}</div>`;
+      ['中1','中2','中3'].forEach(g=>{
+        const hasG=ncSubjs.some(s=>nc[`${g}_${s}_1学期`]||nc[`${g}_${s}_2学期`]||nc[`${g}_${s}_3学期`]||nc[`${g}_${s}_年`]);
+        if(!hasG)return;
+        html+=`<div style="font-size:12px;font-weight:600;color:#555;margin:8px 0 4px">${g}</div><div style="overflow-x:auto"><table class="grade-table" style="font-size:12px"><tr><th>科目</th><th>1学期</th><th>2学期</th><th>3学期</th><th>学年評定</th></tr>`;
+        ncSubjs.forEach(s=>{
+          const v1=nc[`${g}_${s}_1学期`]||'',v2=nc[`${g}_${s}_2学期`]||'',v3=nc[`${g}_${s}_3学期`]||'',vy=nc[`${g}_${s}_年`]||'';
+          if(!v1&&!v2&&!v3&&!vy)return;
+          html+=`<tr><td>${s}</td><td>${v1||'—'}</td><td>${v2||'—'}</td><td>${v3||'—'}</td><td class="total-col">${vy||'—'}</td></tr>`;
+        });
+        html+=`</table></div>`;
+      });
+      html+=`</div>`;
+    });
+  }
+
+  // タイムライン（生徒面談・保護者面談・音声まとめ）
   const items=[];
   (data.student||[]).forEach(r=>items.push({type:'s',date:r.date||'',data:r}));
   (data.parent||[]).forEach(r=>items.push({type:'p',date:r.date||'',data:r}));
+  (data.audio||[]).forEach(r=>items.push({type:'a',date:r.date||'',data:r}));
   items.sort((a,b)=>b.date.localeCompare(a.date));
 
   if(items.length){
-    html+=`<div class="card"><div class="card-title">面談履歴</div><div class="timeline">`;
+    html+=`<div class="card"><div class="card-title">面談・音声まとめ記録</div><div class="timeline">`;
     items.forEach(item=>{
       const d=item.data;
-      const cls=item.type==='s'?'tl-student':'tl-parent';
-      const badge=item.type==='s'?'tl-badge-s':'tl-badge-p';
-      const label=item.type==='s'?'生徒面談':'保護者面談';
+      const cls=item.type==='s'?'tl-student':item.type==='p'?'tl-parent':'tl-audio';
+      const badge=item.type==='s'?'tl-badge-s':item.type==='p'?'tl-badge-p':'tl-badge-a';
+      const label=item.type==='s'?'生徒面談':item.type==='p'?'保護者面談':'音声まとめ';
       let content='';
       if(item.type==='s'){
         const parts=[d.attitude&&`授業：${d.attitude}`,d.strong&&`得意：${d.strong}`,d.weak&&`苦手：${d.weak}`,d.result&&`成績推移：${d.result}`].filter(Boolean);
         content=parts.join(' / ');
         if(d.report)content+=`<div class="tl-quote">"${d.report.slice(0,80)}…"</div>`;
-      }else{
+      }else if(item.type==='p'){
         const parts=[d.relation&&`${d.relation}`,d.rhythm&&`リズム：${d.rhythm}`].filter(Boolean);
         content=parts.join(' / ');
         if(d.memo)content+=`<div class="tl-quote">"${d.memo.slice(0,80)}…"</div>`;
+      }else{
+        if(d.type)content+=`<span style="font-size:11px;color:#777">${d.type}</span>`;
+        if(d.summary)content+=`<div class="tl-quote">"${d.summary.slice(0,80)}…"</div>`;
       }
       html+=`<div class="tl-item ${cls}"><div class="tl-date">${item.date}</div><span class="tl-badge ${badge}">${label}</span><div class="tl-content">${content||'記録なし'}</div></div>`;
     });
     html+=`</div></div>`;
   }
 
-  html+=`<button class="karte-gen-btn" id="karte-gen-btn" onclick="generateKarte('${name.replace(/'/g,'\\\'')}')" >AIカルテ文を生成する</button><div id="karte-result-area"></div>`;
+  const en=name.replace(/'/g,"\\'");
+  html+=`<div style="display:flex;gap:8px;margin-top:0">
+    <button class="karte-gen-btn" id="karte-gen-btn" onclick="generateKarte('${en}')" style="flex:1;margin-top:1rem">AIカルテ文を生成する</button>
+    <button class="a4-preview-btn" onclick="showA4Preview('${en}')" style="margin-top:1rem">A4でまとめを見る</button>
+  </div><div id="karte-result-area"></div>`;
   area.innerHTML=html;
 }
 
@@ -1082,6 +1212,18 @@ async function generateKarte(name){
   const sm=(d.student||[]).map(r=>`[${r.date}] 態度:${r.attitude||'—'} 得意:${r.strong||'—'} 苦手:${r.weak||'—'} 成績:${r.result||'—'} 生活:${r.checks||'—'} ${r.life_memo||''} ${r.study_memo||''} ${r.career_memo||''}`).join('\n');
   const pm=(d.parent||[]).map(r=>`[${r.date}] ${r.relation||''} リズム:${r.rhythm||'—'} ${r.home_memo||''} ${r.request_memo||''}`).join('\n');
   const gm=(d.grade||[]).map(r=>`[${r.date}] ${r.test||''}: 国${r['国語']||'?'} 数${r['数学']||'?'} 英${r['英語']||'?'} 理${r['理科']||'?'} 社${r['社会']||'?'} 計${r.total||'?'} ${r.comment||''}`).join('\n');
+  const subjs=['国語','数学','英語','理科','社会','音楽','美術','保健体育','技術家庭'];
+  const nm=(d.notice||[]).map(r=>{
+    const lines=['中1','中2','中3'].map(g=>{
+      const parts=subjs.map(s=>{
+        const v1=r[`${g}_${s}_1学期`]||'',v2=r[`${g}_${s}_2学期`]||'',v3=r[`${g}_${s}_3学期`]||'',vy=r[`${g}_${s}_年`]||'';
+        if(!v1&&!v2&&!v3&&!vy)return null;
+        return `${s}:${v1||'—'}/${v2||'—'}/${v3||'—'}(年${vy||'—'})`;
+      }).filter(Boolean);
+      return parts.length?`${g}: ${parts.join(' ')}`:null;
+    }).filter(Boolean).join(' | ');
+    return lines?`[${r.date||''}] ${lines}`:'';
+  }).filter(Boolean).join('\n');
 
   const prompt=`あなたは学習塾「エイメイ学院」のベテラン講師です。以下の記録をもとに、${name}さんの総合的な生徒カルテ文を作成してください。
 
@@ -1091,8 +1233,11 @@ ${sm||'記録なし'}
 【保護者面談記録】
 ${pm||'記録なし'}
 
-【成績推移】
+【定期テスト成績】
 ${gm||'記録なし'}
+
+【通知表（5段階評定）】
+${nm||'記録なし'}
 
 【条件】
 ・講師・スタッフが共有する内部資料として書く
@@ -1138,52 +1283,64 @@ function copyText(text,btn){
   });
 }
 
-// ===== 音声まとめ =====
-const aState = { a_lang: 'ja', a_type: 'student' };
-let selectedAudioFile = null;
-let generatedAudioSummary = '';
-
-function saveOpenAiKey(val) { localStorage.setItem('openai_api_key', val); }
-function getOpenAiKey() { return document.getElementById('openai-key').value || localStorage.getItem('openai_api_key') || ''; }
-
-function handleFileSelect(input) {
-  const file = input.files[0];
-  if (file) setAudioFile(file);
-}
-
-function handleDrop(e) {
-  e.preventDefault();
-  document.getElementById('audio-drop').classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (file) setAudioFile(file);
-}
-
-function setAudioFile(file) {
-  selectedAudioFile = file;
-  const wrap = document.getElementById('audio-filename-wrap');
-  wrap.innerHTML = `<div class="audio-filename"><span style="font-size:18px">🎵</span><span class="audio-filename-text">${file.name}</span><button class="audio-filename-clear" onclick="clearAudioFile()" type="button">✕</button></div>`;
-  wrap.classList.remove('hidden');
-
-  const warnEl = document.getElementById('audio-size-warn');
-  const mb = file.size / 1024 / 1024;
-  if (mb > 4) {
-    warnEl.innerHTML = `<div class="warn-msg">ファイルサイズが ${mb.toFixed(1)}MB あります。4MB を超えると処理できない場合があります。短い録音や圧縮済みのファイルを推奨します。</div>`;
-    warnEl.classList.remove('hidden');
-  } else {
-    warnEl.classList.add('hidden');
+// ===== 志望校: 保存 =====
+async function saveTargetSchools(){
+  const btn=document.getElementById('g-school-save-btn');
+  const msg=document.getElementById('g-school-msg');
+  const name=v('g-name');
+  if(!name){msg.innerHTML='<div class="error-msg">生徒名を入力してください</div>';return;}
+  btn.disabled=true; btn.textContent='保存中...';
+  const payload={sheet:'志望校',date:new Date().toLocaleDateString('ja-JP'),name,school:v('g-school'),grade:gState.g_grade,school1:v('g-school1'),school2:v('g-school2'),school3:v('g-school3'),school4:v('g-school4')};
+  try{
+    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    msg.innerHTML='<div class="success-msg">志望校を保存しました！</div>';
+    btn.textContent='保存済み';
+  }catch(e){
+    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    btn.disabled=false; btn.textContent='志望校を保存';
   }
-
-  document.getElementById('transcribe-btn').disabled = false;
 }
 
-function clearAudioFile() {
-  selectedAudioFile = null;
-  document.getElementById('audio-file').value = '';
-  document.getElementById('audio-filename-wrap').innerHTML = '';
-  document.getElementById('audio-filename-wrap').classList.add('hidden');
-  document.getElementById('audio-size-warn').classList.add('hidden');
-  document.getElementById('transcribe-btn').disabled = true;
+// ===== 通知表: タブ切り替え =====
+function showGradeTab(grade){
+  ['g1','g2','g3'].forEach(g=>{
+    document.getElementById('nc-tab-'+g).style.display=g===grade?'block':'none';
+    document.getElementById('nc-tabBtn-'+g).classList.toggle('active',g===grade);
+  });
 }
+
+// ===== 通知表: 保存 =====
+async function saveReportCard(){
+  const btn=document.getElementById('g-nc-save-btn');
+  const msg=document.getElementById('g-nc-msg');
+  const name=v('g-name');
+  if(!name){msg.innerHTML='<div class="error-msg">生徒名を入力してください</div>';return;}
+  btn.disabled=true; btn.textContent='保存中...';
+  const nc=(id)=>v(id)||'';
+  const grades=[['g1','中1'],['g2','中2'],['g3','中3']];
+  const subjects=[['ko','国語'],['su','数学'],['ei','英語'],['ri','理科'],['sh','社会'],['mu','音楽'],['ar','美術'],['pe','保健体育'],['te','技術家庭']];
+  const terms=[['1','1学期'],['2','2学期'],['3','3学期'],['y','年']];
+  const payload={sheet:'通知表',date:new Date().toLocaleDateString('ja-JP'),name,school:v('g-school'),grade:gState.g_grade};
+  grades.forEach(([gId,gName])=>{
+    subjects.forEach(([sId,sName])=>{
+      terms.forEach(([tId,tName])=>{
+        payload[`${gName}_${sName}_${tName}`]=nc(`nc-${gId}-${sId}-${tId}`);
+      });
+    });
+  });
+  try{
+    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    msg.innerHTML='<div class="success-msg">通知表を保存しました！</div>';
+    btn.textContent='保存済み';
+  }catch(e){
+    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    btn.disabled=false; btn.textContent='通知表を保存';
+  }
+}
+
+// ===== テキストまとめ =====
+const aState = { a_type: 'student' };
+let generatedAudioSummary = '';
 
 function selectType(type, btn) {
   document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
@@ -1202,50 +1359,10 @@ function updateCharCount() {
   document.getElementById('char-count').textContent = len.toLocaleString() + ' 文字';
 }
 
-async function transcribeAudio() {
-  if (!selectedAudioFile) return;
-  const openAiKey = getOpenAiKey();
-  if (!openAiKey) {
-    document.getElementById('transcribe-progress').innerHTML = '<div class="error-msg">OpenAI APIキーを入力してください</div>';
-    return;
-  }
-
-  const btn = document.getElementById('transcribe-btn');
-  btn.disabled = true; btn.textContent = '文字起こし中...';
-  const prog = document.getElementById('transcribe-progress');
-  prog.innerHTML = '<div class="loading" style="padding:1rem">文字起こし中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
-
-  try {
-    const formData = new FormData();
-    formData.append('file', selectedAudioFile, selectedAudioFile.name);
-    formData.append('model', 'whisper-1');
-    if (aState.a_lang !== 'auto') formData.append('language', aState.a_lang);
-
-    const res = await fetch('/api/transcribe', {
-      method: 'POST',
-      headers: { 'x-openai-key': openAiKey },
-      body: formData,
-    });
-
-    const data = await res.json();
-    if (data.error) throw new Error(typeof data.error === 'string' ? data.error : data.error.message || JSON.stringify(data.error));
-
-    const text = data.text || '';
-    document.getElementById('transcribe-text').value = text;
-    document.getElementById('transcribe-result-wrap').classList.remove('hidden');
-    updateCharCount();
-    prog.innerHTML = '<div class="success-msg" style="margin-top:8px">文字起こしが完了しました。内容を確認・編集してからまとめを生成してください。</div>';
-  } catch (e) {
-    prog.innerHTML = `<div class="error-msg">文字起こしに失敗しました：${e.message}</div>`;
-  } finally {
-    btn.disabled = false; btn.textContent = '文字起こしを開始する';
-  }
-}
-
 async function generateAudioSummary() {
   const text = document.getElementById('transcribe-text').value.trim();
   if (!text) {
-    document.getElementById('audio-result-area').innerHTML = '<div class="error-msg">先に文字起こしを行うか、テキストを入力してください</div>';
+    document.getElementById('audio-result-area').innerHTML = '<div class="error-msg">テキストを入力してください</div>';
     return;
   }
 
@@ -1321,7 +1438,7 @@ ${text}
 async function saveAudioToSheet() {
   const today = new Date().toLocaleDateString('ja-JP');
   const typeLabel = { student: '生徒面談', parent: '保護者面談', general: '汎用' }[aState.a_type];
-  const payload = { sheet: '音声記録', date: today, name: v('a-name') || '', type: typeLabel, summary: generatedAudioSummary };
+  const payload = { sheet: '音声記録', date: today, name: v('a-name') || '', school: v('a-school') || '', type: typeLabel, summary: generatedAudioSummary };
   const msg = document.getElementById('audio-sheet-msg');
   try {
     await fetch(GAS_URL, {
@@ -1335,15 +1452,152 @@ async function saveAudioToSheet() {
   }
 }
 
+// ===== A4 プレビュー =====
+function showA4Preview(name){
+  const d=karteData||{};
+  const today=new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
+
+  // 学年を最新レコードから取得
+  const allRecs=[...(d.student||[]),...(d.grade||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const gradeLabel=(allRecs[0]||{}).grade||'';
+  const school=karteSchool;
+  const subLabel=[school,gradeLabel].filter(Boolean).join(' / ');
+
+  let html=`
+    <div class="a4-logo">エイメイ学院　生徒カルテ</div>
+    <div class="a4-name-row">
+      <div><span class="a4-name">${name}</span>${subLabel?`<span class="a4-grade-chip" style="margin-left:10px">${subLabel}</span>`:''}</div>
+      <div class="a4-created">作成日：${today}</div>
+    </div>
+    <hr class="a4-rule">`;
+
+  // 成績
+  const grades=[...(d.grade||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  html+=`<div class="a4-sec"><div class="a4-sec-title">成績推移</div>`;
+  if(grades.length){
+    html+=`<table class="a4-gtbl"><tr><th>日付</th><th>テスト</th><th>国語</th><th>数学</th><th>英語</th><th>理科</th><th>社会</th><th>合計</th></tr>`;
+    grades.forEach(g=>{
+      html+=`<tr><td>${g.date||''}</td><td>${g.test||''}</td><td>${g['国語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['英語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="atot">${g.total||'—'}</td></tr>`;
+    });
+    html+=`</table>`;
+  }else{html+=`<div class="a4-empty">記録なし</div>`;}
+  html+=`</div>`;
+
+  // 通知表
+  const a4Subjs=['国語','数学','英語','理科','社会','音楽','美術','保健体育','技術家庭'];
+  const a4Notices=[...(d.notice||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(a4Notices.length){
+    a4Notices.forEach(nc=>{
+      html+=`<div class="a4-sec"><div class="a4-sec-title">通知表（5段階評定）　${nc.date||''}</div>`;
+      ['中1','中2','中3'].forEach(g=>{
+        const hasG=a4Subjs.some(s=>nc[`${g}_${s}_1学期`]||nc[`${g}_${s}_2学期`]||nc[`${g}_${s}_3学期`]||nc[`${g}_${s}_年`]);
+        if(!hasG)return;
+        html+=`<div style="font-size:11px;font-weight:600;margin:6px 0 3px">${g}</div><table class="a4-gtbl"><tr><th>科目</th><th>1学期</th><th>2学期</th><th>3学期</th><th>学年評定</th></tr>`;
+        a4Subjs.forEach(s=>{
+          const v1=nc[`${g}_${s}_1学期`]||'',v2=nc[`${g}_${s}_2学期`]||'',v3=nc[`${g}_${s}_3学期`]||'',vy=nc[`${g}_${s}_年`]||'';
+          if(!v1&&!v2&&!v3&&!vy)return;
+          html+=`<tr><td>${s}</td><td>${v1||'—'}</td><td>${v2||'—'}</td><td>${v3||'—'}</td><td class="atot">${vy||'—'}</td></tr>`;
+        });
+        html+=`</table>`;
+      });
+      html+=`</div>`;
+    });
+  }
+
+  // タイムライン
+  const items=[];
+  (d.student||[]).forEach(r=>items.push({type:'s',date:r.date||'',data:r}));
+  (d.parent||[]).forEach(r=>items.push({type:'p',date:r.date||'',data:r}));
+  (d.audio||[]).forEach(r=>items.push({type:'a',date:r.date||'',data:r}));
+  items.sort((a,b)=>b.date.localeCompare(a.date));
+
+  html+=`<div class="a4-sec"><div class="a4-sec-title">面談・音声まとめ記録</div>`;
+  if(items.length){
+    html+=`<div class="a4-tl">`;
+    items.forEach((item,idx)=>{
+      const r=item.data;
+      const isLast=idx===items.length-1;
+      const dotCls=item.type==='s'?'ds':item.type==='p'?'dp':'da';
+      const tagCls=item.type==='s'?'ts':item.type==='p'?'tp':'ta';
+      const label=item.type==='s'?'生徒面談':item.type==='p'?'保護者面談':'音声まとめ'+(r.type?`（${r.type}）`:'');
+
+      let detail='';
+      if(item.type==='s'){
+        const pts=[r.attitude&&`授業：${r.attitude}`,r.strong&&`得意：${r.strong}`,r.weak&&`苦手：${r.weak}`,r.result&&`成績推移：${r.result}`].filter(Boolean);
+        if(pts.length)detail+=`<div>${pts.join('　/　')}</div>`;
+        if(r.good)detail+=`<div style="margin-top:3px">■ いいところ：${r.good}</div>`;
+        if(r.policy)detail+=`<div>■ 方針：${r.policy}</div>`;
+        if(r.note)detail+=`<div>■ 特記：${r.note}</div>`;
+        if(r.report)detail+=`<div class="a4-tl-sub">${r.report}</div>`;
+      }else if(item.type==='p'){
+        const pts=[r.relation&&`${r.relation}`,r.rhythm&&`生活リズム：${r.rhythm}`].filter(Boolean);
+        if(pts.length)detail+=`<div>${pts.join('　/　')}</div>`;
+        if(r.request_memo)detail+=`<div style="margin-top:3px">■ 相談内容：${r.request_memo}</div>`;
+        if(r.action)detail+=`<div>■ 次回アクション：${r.action}</div>`;
+        if(r.memo)detail+=`<div class="a4-tl-sub">${r.memo}</div>`;
+      }else{
+        if(r.summary)detail+=`<div class="a4-tl-sub">${r.summary}</div>`;
+      }
+
+      html+=`<div class="a4-tl-row">
+        <div class="a4-tl-left">
+          <div class="a4-tl-dot ${dotCls}"></div>
+          ${!isLast?'<div class="a4-tl-vline"></div>':''}
+        </div>
+        <div class="a4-tl-body">
+          <div class="a4-tl-dt">${item.date}</div>
+          <span class="a4-tl-tag ${tagCls}">${label}</span>
+          <div class="a4-tl-detail">${detail||'<span style="color:#ccc;font-size:11px">記録なし</span>'}</div>
+        </div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }else{html+=`<div class="a4-empty">記録なし</div>`;}
+  html+=`</div>`;
+
+  // AIカルテ総評
+  if(generatedKarte){
+    html+=`<div class="a4-sec"><div class="a4-sec-title">AI カルテ総評</div><div class="a4-karte">${generatedKarte}</div></div>`;
+  }
+
+  document.getElementById('a4-page').innerHTML=html;
+  document.getElementById('a4-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeA4(){
+  document.getElementById('a4-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function closeA4Backdrop(e){
+  if(e.target===document.getElementById('a4-overlay'))closeA4();
+}
+
 // ===== Init =====
 window.onload=()=>{
   const saved=localStorage.getItem('anthropic_api_key');
   if(saved)document.getElementById('api-key').value=saved;
-  const savedOai=localStorage.getItem('openai_api_key');
-  if(savedOai)document.getElementById('openai-key').value=savedOai;
-  aState.a_lang='ja';
   initCal();
+
+  // 生徒モード
+  if(new URLSearchParams(location.search).get('mode')==='student'){
+    document.querySelector('.header h1').textContent='成績入力フォーム';
+    document.querySelector('.header p').textContent='テスト結果を入力して「スプレッドシートに保存」を押してください。';
+    document.querySelector('.api-section').style.display='none';
+    document.querySelector('.tab-nav').style.display='none';
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById('screen-grade').classList.add('active');
+  }
 };
 </script>
+<!-- A4 Preview Overlay -->
+<div class="a4-overlay" id="a4-overlay" onclick="closeA4Backdrop(event)">
+  <div class="a4-topbar">
+    <button class="a4-close-btn" onclick="closeA4()">✕ 閉じる</button>
+    <button class="a4-print-btn2" onclick="window.print()">印刷 / PDF保存</button>
+  </div>
+  <div class="a4-page" id="a4-page"></div>
+</div>
 </body>
 </html>
