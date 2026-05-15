@@ -1183,7 +1183,7 @@ function renderKarte(data,name){
       const activeGs=['中1','中2','中3'].filter(g=>ncSubjs.some(s=>nc[`${g}_${s}_年`]));
       if(activeGs.length){
         const multi=activeGs.length>1;
-        html+=`<div style="margin-top:14px;border-top:2px solid #c8e6c9;padding-top:10px"><div style="font-size:12px;font-weight:700;color:#2e7d32;margin-bottom:6px">9科まとめ（学年評定）</div><div style="overflow-x:auto"><table class="grade-table" style="font-size:12px"><tr><th>計算方法</th>${activeGs.map(g=>`<th>${g}</th>`).join('')}${multi?'<th style="background:#a5d6a7">合計</th>':''}</tr>`;
+        html+=`<div style="margin-top:14px;border-top:2px solid #c8e6c9;padding-top:10px"><div style="font-size:12px;font-weight:700;color:#2e7d32;margin-bottom:6px">内申まとめ</div><div style="overflow-x:auto"><table class="grade-table" style="font-size:12px"><tr><th>計算方法</th>${activeGs.map(g=>`<th>${g}</th>`).join('')}${multi?'<th style="background:#a5d6a7">合計</th>':''}</tr>`;
         [1,2,3].forEach(mult=>{
           const vals=activeGs.map(g=>calcWeighted(nc,g,'年',mult));
           const nums=vals.filter(v=>v!=='—').map(Number);
@@ -1211,7 +1211,7 @@ function renderKarte(data,name){
       const termLabel={'中1':'学年評定','中2':'学年評定','中3':'2学期'};
       // 比率: [中1倍率, 中2倍率, 中3倍率]
       const ratios=[[1,1,1],[1,1,2],[1,1,3]];
-      html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>内申点まとめ</div><div class="card-body hidden">`;
+      html+=`<div class="card"><div class="card-title" style="cursor:default">内申点まとめ</div><div class="card-body">`;
       html+=`<div style="overflow-x:auto"><table class="grade-table">`;
       html+=`<tr><th>比率</th>${activeGs.map(g=>`<th>${g}<br><span style="font-size:10px;font-weight:400;color:#888">${termLabel[g]||''}</span></th>`).join('')}<th style="background:#1D9E75;color:#fff">総合計</th></tr>`;
       // 9科合計ベース行
@@ -1616,7 +1616,7 @@ function showA4Preview(name){
       const a4ActiveGs=['中1','中2','中3'].filter(g=>a4Subjs.some(s=>nc[`${g}_${s}_年`]));
       if(a4ActiveGs.length){
         const a4multi=a4ActiveGs.length>1;
-        html+=`<div style="margin-top:10px;border-top:2px solid #a5d6a7;padding-top:8px"><div style="font-size:10px;font-weight:700;color:#2e7d32;margin-bottom:4px">9科まとめ（学年評定）</div><table class="a4-gtbl"><tr><th>計算</th>${a4ActiveGs.map(g=>`<th>${g}</th>`).join('')}${a4multi?'<th>合計</th>':''}</tr>`;
+        html+=`<div style="margin-top:10px;border-top:2px solid #a5d6a7;padding-top:8px"><div style="font-size:10px;font-weight:700;color:#2e7d32;margin-bottom:4px">内申まとめ</div><table class="a4-gtbl"><tr><th>計算</th>${a4ActiveGs.map(g=>`<th>${g}</th>`).join('')}${a4multi?'<th>合計</th>':''}</tr>`;
         [1,2,3].forEach(mult=>{
           const vals=a4ActiveGs.map(g=>a4Weighted(nc,g,'年',mult));
           const nums=vals.filter(v=>v!=='—').map(Number);
