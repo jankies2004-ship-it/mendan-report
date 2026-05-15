@@ -1160,10 +1160,10 @@ function renderKarte(data,name){
   const notices=(data.notice||[]).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   if(notices.length){
     const calcSum=(row,g,subjs,term)=>{const vs=subjs.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));return vs.length?vs.reduce((a,b)=>a+b,0):'—';};
-    const jitsugi=['音楽','美術','保健体育','技術家庭'];
-    const calcWeighted=(row,g,term,mult)=>{const s5=nc5.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));const sj=jitsugi.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));if(!s5.length&&!sj.length)return'—';return s5.reduce((a,b)=>a+b,0)+sj.reduce((a,b)=>a+b,0)*mult;};
-    notices.forEach(nc=>{
-      html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>通知表（5段階評定）</div><div class="card-body hidden">`;
+    const sum9=(row,g,term)=>{const vs=ncSubjs.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));return vs.length?vs.reduce((a,b)=>a+b,0):null;};
+    html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>通知表（5段階評定）</div><div class="card-body hidden">`;
+    notices.forEach((nc,ncIdx)=>{
+      if(ncIdx>0)html+=`<hr style="border:none;border-top:2px dashed #ddd;margin:16px 0">`;
       ['中1','中2','中3'].forEach(g=>{
         const hasG=ncSubjs.some(s=>nc[`${g}_${s}_1学期`]||nc[`${g}_${s}_2学期`]||nc[`${g}_${s}_3学期`]||nc[`${g}_${s}_年`]);
         if(!hasG)return;
@@ -1179,59 +1179,27 @@ function renderKarte(data,name){
         });
         html+=`</table></div>`;
       });
-      // 9科まとめ（独立）
-      const activeGs=['中1','中2','中3'].filter(g=>ncSubjs.some(s=>nc[`${g}_${s}_年`]));
-      if(activeGs.length){
-        const multi=activeGs.length>1;
-        html+=`<div style="margin-top:14px;border-top:2px solid #c8e6c9;padding-top:10px"><div style="font-size:12px;font-weight:700;color:#2e7d32;margin-bottom:6px">内申まとめ</div><div style="overflow-x:auto"><table class="grade-table" style="font-size:12px"><tr><th>計算方法</th>${activeGs.map(g=>`<th>${g}</th>`).join('')}${multi?'<th style="background:#a5d6a7">合計</th>':''}</tr>`;
-        [1,2,3].forEach(mult=>{
-          const vals=activeGs.map(g=>calcWeighted(nc,g,'年',mult));
-          const nums=vals.filter(v=>v!=='—').map(Number);
-          const total=nums.length?nums.reduce((a,b)=>a+b,0):'—';
-          html+=`<tr style="background:#e8f5e9"><td style="font-weight:700;font-size:11px">9科(1:1:${mult})</td>${vals.map(v=>`<td class="total-col" style="font-weight:700">${v}</td>`).join('')}${multi?`<td class="total-col" style="font-weight:700;background:#a5d6a7">${total}</td>`:''}</tr>`;
-        });
-        html+=`</table></div></div>`;
-      }
-      html+=`</div></div>`;
     });
-  }
-
-  // 内申点まとめ（独立カード）
-  // 中1・中2=学年評定(年)の9科合計、中3=2学期の9科合計、比率は学年間の倍率
-  if(notices.length){
-    const sum9=(row,g,term)=>{const vs=ncSubjs.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));return vs.length?vs.reduce((a,b)=>a+b,0):null;};
+    // 内申点まとめ（通知表カード末尾）
     const gData={};
     const e1=notices.find(nc=>ncSubjs.some(s=>nc[`中1_${s}_年`]));   if(e1)gData['中1']={row:e1,term:'年'};
     const e2=notices.find(nc=>ncSubjs.some(s=>nc[`中2_${s}_年`]));   if(e2)gData['中2']={row:e2,term:'年'};
     const e3=notices.find(nc=>ncSubjs.some(s=>nc[`中3_${s}_2学期`]));if(e3)gData['中3']={row:e3,term:'2学期'};
     const activeGs=Object.keys(gData);
     if(activeGs.length){
-      const bases={};
-      activeGs.forEach(g=>{bases[g]=sum9(gData[g].row,g,gData[g].term);});
+      const bases={};activeGs.forEach(g=>{bases[g]=sum9(gData[g].row,g,gData[g].term);});
       const termLabel={'中1':'学年評定','中2':'学年評定','中3':'2学期'};
-      // 比率: [中1倍率, 中2倍率, 中3倍率]
-      const ratios=[[1,1,1],[1,1,2],[1,1,3]];
-      html+=`<div class="card"><div class="card-title" style="cursor:default">内申点まとめ</div><div class="card-body">`;
-      html+=`<div style="overflow-x:auto"><table class="grade-table">`;
-      html+=`<tr><th>比率</th>${activeGs.map(g=>`<th>${g}<br><span style="font-size:10px;font-weight:400;color:#888">${termLabel[g]||''}</span></th>`).join('')}<th style="background:#1D9E75;color:#fff">総合計</th></tr>`;
-      // 9科合計ベース行
-      html+=`<tr style="background:#f5f5f5"><td style="font-size:11px;color:#777">9科合計</td>${activeGs.map(g=>`<td class="total-col" style="color:#333">${bases[g]!==null?bases[g]:'—'}</td>`).join('')}<td></td></tr>`;
-      ratios.forEach(ws=>{
-        const label=`1:1:${ws[2]}`;
+      html+=`<div style="margin-top:16px;border-top:2px solid #c8e6c9;padding-top:12px"><div style="font-size:13px;font-weight:700;color:#2e7d32;margin-bottom:8px">内申点まとめ</div><div style="overflow-x:auto"><table class="grade-table">`;
+      html+=`<tr><th>比率</th>${activeGs.map(g=>`<th>${g}<br><span style="font-size:10px;font-weight:400;color:#888">${termLabel[g]}</span></th>`).join('')}<th style="background:#1D9E75;color:#fff">総合計</th></tr>`;
+      html+=`<tr style="background:#f5f5f5"><td style="font-size:11px;color:#777">9科合計</td>${activeGs.map(g=>`<td class="total-col">${bases[g]!==null?bases[g]:'—'}</td>`).join('')}<td></td></tr>`;
+      [[1,1,1],[1,1,2],[1,1,3]].forEach(ws=>{
         let total=0,hasVal=false;
-        const cells=activeGs.map((g,i)=>{
-          const base=bases[g];
-          const w=ws[i]||1;
-          if(base===null)return`<td class="total-col">—</td>`;
-          const weighted=base*w;
-          total+=weighted;hasVal=true;
-          const disp=`${weighted}`;
-          return`<td class="total-col">${disp}</td>`;
-        });
-        html+=`<tr><td style="font-weight:700">${label}</td>${cells.join('')}<td class="total-col" style="font-weight:700;font-size:16px;background:#e8f5e9">${hasVal?total:'—'}</td></tr>`;
+        const cells=activeGs.map((g,i)=>{const base=bases[g];const w=ws[i]||1;if(base===null)return`<td class="total-col">—</td>`;const wv=base*w;total+=wv;hasVal=true;return`<td class="total-col">${wv}</td>`;});
+        html+=`<tr><td style="font-weight:700">1:1:${ws[2]}</td>${cells.join('')}<td class="total-col" style="font-weight:700;font-size:16px;background:#e8f5e9">${hasVal?total:'—'}</td></tr>`;
       });
-      html+=`</table></div></div></div>`;
+      html+=`</table></div></div>`;
     }
+    html+=`</div></div>`;
   }
 
   // 志望校
