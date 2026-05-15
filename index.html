@@ -1141,13 +1141,13 @@ function renderKarte(data,name){
     html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>${name} さんの成績履歴</div><div class="card-body hidden">
       <div style="overflow-x:auto">
       <table class="grade-table">
-        <tr><th>テスト</th><th>国</th><th>数</th><th>英</th><th>理</th><th>社</th><th>合計</th><th>学年順位</th></tr>`;
+        <tr><th>テスト</th><th>英</th><th>数</th><th>国</th><th>理</th><th>社</th><th>合計</th><th>学年順位</th></tr>`;
     const rankCell=g=>{const gr=g['学年順位'];if(!gr)return`<td>—</td>`;return`<td style="text-align:center;font-weight:700">${gr}位</td>`;};
     sorted.forEach((g,idx)=>{
       if(idx===0&&prev){
-        html+=`<tr><td>${g.test||''}</td>${dcell(g['国語'],prev['国語'])}${dcell(g['数学'],prev['数学'])}${dcell(g['英語'],prev['英語'])}${dcell(g['理科'],prev['理科'])}${dcell(g['社会'],prev['社会'])}${dcell(g.total,prev.total,'total-col')}${rankCell(g)}</tr>`;
+        html+=`<tr><td>${g.test||''}</td>${dcell(g['英語'],prev['英語'])}${dcell(g['数学'],prev['数学'])}${dcell(g['国語'],prev['国語'])}${dcell(g['理科'],prev['理科'])}${dcell(g['社会'],prev['社会'])}${dcell(g.total,prev.total,'total-col')}${rankCell(g)}</tr>`;
       }else{
-        html+=`<tr><td>${g.test||''}</td><td>${g['国語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['英語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="total-col">${g.total||'—'}</td>${rankCell(g)}</tr>`;
+        html+=`<tr><td>${g.test||''}</td><td>${g['英語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['国語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="total-col">${g.total||'—'}</td>${rankCell(g)}</tr>`;
       }
     });
     html+=`</table></div></div></div>`;
