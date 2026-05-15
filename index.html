@@ -292,8 +292,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
   </div>
 
   <div class="api-section">
-    <label>Anthropic APIキー（初回のみ入力・このデバイスに保存）</label>
-    <input type="password" id="api-key" placeholder="sk-ant-..." oninput="saveApiKey(this.value)">
+    <label>Gemini APIキー（初回のみ入力・このデバイスに保存）</label>
+    <input type="password" id="api-key" placeholder="AIza..." oninput="saveApiKey(this.value)">
     <p class="api-note">APIキーはブラウザのlocalStorageにのみ保存されます。</p>
   </div>
 
@@ -815,8 +815,14 @@ const gState = { g_grade:'', g_test:'' };
 let generatedReport = '', generatedParentMemo = '', generatedKarte = '', karteData = null, karteSchool = '';
 
 // ===== API Key =====
-function saveApiKey(val) { localStorage.setItem('anthropic_api_key', val); }
-function getApiKey() { return document.getElementById('api-key').value || localStorage.getItem('anthropic_api_key') || ''; }
+function saveApiKey(val) { localStorage.setItem('gemini_api_key', val); }
+function getApiKey() { return document.getElementById('api-key').value || localStorage.getItem('gemini_api_key') || ''; }
+async function callGemini(prompt){
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${getApiKey()}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+  const data=await res.json();
+  if(data.error)throw new Error(data.error.message||'Gemini APIエラー');
+  return data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+}
 
 // ===== Calendar (generic, keyed by 's'|'p'|'g') =====
 const cals = {
@@ -976,10 +982,7 @@ async function generateReport(){
 ・400〜500字程度`;
 
   try{
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
-    const data=await res.json();
-    if(data.error)throw new Error(data.error.message);
-    generatedReport=data.content?.[0]?.text||'';
+    generatedReport=await callGemini(prompt);
     if(!generatedReport)throw new Error('レスポンスが空です');
     ra.innerHTML=`<div class="result-box">${generatedReport}</div>
       <div class="result-actions">
@@ -1041,10 +1044,7 @@ async function generateParentMemo(){
 ・300〜400字程度`;
 
   try{
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
-    const data=await res.json();
-    if(data.error)throw new Error(data.error.message);
-    generatedParentMemo=data.content?.[0]?.text||'';
+    generatedParentMemo=await callGemini(prompt);
     if(!generatedParentMemo)throw new Error('レスポンスが空です');
     ra.innerHTML=`<div class="result-box">${generatedParentMemo}</div>
       <div class="result-actions">
@@ -1306,10 +1306,7 @@ ${tv}
 ・500〜700字程度`;
 
   try{
-    const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1500,messages:[{role:'user',content:prompt}]})});
-    const data=await res.json();
-    if(data.error)throw new Error(data.error.message);
-    generatedKarte=data.content?.[0]?.text||'';
+    generatedKarte=await callGemini(prompt);
     if(!generatedKarte)throw new Error('レスポンスが空です');
     ra.innerHTML=`<div class="karte-result">${generatedKarte}</div>
       <div class="result-actions" style="margin-top:10px">
@@ -1471,14 +1468,7 @@ ${text}
   };
 
   try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': getApiKey(), 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1200, messages: [{ role: 'user', content: promptMap[type] }] })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    generatedAudioSummary = data.content?.[0]?.text || '';
+    generatedAudioSummary = await callGemini(promptMap[type]);
     if (!generatedAudioSummary) throw new Error('レスポンスが空です');
 
     ra.innerHTML = `<div class="result-box">${generatedAudioSummary}</div>
@@ -1657,7 +1647,7 @@ function closeA4Backdrop(e){
 
 // ===== Init =====
 window.onload=()=>{
-  const saved=localStorage.getItem('anthropic_api_key');
+  const saved=localStorage.getItem('gemini_api_key');
   if(saved)document.getElementById('api-key').value=saved;
   initCal();
 
