@@ -30,7 +30,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 
 /* Card */
 .card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
-.card-title{font-size:14px;font-weight:600;color:#555;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid #eee}
+.card-title{font-size:14px;font-weight:600;color:#555;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid #eee;cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px}
+.card-toggle{font-size:11px;transition:transform .2s;display:inline-block;color:#888}
+.card-title.collapsed .card-toggle{transform:rotate(-90deg)}
+.card-body.hidden{display:none}
 
 /* Fields */
 .field{margin-bottom:1.1rem}
@@ -1120,6 +1123,12 @@ async function searchKarte(){
   }
 }
 
+function toggleCard(title){
+  title.classList.toggle('collapsed');
+  const body=title.nextElementSibling;
+  if(body)body.classList.toggle('hidden');
+}
+
 function renderKarte(data,name){
   const area=document.getElementById('karte-area');
   const hasData=(data.student&&data.student.length)||(data.parent&&data.parent.length)||(data.grade&&data.grade.length)||(data.audio&&data.audio.length)||(data.notice&&data.notice.length);
@@ -1143,11 +1152,11 @@ function renderKarte(data,name){
       if(!isNaN(p)&&c!==p){const d=c-p,col=d>0?'#185FA5':'#e53e3e',s=d>0?'+':'';return`${td}${c}<br><span style="font-size:10px;color:${col};font-weight:700">${s}${d}</span></td>`;}
       return`${td}${c}</td>`;
     };
-    html+=`<div class="card"><div class="card-title">${name} さんの成績履歴</div>
+    html+=`<div class="card"><div class="card-title" onclick="toggleCard(this)"><span class="card-toggle">▼</span>${name} さんの成績履歴</div><div class="card-body">
       <div style="overflow-x:auto">
       <table class="grade-table">
         <tr><th>テスト</th><th>国</th><th>数</th><th>英</th><th>理</th><th>社</th><th>合計</th><th>学年順位</th></tr>`;
-    const rankCell=g=>{const gr=g['学年順位'],cr=g['クラス順位'];if(!gr&&!cr)return`<td>—</td>`;let s=gr?`${gr}位`:'—';if(cr)s+=`<br><span style="font-size:10px;color:#666">ク:${cr}位</span>`;return`<td style="text-align:center;font-weight:700">${s}</td>`;};
+    const rankCell=g=>{const gr=g['学年順位'];if(!gr)return`<td>—</td>`;return`<td style="text-align:center;font-weight:700">${gr}位</td>`;};
     sorted.forEach((g,idx)=>{
       if(idx===0&&prev){
         html+=`<tr><td>${g.test||''}</td>${dcell(g['国語'],prev['国語'])}${dcell(g['数学'],prev['数学'])}${dcell(g['英語'],prev['英語'])}${dcell(g['理科'],prev['理科'])}${dcell(g['社会'],prev['社会'])}${dcell(g.total,prev.total,'total-col')}${rankCell(g)}</tr>`;
@@ -1155,7 +1164,7 @@ function renderKarte(data,name){
         html+=`<tr><td>${g.test||''}</td><td>${g['国語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['英語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="total-col">${g.total||'—'}</td>${rankCell(g)}</tr>`;
       }
     });
-    html+=`</table></div></div>`;
+    html+=`</table></div></div></div>`;
   }
 
   // 通知表
@@ -1166,7 +1175,7 @@ function renderKarte(data,name){
   if(notices.length){
     const calcSum=(row,g,subjs,term)=>{const vs=subjs.map(s=>parseInt(row[`${g}_${s}_${term}`]||'')).filter(v=>!isNaN(v));return vs.length?vs.reduce((a,b)=>a+b,0):'—';};
     notices.forEach(nc=>{
-      html+=`<div class="card"><div class="card-title">通知表（5段階評定）</div>`;
+      html+=`<div class="card"><div class="card-title" onclick="toggleCard(this)"><span class="card-toggle">▼</span>通知表（5段階評定）</div><div class="card-body">`;
       ['中1','中2','中3'].forEach(g=>{
         const hasG=ncSubjs.some(s=>nc[`${g}_${s}_1学期`]||nc[`${g}_${s}_2学期`]||nc[`${g}_${s}_3学期`]||nc[`${g}_${s}_年`]);
         if(!hasG)return;
@@ -1182,8 +1191,21 @@ function renderKarte(data,name){
         });
         html+=`</table></div>`;
       });
-      html+=`</div>`;
+      html+=`</div></div>`;
     });
+  }
+
+  // 志望校
+  const targets=(data.target||[]).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(targets.length){
+    const t=targets[0];
+    const schools=[t['第一志望'],t['第二志望'],t['第三志望'],t['第四志望']].filter(Boolean);
+    if(schools.length){
+      html+=`<div class="card"><div class="card-title" onclick="toggleCard(this)"><span class="card-toggle">▼</span>志望校</div><div class="card-body">`;
+      html+=`<ol style="margin:0;padding-left:1.4em;line-height:2">`;
+      schools.forEach(s=>{ html+=`<li style="font-size:14px;font-weight:600">${s}</li>`; });
+      html+=`</ol></div></div>`;
+    }
   }
 
   // タイムライン（生徒面談・保護者面談・音声まとめ）
@@ -1194,7 +1216,7 @@ function renderKarte(data,name){
   items.sort((a,b)=>b.date.localeCompare(a.date));
 
   if(items.length){
-    html+=`<div class="card"><div class="card-title">面談・音声まとめ記録</div><div class="timeline">`;
+    html+=`<div class="card"><div class="card-title" onclick="toggleCard(this)"><span class="card-toggle">▼</span>面談・音声まとめ記録</div><div class="card-body"><div class="timeline">`;
     items.forEach(item=>{
       const d=item.data;
       const cls=item.type==='s'?'tl-student':item.type==='p'?'tl-parent':'tl-audio';
@@ -1215,7 +1237,7 @@ function renderKarte(data,name){
       }
       html+=`<div class="tl-item ${cls}"><div class="tl-date">${item.date}</div><span class="tl-badge ${badge}">${label}</span><div class="tl-content">${content||'記録なし'}</div></div>`;
     });
-    html+=`</div></div>`;
+    html+=`</div></div></div>`;
   }
 
   const en=name.replace(/'/g,"\\'");
@@ -1248,6 +1270,8 @@ async function generateKarte(name){
     }).filter(Boolean).join(' | ');
     return lines?`[${r.date||''}] ${lines}`:'';
   }).filter(Boolean).join('\n');
+  const tm=(d.target||[]).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const tv=tm.length?[tm[0]['第一志望'],tm[0]['第二志望'],tm[0]['第三志望'],tm[0]['第四志望']].filter(Boolean).map((s,i)=>`第${i+1}志望:${s}`).join(' '):'記録なし';
 
   const prompt=`あなたは学習塾「エイメイ学院」のベテラン講師です。以下の記録をもとに、${name}さんの総合的な生徒カルテ文を作成してください。
 
@@ -1262,6 +1286,9 @@ ${gm||'記録なし'}
 
 【通知表（5段階評定）】
 ${nm||'記録なし'}
+
+【志望校】
+${tv}
 
 【条件】
 ・講師・スタッフが共有する内部資料として書く
@@ -1510,7 +1537,7 @@ function showA4Preview(name){
       if(!isNaN(p)&&c!==p){const d=c-p,col=d>0?'#185FA5':'#e53e3e',s=d>0?'+':'';return`${td}${c}<span style="font-size:9px;color:${col};font-weight:700;margin-left:2px">${s}${d}</span></td>`;}
       return`${td}${c}</td>`;
     };
-    const a4rank=g=>{const gr=g['学年順位'],cr=g['クラス順位'];if(!gr&&!cr)return`<td>—</td>`;let s=gr?`${gr}位`:'—';if(cr)s+=`<span style="font-size:8px;color:#666;margin-left:2px">ク:${cr}位</span>`;return`<td style="text-align:center;font-weight:700">${s}</td>`;};
+    const a4rank=g=>{const gr=g['学年順位'];if(!gr)return`<td>—</td>`;return`<td style="text-align:center;font-weight:700">${gr}位</td>`;};
     html+=`<table class="a4-gtbl"><tr><th>テスト</th><th>国語</th><th>数学</th><th>英語</th><th>理科</th><th>社会</th><th>合計</th><th>学年順位</th></tr>`;
     grades.forEach((g,idx)=>{
       if(idx===0&&a4prev){

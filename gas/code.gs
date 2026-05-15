@@ -162,7 +162,7 @@ function getStudentData(e) {
   }
 
   const ss = getSpreadsheet();
-  const result = { name: name, school: school, grade: [], student: [], parent: [], audio: [], karte: [], notice: [] };
+  const result = { name: name, school: school, grade: [], student: [], parent: [], audio: [], karte: [], notice: [], target: [] };
 
   // 成績
   const gradeSheet = ss.getSheetByName('成績');
@@ -270,6 +270,24 @@ function getStudentData(e) {
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
         entry.date = entry['日付'];
         result.notice.push(entry);
+      }
+    }
+  }
+
+  // 志望校
+  const tSheet = ss.getSheetByName('志望校');
+  if (tSheet) {
+    const rows = tSheet.getDataRange().getValues();
+    const headers = rows[0];
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
+      const rowSchool = String(row[headers.indexOf('校舎名')] || '').trim();
+      if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
+        const entry = {};
+        headers.forEach((h, idx) => { entry[h] = row[idx]; });
+        entry.date = entry['日付'];
+        result.target.push(entry);
       }
     }
   }
