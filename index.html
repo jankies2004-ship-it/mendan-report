@@ -1130,7 +1130,10 @@ function renderKarte(data,name){
   // 成績表
   const grades=data.grade||[];
   if(grades.length){
-    const sorted=[...grades].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    const testOrder={'1学期中間':1,'1学期期末':2,'2学期中間':3,'2学期期末':4,'3学期':5,'学年末':5,'塾内テスト':6,'北辰テスト':7};
+    const gradeOrder={'中1':1,'中2':2,'中3':3};
+    const sortKey=r=>{const g=gradeOrder[String(r['学年']||'').trim()]||0;const t=(r.test||'').replace(/^中[123]-/,'');return g*10+(testOrder[t]||0);};
+    const sorted=[...grades].sort((a,b)=>sortKey(b)-sortKey(a));
     const prev=sorted[1];
     const dcell=(cur,pre,cls='')=>{
       const c=parseInt(cur),p=parseInt(pre);
@@ -1492,7 +1495,10 @@ function showA4Preview(name){
     <hr class="a4-rule">`;
 
   // 成績
-  const grades=[...(d.grade||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const a4TestOrder={'1学期中間':1,'1学期期末':2,'2学期中間':3,'2学期期末':4,'3学期':5,'学年末':5,'塾内テスト':6,'北辰テスト':7};
+  const a4GradeOrder={'中1':1,'中2':2,'中3':3};
+  const a4SortKey=r=>{const g=a4GradeOrder[String(r['学年']||'').trim()]||0;const t=(r.test||'').replace(/^中[123]-/,'');return g*10+(a4TestOrder[t]||0);};
+  const grades=[...(d.grade||[])].sort((a,b)=>a4SortKey(b)-a4SortKey(a));
   html+=`<div class="a4-sec"><div class="a4-sec-title">成績推移</div>`;
   if(grades.length){
     const a4prev=grades[1];
