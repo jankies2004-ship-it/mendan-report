@@ -1225,7 +1225,7 @@ function renderKarte(data,name){
           if(base===null)return`<td class="total-col">—</td>`;
           const weighted=base*w;
           total+=weighted;hasVal=true;
-          const disp=w>1?`<span style="font-size:11px;color:#888">${base}×${w}=</span><strong>${weighted}</strong>`:`${base}`;
+          const disp=`${weighted}`;
           return`<td class="total-col">${disp}</td>`;
         });
         html+=`<tr><td style="font-weight:700">${label}</td>${cells.join('')}<td class="total-col" style="font-weight:700;font-size:16px;background:#e8f5e9">${hasVal?total:'—'}</td></tr>`;
