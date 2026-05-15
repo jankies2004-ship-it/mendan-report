@@ -1174,7 +1174,7 @@ function renderKarte(data,name){
           html+=`<tr><td>${s}</td><td>${v1||'—'}</td><td>${v2||'—'}</td><td>${v3||'—'}</td><td class="total-col">${vy||'—'}</td></tr>`;
         });
         html+=`<tr><td colspan="5" style="padding:2px 0;border-top:2px solid #ddd"></td></tr>`;
-        [['3科合計',nc3],['5科合計',nc5]].forEach(([label,subjs])=>{
+        [['3科合計',nc3],['5科合計',nc5],['9科合計',ncSubjs]].forEach(([label,subjs])=>{
           html+=`<tr style="background:#f0f9ff"><td style="font-weight:700;font-size:11px">${label}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'1学期')}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'2学期')}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'3学期')}</td><td class="total-col" style="font-weight:700">${calcSum(nc,g,subjs,'年')}</td></tr>`;
         });
         html+=`</table></div>`;
@@ -1607,7 +1607,7 @@ function showA4Preview(name){
           html+=`<tr><td>${s}</td><td>${v1||'—'}</td><td>${v2||'—'}</td><td>${v3||'—'}</td><td class="atot">${vy||'—'}</td></tr>`;
         });
         html+=`<tr><td colspan="5" style="padding:2px 0;border-top:2px solid #ddd"></td></tr>`;
-        [['3科合計',a4s3],['5科合計',a4s5]].forEach(([label,subjs])=>{
+        [['3科合計',a4s3],['5科合計',a4s5],['9科合計',a4Subjs]].forEach(([label,subjs])=>{
           html+=`<tr style="background:#f0f9ff"><td style="font-weight:700">${label}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'1学期')}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'2学期')}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'3学期')}</td><td class="atot" style="font-weight:700">${a4Sum(nc,g,subjs,'年')}</td></tr>`;
         });
         html+=`</table>`;
