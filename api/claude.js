@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   if (!apiKey) { res.status(500).json({ error: 'ANTHROPIC_API_KEY が設定されていません' }); return; }
 
   const body = JSON.stringify({
-    model: 'claude-3-haiku-20240307',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: 1024,
     messages: [{ role: 'user', content: prompt }]
   });
