@@ -26,7 +26,10 @@ export default async function handler(req, res) {
           await new Promise(r => setTimeout(r, attempt * 2000));
           continue;
         }
-        res.status(400).json({ error: data.error.message }); return;
+        res.status(400).json({ error: `HTTP${response.status} ${data.error.type}: ${data.error.message}` }); return;
+      }
+      if (!response.ok) {
+        res.status(400).json({ error: `HTTP${response.status}: ${JSON.stringify(data)}` }); return;
       }
       res.status(200).json({ text: data.content?.[0]?.text || '' }); return;
     } catch (e) {
