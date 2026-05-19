@@ -804,7 +804,7 @@ let generatedReport = '', generatedParentMemo = '', generatedKarte = '', karteDa
 
 // ===== Gemini =====
 async function callGemini(prompt){
-  const res=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+  const res=await fetch('/api/gemini',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
   const data=await res.json();
   if(data.error)throw new Error(data.error);
   return data.text||'';
