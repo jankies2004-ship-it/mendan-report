@@ -5,9 +5,21 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
 
-  const name = req.query.name;
+  const { name, school = '', action } = req.query;
+
+  if (action === 'listStudents') {
+    try {
+      const url = `${GAS_URL}?action=listStudents${school ? '&school=' + encodeURIComponent(school) : ''}`;
+      const gasRes = await fetch(url, { redirect: 'follow' });
+      const data = await gasRes.json();
+      res.status(200).json(data);
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+    return;
+  }
+
   if (!name) { res.status(400).json({ error: 'name is required' }); return; }
-  const school = req.query.school || '';
 
   try {
     const url = `${GAS_URL}?action=getStudent&name=${encodeURIComponent(name)}${school ? '&school=' + encodeURIComponent(school) : ''}`;

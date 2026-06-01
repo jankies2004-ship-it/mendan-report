@@ -781,13 +781,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 
   <!-- ===== 生徒カルテ ===== -->
   <div id="screen-karte" class="screen">
-    <div class="karte-search">
-      <select id="karte-school"><option value="">すべての校舎</option><optgroup label="エイメイ学院"><option>みずほ台校舎</option><option>鶴瀬校舎</option><option>ふじみ野校舎</option><option>トナリエふじみ野校舎</option><option>富士見羽沢校舎</option><option>水谷校舎</option></optgroup><optgroup label="明成個別"><option>鶴瀬東校舎</option><option>鶴瀬西校舎</option><option>三芳藤久保校舎</option><option>ふじみ野大井校舎</option><option>トナリエふじみ野校舎（個別）</option><option>ふじみ野西口校舎</option><option>ふじみ野上福岡校舎</option><option>新河岸校舎</option><option>南古谷校舎</option><option>川越南大塚校舎</option><option>志木校舎</option><option>朝霞台校舎</option></optgroup><optgroup label="Elena個別女子"><option>水谷校舎（Elena）</option><option>ふじみ野西口校舎（Elena）</option></optgroup><optgroup label="EIMEI予備校"><option>鶴瀬校舎（予備校）</option><option>ふじみ野駅前校舎</option></optgroup><optgroup label="Luce個別指導"><option>みずほ台校舎（Luce）</option><option>鶴瀬校舎（Luce）</option></optgroup></select>
-      <input type="text" id="karte-name" placeholder="生徒名（例：山田 太郎）" onkeydown="if(event.key==='Enter')searchKarte()">
-      <button class="karte-search-btn" onclick="searchKarte()">検索</button>
+    <div class="card" style="margin-bottom:1rem">
+      <div class="field">
+        <label>校舎</label>
+        <select id="karte-school" onchange="onKarteSchoolChange()"><option value="">-- 校舎を選択 --</option><optgroup label="エイメイ学院"><option>みずほ台校舎</option><option>鶴瀬校舎</option><option>ふじみ野校舎</option><option>トナリエふじみ野校舎</option><option>富士見羽沢校舎</option><option>水谷校舎</option></optgroup><optgroup label="明成個別"><option>鶴瀬東校舎</option><option>鶴瀬西校舎</option><option>三芳藤久保校舎</option><option>ふじみ野大井校舎</option><option>トナリエふじみ野校舎（個別）</option><option>ふじみ野西口校舎</option><option>ふじみ野上福岡校舎</option><option>新河岸校舎</option><option>南古谷校舎</option><option>川越南大塚校舎</option><option>志木校舎</option><option>朝霞台校舎</option></optgroup><optgroup label="Elena個別女子"><option>水谷校舎（Elena）</option><option>ふじみ野西口校舎（Elena）</option></optgroup><optgroup label="EIMEI予備校"><option>鶴瀬校舎（予備校）</option><option>ふじみ野駅前校舎</option></optgroup><optgroup label="Luce個別指導"><option>みずほ台校舎（Luce）</option><option>鶴瀬校舎（Luce）</option></optgroup></select>
+      </div>
+      <div class="field" id="karte-student-wrap" style="display:none">
+        <label>生徒</label>
+        <select id="karte-student-select" onchange="onKarteStudentSelect()"><option value="">-- 生徒を選択 --</option></select>
+      </div>
+      <div class="or-divider"><span>または名前で直接検索</span></div>
+      <div class="karte-search" style="margin-bottom:0">
+        <input type="text" id="karte-name" placeholder="生徒名（例：山田 太郎）" onkeydown="if(event.key==='Enter')searchKarte()">
+        <button class="karte-search-btn" onclick="searchKarte()">検索</button>
+      </div>
     </div>
     <div id="karte-area">
-      <div class="empty-state">生徒名を入力して「検索」を押すと<br>過去の面談・成績記録が表示されます</div>
+      <div class="empty-state">校舎を選択すると生徒一覧が表示されます<br>または生徒名を直接入力して「検索」を押してください</div>
     </div>
   </div>
 
@@ -1144,6 +1154,38 @@ async function searchKarte(){
   }catch(e){
     area.innerHTML=`<div class="error-msg">データ取得に失敗しました。<br><small>${e.message}</small></div>`;
   }
+}
+
+async function onKarteSchoolChange(){
+  const school=v('karte-school');
+  const wrap=document.getElementById('karte-student-wrap');
+  const sel=document.getElementById('karte-student-select');
+  if(!school){
+    wrap.style.display='none';
+    sel.innerHTML='<option value="">-- 生徒を選択 --</option>';
+    return;
+  }
+  wrap.style.display='';
+  sel.innerHTML='<option value="">読み込み中...</option>';
+  sel.disabled=true;
+  try{
+    const res=await fetch('/api/karte?action=listStudents&school='+encodeURIComponent(school));
+    const data=await res.json();
+    const students=data.students||[];
+    sel.innerHTML='<option value="">-- 生徒を選択（'+students.length+'名）--</option>'+
+      students.map(n=>`<option value="${n}">${n}</option>`).join('');
+    sel.disabled=false;
+  }catch(e){
+    sel.innerHTML='<option value="">取得に失敗しました</option>';
+    sel.disabled=false;
+  }
+}
+
+function onKarteStudentSelect(){
+  const name=v('karte-student-select');
+  if(!name)return;
+  document.getElementById('karte-name').value=name;
+  searchKarte();
 }
 
 function toggleCard(title){

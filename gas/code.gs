@@ -151,7 +151,34 @@ function doGet(e) {
   if (action === 'getStudent') {
     return getStudentData(e);
   }
+  if (action === 'listStudents') {
+    return getStudentsBySchool(e);
+  }
   return ContentService.createTextOutput(JSON.stringify({ error: 'unknown action' })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function getStudentsBySchool(e) {
+  const school = e.parameter.school || '';
+  const ss = getSpreadsheet();
+  const names = new Set();
+  ['生徒面談','保護者面談','成績','カルテ','音声記録','志望校','通知表'].forEach(sheetName => {
+    const sheet = ss.getSheetByName(sheetName);
+    if (!sheet) return;
+    const rows = sheet.getDataRange().getValues();
+    const headers = rows[0];
+    const nameIdx = headers.indexOf('生徒名');
+    const schoolIdx = headers.indexOf('校舎名');
+    if (nameIdx === -1) return;
+    for (let i = 1; i < rows.length; i++) {
+      const rowName = String(rows[i][nameIdx] || '').trim();
+      const rowSchool = schoolIdx >= 0 ? String(rows[i][schoolIdx] || '').trim() : '';
+      if (!rowName) continue;
+      if (school && rowSchool !== school) continue;
+      names.add(rowName);
+    }
+  });
+  const sorted = [...names].sort((a, b) => a.localeCompare(b, 'ja'));
+  return ContentService.createTextOutput(JSON.stringify({ students: sorted })).setMimeType(ContentService.MimeType.JSON);
 }
 
 function getStudentData(e) {
