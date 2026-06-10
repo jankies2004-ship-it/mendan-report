@@ -1204,32 +1204,54 @@ function renderKarte(data,name){
   // 成績表
   const grades=data.grade||[];
   if(grades.length){
-    const testOrder={'1学期中間':1,'1学期期末':2,'2学期中間':3,'2学期期末':4,'学年末':5,'3学期':5};
-    const gradeOrder={'中1':1,'中2':2,'中3':3};
-    const sortKey=r=>{const m=String(r.test||'').match(/^(中[123])/);const g=m?gradeOrder[m[1]]||0:0;const t=String(r.test||'').replace(/^中[123]-/,'');return g*100+(testOrder[t]||0);};
-    const sorted=[...grades].sort((a,b)=>sortKey(b)-sortKey(a));
-    const prev=sorted[1];
-    const dcell=(cur,pre,cls='')=>{
-      const c=parseInt(cur),p=parseInt(pre);
-      const td=`<td${cls?` class="${cls}"`:''}>`;
+    const isHokushin=r=>String(r.test||'').includes('北辰テスト');
+    const regularGrades=grades.filter(r=>!isHokushin(r));
+    const hokushinGrades=grades.filter(r=>isHokushin(r));
 
-      if(isNaN(c))return`${td}—</td>`;
-      if(!isNaN(p)&&c!==p){const d=c-p,col=d>0?'#185FA5':'#e53e3e',s=d>0?'+':'';return`${td}${c}<br><span style="font-size:10px;color:${col};font-weight:700">${s}${d}</span></td>`;}
-      return`${td}${c}</td>`;
-    };
-    html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>${name} さんの成績履歴</div><div class="card-body hidden">
-      <div style="overflow-x:auto">
-      <table class="grade-table">
-        <tr><th>テスト</th><th>英</th><th>数</th><th>国</th><th>理</th><th>社</th><th>合計</th><th>学年順位</th></tr>`;
-    const rankCell=g=>{const gr=g['学年順位'];if(!gr)return`<td>—</td>`;return`<td style="text-align:center;font-weight:700">${gr}位</td>`;};
-    sorted.forEach((g,idx)=>{
-      if(idx===0&&prev){
-        html+=`<tr><td>${g.test||''}</td>${dcell(g['英語'],prev['英語'])}${dcell(g['数学'],prev['数学'])}${dcell(g['国語'],prev['国語'])}${dcell(g['理科'],prev['理科'])}${dcell(g['社会'],prev['社会'])}${dcell(g.total,prev.total,'total-col')}${rankCell(g)}</tr>`;
-      }else{
-        html+=`<tr><td>${g.test||''}</td><td>${g['英語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['国語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="total-col">${g.total||'—'}</td>${rankCell(g)}</tr>`;
-      }
-    });
-    html+=`</table></div></div></div>`;
+    // 定期テスト（点数表示）
+    if(regularGrades.length){
+      const testOrder={'1学期中間':1,'1学期期末':2,'2学期中間':3,'2学期期末':4,'学年末':5,'3学期':5};
+      const gradeOrder={'中1':1,'中2':2,'中3':3};
+      const sortKey=r=>{const m=String(r.test||'').match(/^(中[123])/);const g=m?gradeOrder[m[1]]||0:0;const t=String(r.test||'').replace(/^中[123]-/,'');return g*100+(testOrder[t]||0);};
+      const sorted=[...regularGrades].sort((a,b)=>sortKey(b)-sortKey(a));
+      const prev=sorted[1];
+      const dcell=(cur,pre,cls='')=>{
+        const c=parseInt(cur),p=parseInt(pre);
+        const td=`<td${cls?` class="${cls}"`:''}>`;
+        if(isNaN(c))return`${td}—</td>`;
+        if(!isNaN(p)&&c!==p){const d=c-p,col=d>0?'#185FA5':'#e53e3e',s=d>0?'+':'';return`${td}${c}<br><span style="font-size:10px;color:${col};font-weight:700">${s}${d}</span></td>`;}
+        return`${td}${c}</td>`;
+      };
+      html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>${name} さんの成績履歴</div><div class="card-body hidden">
+        <div style="overflow-x:auto">
+        <table class="grade-table">
+          <tr><th>テスト</th><th>英</th><th>数</th><th>国</th><th>理</th><th>社</th><th>合計</th><th>学年順位</th></tr>`;
+      const rankCell=g=>{const gr=g['学年順位'];if(!gr)return`<td>—</td>`;return`<td style="text-align:center;font-weight:700">${gr}位</td>`;};
+      sorted.forEach((g,idx)=>{
+        if(idx===0&&prev){
+          html+=`<tr><td>${g.test||''}</td>${dcell(g['英語'],prev['英語'])}${dcell(g['数学'],prev['数学'])}${dcell(g['国語'],prev['国語'])}${dcell(g['理科'],prev['理科'])}${dcell(g['社会'],prev['社会'])}${dcell(g.total,prev.total,'total-col')}${rankCell(g)}</tr>`;
+        }else{
+          html+=`<tr><td>${g.test||''}</td><td>${g['英語']||'—'}</td><td>${g['数学']||'—'}</td><td>${g['国語']||'—'}</td><td>${g['理科']||'—'}</td><td>${g['社会']||'—'}</td><td class="total-col">${g.total||'—'}</td>${rankCell(g)}</tr>`;
+        }
+      });
+      html+=`</table></div></div></div>`;
+    }
+
+    // 北辰テスト（偏差値表示）
+    if(hokushinGrades.length){
+      const roundOrder=r=>{const m=String(r['北辰実施回']||'').match(/第(\d+)回/);return m?parseInt(m[1]):0;};
+      const hSorted=[...hokushinGrades].sort((a,b)=>roundOrder(b)-roundOrder(a));
+      const fh=v=>{const n=parseFloat(v);return isNaN(n)?'—':String(Math.round(n));};
+      const f3=v=>{const n=parseFloat(v);return isNaN(n)?'—':n.toFixed(1);};
+      html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>${name} さんの北辰テスト（偏差値）</div><div class="card-body hidden">
+        <div style="overflow-x:auto">
+        <table class="grade-table">
+          <tr><th>回数</th><th>英</th><th>数</th><th>国</th><th>理</th><th>社</th><th>3科</th><th>5科</th></tr>`;
+      hSorted.forEach(g=>{
+        html+=`<tr><td>${g['北辰実施回']||'—'}</td><td>${fh(g['英語偏差値'])}</td><td>${fh(g['数学偏差値'])}</td><td>${fh(g['国語偏差値'])}</td><td>${fh(g['理科偏差値'])}</td><td>${fh(g['社会偏差値'])}</td><td class="total-col">${f3(g['3科偏差値'])}</td><td class="total-col">${f3(g['5科偏差値'])}</td></tr>`;
+      });
+      html+=`</table></div></div></div>`;
+    }
   }
 
   // 通知表

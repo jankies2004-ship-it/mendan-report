@@ -2,6 +2,40 @@ function getSpreadsheet() {
   return SpreadsheetApp.getActiveSpreadsheet();
 }
 
+// 一括取り込みシートの校舎名(「エイメイ学院 みずほ台校舎」形式)を
+// Webフォームの校舎名(「みずほ台校舎」形式)に統一するマッピング
+const SCHOOL_ALIASES = {
+  'エイメイ学院 みずほ台校舎': 'みずほ台校舎',
+  'エイメイ学院 鶴瀬校舎': '鶴瀬校舎',
+  'エイメイ学院 ふじみ野校舎': 'ふじみ野校舎',
+  'エイメイ学院 トナリエふじみ野校舎': 'トナリエふじみ野校舎',
+  'エイメイ学院 富士見羽沢校舎': '富士見羽沢校舎',
+  'エイメイ学院 水谷校舎': '水谷校舎',
+  '明成個別 鶴瀬東校舎': '鶴瀬東校舎',
+  '明成個別 鶴瀬西校舎': '鶴瀬西校舎',
+  '明成個別 三芳藤久保校舎': '三芳藤久保校舎',
+  '明成個別 ふじみ野大井校舎': 'ふじみ野大井校舎',
+  '明成個別 トナリエふじみ野校舎': 'トナリエふじみ野校舎（個別）',
+  '明成個別 ふじみ野西口校舎': 'ふじみ野西口校舎',
+  '明成個別 ふじみ野上福岡校舎': 'ふじみ野上福岡校舎',
+  '明成個別 新河岸校舎': '新河岸校舎',
+  '明成個別 南古谷校舎': '南古谷校舎',
+  '明成個別 川越南大塚校舎': '川越南大塚校舎',
+  '明成個別 志木校舎': '志木校舎',
+  '明成個別 朝霞台校舎': '朝霞台校舎',
+  'Elena個別女子 水谷校舎': '水谷校舎（Elena）',
+  'Elena個別女子 ふじみ野西口校舎': 'ふじみ野西口校舎（Elena）',
+  'EIMEI予備校 鶴瀬校舎': '鶴瀬校舎（予備校）',
+  'EIMEI予備校 ふじみ野駅前校舎': 'ふじみ野駅前校舎',
+  'Luce個別指導 みずほ台校舎': 'みずほ台校舎（Luce）',
+  'Luce個別指導 鶴瀬校舎': '鶴瀬校舎（Luce）'
+};
+
+function canonicalSchool(school) {
+  const s = (school || '').trim();
+  return SCHOOL_ALIASES[s] || s;
+}
+
 const HEADERS = {
   '生徒面談': ['日付','生徒名','校舎名','学年','チェック項目','楽しいこと','生活メモ','授業態度','得意科目','苦手科目','成績推移','勉強メモ','進路関心度','志望校','進路メモ','いいところ','指導方針','特記事項','報告文'],
   '保護者面談': ['日付','生徒名','校舎名','学年','続柄','生活リズム','チェック項目','家庭メモ','相談・要望メモ','塾の提案','保護者印象','次回アクション','まとめ文'],
@@ -171,7 +205,7 @@ function getStudentsBySchool(e) {
     if (nameIdx === -1) return;
     for (let i = 1; i < rows.length; i++) {
       const rowName = String(rows[i][nameIdx] || '').trim();
-      const rowSchool = schoolIdx >= 0 ? String(rows[i][schoolIdx] || '').trim() : '';
+      const rowSchool = canonicalSchool(schoolIdx >= 0 ? String(rows[i][schoolIdx] || '') : '');
       if (!rowName) continue;
       if (school && rowSchool !== school) continue;
       names.add(rowName);
@@ -199,7 +233,7 @@ function getStudentData(e) {
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
-      const rowSchool = String(row[headers.indexOf('校舎名')] || '').trim();
+      const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
       if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
@@ -221,7 +255,7 @@ function getStudentData(e) {
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
-      const rowSchool = String(row[headers.indexOf('校舎名')] || '').trim();
+      const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
       if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
@@ -248,7 +282,7 @@ function getStudentData(e) {
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
-      const rowSchool = String(row[headers.indexOf('校舎名')] || '').trim();
+      const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
       if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
@@ -271,7 +305,7 @@ function getStudentData(e) {
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
-      const rowSchool = String(row[headers.indexOf('校舎名')] || '').trim();
+      const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
       if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
@@ -291,7 +325,7 @@ function getStudentData(e) {
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
-      const rowSchool = String(row[headers.indexOf('校舎名')] || '').trim();
+      const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
       if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
@@ -309,7 +343,7 @@ function getStudentData(e) {
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
-      const rowSchool = String(row[headers.indexOf('校舎名')] || '').trim();
+      const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
       if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
@@ -327,7 +361,7 @@ function getStudentData(e) {
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
-      const rowSchool = String(row[headers.indexOf('校舎名')] || '').trim();
+      const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
       if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
@@ -342,13 +376,50 @@ function getStudentData(e) {
 }
 
 function onOpen() {
-  SpreadsheetApp.getUi()
-    .createMenu('成績管理')
+  const ui = SpreadsheetApp.getUi();
+  ui.createMenu('成績管理')
     .addItem('成績を一括転記', 'bulkImportGrades')
     .addItem('入力シートを初期化', 'setupGradeInputSheet')
+    .addItem('テスト種別プルダウンを更新', 'updateTestTypeValidation')
+    .addSeparator()
+    .addSubMenu(ui.createMenu('【みずほ台①】成績取り込み')
+      .addItem('中1-1学期中間', 'importSS1_1Nen1ChukanChuukan')
+      .addItem('中1-1学期期末', 'importSS1_1Nen1ChukanKimatsu')
+      .addItem('中1-2学期中間', 'importSS1_1Nen2ChukanChuukan')
+      .addItem('中1-2学期期末', 'importSS1_1Nen2ChukanKimatsu')
+      .addItem('中1-学年末',    'importSS1_1NenGakumatsu')
+      .addItem('中2-1学期中間', 'importSS1_2Nen1ChukanChuukan')
+      .addItem('中2-1学期期末', 'importSS1_2Nen1ChukanKimatsu')
+      .addItem('中2-2学期中間', 'importSS1_2Nen2ChukanChuukan')
+      .addItem('中2-2学期期末', 'importSS1_2Nen2ChukanKimatsu')
+      .addItem('中2-学年末',    'importSS1_2NenGakumatsu')
+      .addItem('中3-1学期中間', 'importSS1_3Nen1ChukanChuukan')
+      .addItem('中3-1学期期末', 'importSS1_3Nen1ChukanKimatsu')
+      .addItem('中3-2学期中間', 'importSS1_3Nen2ChukanChuukan')
+      .addItem('中3-2学期期末', 'importSS1_3Nen2ChukanKimatsu')
+      .addItem('中3-学年末',    'importSS1_3NenGakumatsu'))
+    .addSubMenu(ui.createMenu('【みずほ台②】成績取り込み')
+      .addItem('中1-1学期中間', 'importSS2_1Nen1ChukanChuukan')
+      .addItem('中1-1学期期末', 'importSS2_1Nen1ChukanKimatsu')
+      .addItem('中1-2学期中間', 'importSS2_1Nen2ChukanChuukan')
+      .addItem('中1-2学期期末', 'importSS2_1Nen2ChukanKimatsu')
+      .addItem('中1-学年末',    'importSS2_1NenGakumatsu')
+      .addItem('中2-1学期中間', 'importSS2_2Nen1ChukanChuukan')
+      .addItem('中2-1学期期末', 'importSS2_2Nen1ChukanKimatsu')
+      .addItem('中2-2学期中間', 'importSS2_2Nen2ChukanChuukan')
+      .addItem('中2-2学期期末', 'importSS2_2Nen2ChukanKimatsu')
+      .addItem('中2-学年末',    'importSS2_2NenGakumatsu')
+      .addItem('中3-1学期中間', 'importSS2_3Nen1ChukanChuukan')
+      .addItem('中3-1学期期末', 'importSS2_3Nen1ChukanKimatsu')
+      .addItem('中3-2学期中間', 'importSS2_3Nen2ChukanChuukan')
+      .addItem('中3-2学期期末', 'importSS2_3Nen2ChukanKimatsu')
+      .addItem('中3-学年末',    'importSS2_3NenGakumatsu'))
     .addSeparator()
     .addItem('通知表シートをリセット（旧データ削除）', 'resetNoticeSheet')
     .addItem('スプレッドシート名を「生徒カルテ」に変更', 'renameToKarte')
+    .addItem('外部SSのシート名を確認', 'checkExternalSheetNames')
+    .addSeparator()
+    .addItem('【みずほ台】2026年 中3 第1回 北辰テストを取り込む', 'importHokushin2026_3nen_1kai')
     .addToUi();
 }
 
@@ -378,6 +449,24 @@ function updateNoticeTableHeaders() {
 function renameToKarte() {
   getSpreadsheet().rename('生徒カルテ');
   SpreadsheetApp.getUi().alert('スプレッドシート名を「生徒カルテ」に変更しました。');
+}
+
+function checkExternalSheetNames() {
+  const ids = [
+    '1iOvDWc4od1d4YigHsYQIjo_19cpqZHpifOwEE9VuQkM',
+    '1_FL59HjPJ_sT8bG7jQ3lZinMngxl-7vCuz3bY2Az4ec'
+  ];
+  let msg = '';
+  ids.forEach((id, i) => {
+    try {
+      const ss = SpreadsheetApp.openById(id);
+      const names = ss.getSheets().map(s => s.getName()).join('\n  ');
+      msg += '【スプレッドシート' + (i + 1) + '】\n  ' + names + '\n\n';
+    } catch(e) {
+      msg += '【スプレッドシート' + (i + 1) + '】アクセス失敗: ' + e.message + '\n\n';
+    }
+  });
+  SpreadsheetApp.getUi().alert(msg);
 }
 
 function setupGradeInputSheet() {
@@ -433,7 +522,12 @@ function setupGradeInputSheet() {
   sheet.getRange(3, 23, 200, 1).setBackground('#f5f5f5');
 
   // プルダウン：テスト種別
-  const testTypes = ['1学期中間テスト','1学期期末テスト','2学期中間テスト','2学期期末テスト','学年末テスト','北辰テスト'];
+  const testTypes = [
+    '中1-1学期中間','中1-1学期期末','中1-2学期中間','中1-2学期期末','中1-学年末',
+    '中2-1学期中間','中2-1学期期末','中2-2学期中間','中2-2学期期末','中2-学年末',
+    '中3-1学期中間','中3-1学期期末','中3-2学期中間','中3-2学期期末','中3-学年末',
+    '1学期中間','1学期期末','2学期中間','2学期期末','学年末','塾内テスト','北辰テスト'
+  ];
   const testRule = SpreadsheetApp.newDataValidation()
     .requireValueInList(testTypes, true).setAllowInvalid(false).build();
   sheet.getRange(3, 5, 200, 1).setDataValidation(testRule);
@@ -468,6 +562,124 @@ function setupGradeInputSheet() {
   Logger.log('「成績入力」シートを作成しました。');
 }
 
+// 既存の「成績入力」シートのテスト種別プルダウンだけ更新する（データは消えない）
+function updateTestTypeValidation() {
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName('成績入力');
+  if (!sheet) {
+    SpreadsheetApp.getUi().alert('「成績入力」シートが見つかりません。');
+    return;
+  }
+  const testTypes = [
+    '中1-1学期中間','中1-1学期期末','中1-2学期中間','中1-2学期期末','中1-学年末',
+    '中2-1学期中間','中2-1学期期末','中2-2学期中間','中2-2学期期末','中2-学年末',
+    '中3-1学期中間','中3-1学期期末','中3-2学期中間','中3-2学期期末','中3-学年末',
+    '1学期中間','1学期期末','2学期中間','2学期期末','学年末','塾内テスト','北辰テスト'
+  ];
+  const rule = SpreadsheetApp.newDataValidation()
+    .requireValueInList(testTypes, true).setAllowInvalid(true).build();
+  sheet.getRange(3, 5, 200, 1).setDataValidation(rule);
+  SpreadsheetApp.getUi().alert('テスト種別のプルダウンを更新しました。\n既存データはそのまま残っています。');
+}
+
+// シート名を正規化して検索（半角・全角数字、前後スペース等を無視）
+function findSheet_(ss, sheetName) {
+  const normalize = s => s
+    .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0)) // 全角→半角数字
+    .replace(/\s/g, ''); // 空白除去
+  const target = normalize(sheetName);
+  return ss.getSheets().find(s => normalize(s.getName()) === target) || null;
+}
+
+// 外部スプレッドシートから左側生徒データ（今回の点数のみ）を成績シートに取り込む共通処理
+function importFromExternal_(sheetName, testName, grade, ssId) {
+  const EXTERNAL_SS_ID = ssId || '1iOvDWc4od1d4YigHsYQIjo_19cpqZHpifOwEE9VuQkM';
+  const SCHOOL = 'みずほ台校舎';
+  const GRADE = grade || '中1';
+
+  const extSS = SpreadsheetApp.openById(EXTERNAL_SS_ID);
+  const extSheet = findSheet_(extSS, sheetName);
+  if (!extSheet) {
+    SpreadsheetApp.getUi().alert('シート「' + sheetName + '」が見つかりません。');
+    return;
+  }
+
+  const rows = extSheet.getDataRange().getValues();
+  const gradeSheet = ensureSheet(getSpreadsheet(), '成績');
+
+  // 列インデックス（0始まり）
+  // 5:順位, 6:氏名, 8:今回英語, 9:数学, 10:国語, 11:理科, 12:社会, 13:5科計
+  const toNum = v => (v !== '' && v !== '-' && !isNaN(Number(v))) ? Number(v) : '';
+
+  let count = 0;
+  for (let i = 1; i < rows.length; i++) {
+    const row = rows[i];
+    const name = String(row[6] || '').trim();
+    if (!name) continue;
+
+    const eng  = toNum(row[8]);
+    const math = toNum(row[9]);
+    const jpn  = toNum(row[10]);
+    const sci  = toNum(row[11]);
+    const soc  = toNum(row[12]);
+
+    if ([eng, math, jpn, sci, soc].every(s => s === '')) continue;
+
+    let total = toNum(row[13]);
+    if (total === '') {
+      const nums = [eng, math, jpn, sci, soc].filter(s => s !== '');
+      total = nums.length > 0 ? nums.reduce((a, b) => a + b, 0) : '';
+    }
+
+    gradeSheet.appendRow(buildRow(HEADERS['成績'], {
+      '日付': '', '生徒名': name, '校舎名': SCHOOL, '学年': GRADE, 'テスト名': testName,
+      '北辰実施回': '', '国語': jpn, '数学': math, '英語': eng, '理科': sci, '社会': soc,
+      '合計': total, 'クラス順位': '', '学年順位': toNum(row[5]),
+      '国語偏差値': '', '数学偏差値': '', '英語偏差値': '', '理科偏差値': '', '社会偏差値': '',
+      '3科偏差値': '', '5科偏差値': '', 'コメント': ''
+    }));
+    count++;
+  }
+
+  SpreadsheetApp.getUi().alert(count + '件を成績シートに取り込みました。\n校舎：' + SCHOOL + '\nテスト：' + testName);
+}
+
+const SS2_ID = '1_FL59HjPJ_sT8bG7jQ3lZinMngxl-7vCuz3bY2Az4ec';
+
+// みずほ台① （１年：全角、2年・3年：半角）
+function importSS1_1Nen1ChukanChuukan()  { importFromExternal_('１年１学期中間', '中1-1学期中間', '中1'); }
+function importSS1_1Nen1ChukanKimatsu()  { importFromExternal_('１年１学期期末', '中1-1学期期末', '中1'); }
+function importSS1_1Nen2ChukanChuukan()  { importFromExternal_('１年２学期中間', '中1-2学期中間', '中1'); }
+function importSS1_1Nen2ChukanKimatsu()  { importFromExternal_('１年２学期期末', '中1-2学期期末', '中1'); }
+function importSS1_1NenGakumatsu()       { importFromExternal_('１年学年末',     '中1-学年末',   '中1'); }
+function importSS1_2Nen1ChukanChuukan()  { importFromExternal_('2年1学期中間',   '中2-1学期中間', '中2'); }
+function importSS1_2Nen1ChukanKimatsu()  { importFromExternal_('2年1学期期末',   '中2-1学期期末', '中2'); }
+function importSS1_2Nen2ChukanChuukan()  { importFromExternal_('2年2学期中間',   '中2-2学期中間', '中2'); }
+function importSS1_2Nen2ChukanKimatsu()  { importFromExternal_('2年2学期期末',   '中2-2学期期末', '中2'); }
+function importSS1_2NenGakumatsu()       { importFromExternal_('2年学年末',      '中2-学年末',   '中2'); }
+function importSS1_3Nen1ChukanChuukan()  { importFromExternal_('3年1学期中間',   '中3-1学期中間', '中3'); }
+function importSS1_3Nen1ChukanKimatsu()  { importFromExternal_('3年1学期期末',   '中3-1学期期末', '中3'); }
+function importSS1_3Nen2ChukanChuukan()  { importFromExternal_('3年2学期中間',   '中3-2学期中間', '中3'); }
+function importSS1_3Nen2ChukanKimatsu()  { importFromExternal_('3年2学期期末',   '中3-2学期期末', '中3'); }
+function importSS1_3NenGakumatsu()       { importFromExternal_('3年学年末',      '中3-学年末',   '中3'); }
+
+// みずほ台② （１年：全角、1学期期末のみ混在「1年１学期期末」、2年・3年：半角）
+function importSS2_1Nen1ChukanChuukan()  { importFromExternal_('１年１学期中間', '中1-1学期中間', '中1', SS2_ID); }
+function importSS2_1Nen1ChukanKimatsu()  { importFromExternal_('1年１学期期末', '中1-1学期期末', '中1', SS2_ID); }
+function importSS2_1Nen2ChukanChuukan()  { importFromExternal_('１年２学期中間', '中1-2学期中間', '中1', SS2_ID); }
+function importSS2_1Nen2ChukanKimatsu()  { importFromExternal_('１年２学期期末', '中1-2学期期末', '中1', SS2_ID); }
+function importSS2_1NenGakumatsu()       { importFromExternal_('１年学年末',     '中1-学年末',   '中1', SS2_ID); }
+function importSS2_2Nen1ChukanChuukan()  { importFromExternal_('2年1学期中間',   '中2-1学期中間', '中2', SS2_ID); }
+function importSS2_2Nen1ChukanKimatsu()  { importFromExternal_('2年1学期期末',   '中2-1学期期末', '中2', SS2_ID); }
+function importSS2_2Nen2ChukanChuukan()  { importFromExternal_('2年2学期中間',   '中2-2学期中間', '中2', SS2_ID); }
+function importSS2_2Nen2ChukanKimatsu()  { importFromExternal_('2年2学期期末',   '中2-2学期期末', '中2', SS2_ID); }
+function importSS2_2NenGakumatsu()       { importFromExternal_('2年学年末',      '中2-学年末',   '中2', SS2_ID); }
+function importSS2_3Nen1ChukanChuukan()  { importFromExternal_('3年1学期中間',   '中3-1学期中間', '中3', SS2_ID); }
+function importSS2_3Nen1ChukanKimatsu()  { importFromExternal_('3年1学期期末',   '中3-1学期期末', '中3', SS2_ID); }
+function importSS2_3Nen2ChukanChuukan()  { importFromExternal_('3年2学期中間',   '中3-2学期中間', '中3', SS2_ID); }
+function importSS2_3Nen2ChukanKimatsu()  { importFromExternal_('3年2学期期末',   '中3-2学期期末', '中3', SS2_ID); }
+function importSS2_3NenGakumatsu()       { importFromExternal_('3年学年末',      '中3-学年末',   '中3', SS2_ID); }
+
 function bulkImportGrades() {
   const ss = getSpreadsheet();
   const inputSheet = ss.getSheetByName('成績入力');
@@ -493,8 +705,14 @@ function bulkImportGrades() {
     const entry = {};
     headers.forEach((h, idx) => { entry[h] = row[idx]; });
     // 入力シートの列名を成績シートの列名にマッピング
-    entry['テスト名'] = entry['テスト種別'] || '';
+    // 既に「中1-1学期中間」形式ならそのまま、旧形式「1学期中間」＋中学生なら付与
+    const grade_ = String(entry['学年'] || '');
+    const testBase_ = String(entry['テスト種別'] || '');
+    const alreadyPrefixed = /^中[1-3]-/.test(testBase_);
+    entry['テスト名'] = !alreadyPrefixed && ['中1','中2','中3'].includes(grade_) && testBase_ ? `${grade_}-${testBase_}` : testBase_;
     entry['北辰実施回'] = entry['北辰回数'] || '';
+    // 校舎名を正規化（「エイメイ学院 みずほ台校舎」→「みずほ台校舎」）
+    entry['校舎名'] = canonicalSchool(entry['校舎名'] || '');
 
     gradeSheet.appendRow(buildRow(HEADERS['成績'], entry));
     inputSheet.getRange(i + 1, doneCol + 1).setValue('済').setBackground('#d9ead3');
@@ -502,4 +720,52 @@ function bulkImportGrades() {
   }
 
   Logger.log(count + '件を成績シートに転記しました。');
+}
+
+// 2026年度 中3 第1回 北辰テスト（みずほ台）— PDFより手動データ転記
+function importHokushin2026_3nen_1kai() {
+  const gradeSheet = ensureSheet(getSpreadsheet(), '成績');
+
+  const DATE   = '2026/05/12';
+  const SCHOOL = 'みずほ台校舎';
+  const GRADE  = '中3';
+  const TEST   = '北辰テスト';
+  const ROUND  = '第1回';
+
+  // [名前, 国語点, 数学点, 社会点, 理科点, 英語点, 5科計,
+  //  国語偏, 数学偏, 社会偏, 理科偏, 英語偏, 3科偏, 5科偏]
+  const students = [
+    ['大嶋　結希',  30,  '',  '',  '',  '',  '',  33,  '',  '',  '',  '',  '',    ''],
+    ['川崎　璃琥',  69,  73,  64,  50,  73, 329,  55,  67,  58,  53,  63, 62.0, 60.1],
+    ['鈴木　颯人',  77,  55,  56,  53,  40, 281,  60,  55,  55,  54,  50, 54.2, 54.7],
+    ['田中　蒼太',  68,  40,  71,  63,  28, 270,  55,  45,  62,  60,  45, 48.3, 53.5],
+    ['越智　湊',    63,  50,  56,  44,  44, 257,  52,  51,  55,  50,  52, 51.7, 52.2],
+    ['沢　一歩',    58,  43,  69,  60,  22, 252,  49,  47,  61,  58,  43, 46.3, 51.7],
+    ['加藤　碧希',  63,  59,  34,  43,  43, 242,  52,  57,  44,  49,  51, 53.0, 50.6],
+    ['細田　彩花',  71,  49,  40,  47,  26, 233,  57,  51,  47,  51,  44, 49.8, 49.7],
+    ['伊藤　悠弥',  56,  41,  58,  43,  28, 226,  47,  45,  56,  49,  45, 46.6, 49.0],
+    ['徳山　遙人',  70,  24,  41,  27,  41, 203,  56,  34,  48,  41,  50, 48.1, 46.6],
+    ['武藤　楓',    65,  36,  46,  34,  20, 201,  53,  42,  50,  44,  42, 45.9, 46.4],
+    ['武井　直優',  64,  27,  29,  41,  35, 196,  52,  36,  42,  48,  48, 46.7, 45.9],
+    ['上原　佑理',  61,  25,  38,  34,  29, 187,  50,  35,  46,  44,  46, 45.0, 45.0],
+    ['大高　要',    57,  33,  34,  39,  16, 179,  48,  40,  44,  47,  40, 43.5, 44.1],
+    ['柴田　結衣',  18,  20,  21,  15,  18,  92,  28,  32,  38,  34,  41, 35.5, 34.8],
+  ];
+
+  students.forEach(([name, jpn, math, soc, sci, eng, total, jpnH, mathH, socH, sciH, engH, h3, h5]) => {
+    gradeSheet.appendRow(buildRow(HEADERS['成績'], {
+      '日付': DATE, '生徒名': name, '校舎名': SCHOOL, '学年': GRADE,
+      'テスト名': TEST, '北辰実施回': ROUND,
+      '国語': jpn, '数学': math, '英語': eng, '理科': sci, '社会': soc,
+      '合計': total, 'クラス順位': '', '学年順位': '',
+      '国語偏差値': jpnH, '数学偏差値': mathH, '英語偏差値': engH,
+      '理科偏差値': sciH, '社会偏差値': socH,
+      '3科偏差値': h3, '5科偏差値': h5, 'コメント': ''
+    }));
+  });
+
+  SpreadsheetApp.getUi().alert(
+    students.length + '件を成績シートに取り込みました。\n' +
+    '2026年度 中3 第1回 北辰テスト（みずほ台）'
+  );
 }
