@@ -193,6 +193,7 @@ function doGet(e) {
 
 function getStudentsBySchool(e) {
   const school = e.parameter.school || '';
+  const grade  = e.parameter.grade  || '';
   const ss = getSpreadsheet();
   const names = new Set();
   ['生徒面談','保護者面談','成績','カルテ','音声記録','志望校','通知表'].forEach(sheetName => {
@@ -200,14 +201,19 @@ function getStudentsBySchool(e) {
     if (!sheet) return;
     const rows = sheet.getDataRange().getValues();
     const headers = rows[0];
-    const nameIdx = headers.indexOf('生徒名');
+    const nameIdx  = headers.indexOf('生徒名');
     const schoolIdx = headers.indexOf('校舎名');
+    const gradeIdx  = headers.indexOf('学年');
     if (nameIdx === -1) return;
+    // 学年フィルタ指定時、学年列のないシートはスキップ
+    if (grade && gradeIdx === -1) return;
     for (let i = 1; i < rows.length; i++) {
-      const rowName = String(rows[i][nameIdx] || '').trim();
+      const rowName   = String(rows[i][nameIdx] || '').trim();
       const rowSchool = canonicalSchool(schoolIdx >= 0 ? String(rows[i][schoolIdx] || '') : '');
+      const rowGrade  = gradeIdx >= 0 ? String(rows[i][gradeIdx] || '').trim() : '';
       if (!rowName) continue;
       if (school && rowSchool !== school) continue;
+      if (grade && rowGrade !== grade) continue;
       names.add(rowName);
     }
   });

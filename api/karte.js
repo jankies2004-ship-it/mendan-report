@@ -5,11 +5,11 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
 
-  const { name, school = '', action } = req.query;
+  const { name, school = '', grade = '', action } = req.query;
 
   if (action === 'listStudents') {
     try {
-      const url = `${GAS_URL}?action=listStudents${school ? '&school=' + encodeURIComponent(school) : ''}`;
+      const url = `${GAS_URL}?action=listStudents${school ? '&school=' + encodeURIComponent(school) : ''}${grade ? '&grade=' + encodeURIComponent(grade) : ''}`;
       const gasRes = await fetch(url, { redirect: 'follow' });
       const data = await gasRes.json();
       res.status(200).json(data);
