@@ -422,6 +422,7 @@ function onOpen() {
       .addItem('中3-学年末',    'importSS2_3NenGakumatsu'))
     .addSeparator()
     .addItem('成績シートのヘッダーを修正（北辰実施回 列を追加）', 'fixGradeSheetHeader')
+    .addItem('成績シートのヘッダー行を正しい列順に修正', 'fixGradeSheetHeaderRow')
     .addSeparator()
     .addItem('通知表シートをリセット（旧データ削除）', 'resetNoticeSheet')
     .addItem('スプレッドシート名を「生徒カルテ」に変更', 'renameToKarte')
@@ -761,6 +762,28 @@ function fixGradeSheetHeader() {
     '「北辰実施回」列を追加しました（' + testNameCol1 + '列目の直後）。\n' +
     '既存データはそのまま保持されています。\n' +
     '次回から北辰テストの取り込みで回数が正しく入ります。'
+  );
+}
+
+// 成績シートのヘッダー行を HEADERS['成績'] の正しい列順に上書きする
+// スプレッドシート側の列順がコードと食い違っている場合（偏差値がずれる場合）に一度だけ実行する
+function fixGradeSheetHeaderRow() {
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName('成績');
+  if (!sheet) {
+    SpreadsheetApp.getUi().alert('成績シートが見つかりません。');
+    return;
+  }
+  const headers = HEADERS['成績'];
+  const currentLen = sheet.getLastColumn();
+  // 不足列があれば右に追加してからヘッダーをセット
+  if (currentLen < headers.length) {
+    sheet.getRange(1, currentLen + 1, 1, headers.length - currentLen).clearContent();
+  }
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold');
+  SpreadsheetApp.getUi().alert(
+    '成績シートのヘッダー行を正しい列順に修正しました（' + headers.length + '列）。\n' +
+    'データ行の値は変更していません。'
   );
 }
 
