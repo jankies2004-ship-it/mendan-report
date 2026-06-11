@@ -423,6 +423,7 @@ function onOpen() {
     .addSeparator()
     .addItem('成績シートのヘッダーを修正（北辰実施回 列を追加）', 'fixGradeSheetHeader')
     .addItem('成績シートのヘッダー行を正しい列順に修正', 'fixGradeSheetHeaderRow')
+    .addItem('旧形式データを新形式に一括変換（点数ズレ修正）', 'migrateGradeSheetToNewFormat')
     .addSeparator()
     .addItem('通知表シートをリセット（旧データ削除）', 'resetNoticeSheet')
     .addItem('スプレッドシート名を「生徒カルテ」に変更', 'renameToKarte')
@@ -785,6 +786,37 @@ function fixGradeSheetHeaderRow() {
     '成績シートのヘッダー行を正しい列順に修正しました（' + headers.length + '列）。\n' +
     'データ行の値は変更していません。'
   );
+}
+
+// 旧形式データ（北辰実施回列がなく国語が列5に入っている行）を新形式に一括変換する
+// fixGradeSheetHeaderRow 実行後に定期テスト点数がずれた場合に一度だけ実行する
+function migrateGradeSheetToNewFormat() {
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName('成績');
+  if (!sheet) { SpreadsheetApp.getUi().alert('成績シートが見つかりません。'); return; }
+
+  // 北辰実施回列が存在しなかった旧ヘッダー構成（コメントが偏差値の前）
+  const OLD_HEADERS = ['日付','生徒名','校舎名','学年','テスト名',
+    '国語','数学','英語','理科','社会','合計','クラス順位','学年順位',
+    'コメント','国語偏差値','数学偏差値','英語偏差値','理科偏差値','社会偏差値','3科偏差値','5科偏差値'];
+
+  const data = sheet.getDataRange().getValues();
+  let fixedCount = 0;
+
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (!row[1]) continue;
+    // 旧形式の判定: 列5(0始まり)が数値 = 国語の点数が入っている（北辰実施回ではない）
+    if (typeof row[5] === 'number') {
+      const entry = {};
+      OLD_HEADERS.forEach((h, idx) => { entry[h] = idx < row.length ? row[idx] : ''; });
+      const newRow = buildRow(HEADERS['成績'], entry);
+      sheet.getRange(i + 1, 1, 1, newRow.length).setValues([newRow]);
+      fixedCount++;
+    }
+  }
+
+  SpreadsheetApp.getUi().alert(fixedCount + '件の旧形式データを新形式に変換しました。\n合計 ' + (data.length - 1) + '件中。');
 }
 
 // 2026年度 中3 第1回 北辰テスト（みずほ台）— PDFより手動データ転記
