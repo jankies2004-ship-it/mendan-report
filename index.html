@@ -1387,7 +1387,15 @@ async function generateKarte(name){
   const d=karteData||{};
   const sm=(d.student||[]).map(r=>`[${r.date}] 態度:${r.attitude||'—'} 得意:${r.strong||'—'} 苦手:${r.weak||'—'} 成績:${r.result||'—'} 生活:${r.checks||'—'} ${r.life_memo||''} ${r.study_memo||''} ${r.career_memo||''}`).join('\n');
   const pm=(d.parent||[]).map(r=>`[${r.date}] ${r.relation||''} リズム:${r.rhythm||'—'} ${r.home_memo||''} ${r.request_memo||''}`).join('\n');
-  const gm=(d.grade||[]).map(r=>`[${r.date}] ${r.test||''}: 国${r['国語']||'?'} 数${r['数学']||'?'} 英${r['英語']||'?'} 理${r['理科']||'?'} 社${r['社会']||'?'} 計${r.total||'?'} ${r.comment||''}`).join('\n');
+  const isHokushinR=r=>String(r.test||'').includes('北辰テスト');
+  const hvR=v=>{const n=parseFloat(v);return isNaN(n)?'—':String(Math.round(n));};
+  const fvR=v=>{const n=parseFloat(v);return isNaN(n)?'—':n.toFixed(1);};
+  const gm=(d.grade||[]).map(r=>{
+    if(isHokushinR(r)){
+      return `[${r.date}] ${r.test||''}${r['北辰実施回']?` ${r['北辰実施回']}`:''}（偏差値）: 国${hvR(r['国語偏差値'])} 数${hvR(r['数学偏差値'])} 英${hvR(r['英語偏差値'])} 理${hvR(r['理科偏差値'])} 社${hvR(r['社会偏差値'])} 3科${fvR(r['3科偏差値'])} 5科${fvR(r['5科偏差値'])} ${r.comment||''}`;
+    }
+    return `[${r.date}] ${r.test||''}: 国${r['国語']||'?'} 数${r['数学']||'?'} 英${r['英語']||'?'} 理${r['理科']||'?'} 社${r['社会']||'?'} 計${r.total||'?'} ${r.comment||''}`;
+  }).join('\n');
   const subjs=['国語','数学','英語','理科','社会','音楽','美術','保健体育','技術家庭'];
   const nm=(d.notice||[]).map(r=>{
     const lines=['中1','中2','中3'].map(g=>{
@@ -1411,7 +1419,7 @@ ${sm||'記録なし'}
 【保護者面談記録】
 ${pm||'記録なし'}
 
-【定期テスト成績】
+【定期テスト成績・北辰テスト偏差値】
 ${gm||'記録なし'}
 
 【通知表（5段階評定）】
@@ -1645,8 +1653,10 @@ function showA4Preview(name){
   // 成績
   const a4TestOrder={'1学期中間':1,'1学期期末':2,'2学期中間':3,'2学期期末':4,'学年末':5,'3学期':5};
   const a4GradeOrder={'中1':1,'中2':2,'中3':3};
+  const a4IsHokushin=r=>String(r.test||'').includes('北辰テスト');
   const a4SortKey=r=>{const g=a4GradeOrder[String(r['学年']||'').trim()]||0;const t=(r.test||'').replace(/^中[123]-/,'');return g*100+(a4TestOrder[t]||0);};
-  const grades=[...(d.grade||[])].sort((a,b)=>a4SortKey(b)-a4SortKey(a));
+  const grades=[...(d.grade||[]).filter(r=>!a4IsHokushin(r))].sort((a,b)=>a4SortKey(b)-a4SortKey(a));
+  const a4Hokushin=[...(d.grade||[]).filter(r=>a4IsHokushin(r))].sort((a,b)=>{const ma=String(a['北辰実施回']||'').match(/第(\d+)回/);const mb=String(b['北辰実施回']||'').match(/第(\d+)回/);return(mb?parseInt(mb[1]):0)-(ma?parseInt(ma[1]):0);});
   html+=`<div class="a4-sec"><div class="a4-sec-title">成績推移</div>`;
   if(grades.length){
     const a4prev=grades[1];
@@ -1669,6 +1679,17 @@ function showA4Preview(name){
     html+=`</table>`;
   }else{html+=`<div class="a4-empty">記録なし</div>`;}
   html+=`</div>`;
+
+  // 北辰テスト（偏差値）
+  if(a4Hokushin.length){
+    const a4fh=v=>{const n=parseFloat(v);return isNaN(n)?'—':String(Math.round(n));};
+    const a4f3=v=>{const n=parseFloat(v);return isNaN(n)?'—':n.toFixed(1);};
+    html+=`<div class="a4-sec"><div class="a4-sec-title">北辰テスト（偏差値）</div><table class="a4-gtbl"><tr><th>回数</th><th>国語</th><th>数学</th><th>英語</th><th>理科</th><th>社会</th><th>3科</th><th>5科</th></tr>`;
+    a4Hokushin.forEach(g=>{
+      html+=`<tr><td>${g['北辰実施回']||'—'}</td><td>${a4fh(g['国語偏差値'])}</td><td>${a4fh(g['数学偏差値'])}</td><td>${a4fh(g['英語偏差値'])}</td><td>${a4fh(g['理科偏差値'])}</td><td>${a4fh(g['社会偏差値'])}</td><td class="atot">${a4f3(g['3科偏差値'])}</td><td class="atot">${a4f3(g['5科偏差値'])}</td></tr>`;
+    });
+    html+=`</table></div>`;
+  }
 
   // 通知表
   const a4Subjs=['国語','数学','英語','理科','社会','音楽','美術','保健体育','技術家庭'];

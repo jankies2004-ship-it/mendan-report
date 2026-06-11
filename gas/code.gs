@@ -421,6 +421,8 @@ function onOpen() {
       .addItem('中3-2学期期末', 'importSS2_3Nen2ChukanKimatsu')
       .addItem('中3-学年末',    'importSS2_3NenGakumatsu'))
     .addSeparator()
+    .addItem('成績シートのヘッダーを修正（北辰実施回 列を追加）', 'fixGradeSheetHeader')
+    .addSeparator()
     .addItem('通知表シートをリセット（旧データ削除）', 'resetNoticeSheet')
     .addItem('スプレッドシート名を「生徒カルテ」に変更', 'renameToKarte')
     .addItem('外部SSのシート名を確認', 'checkExternalSheetNames')
@@ -726,6 +728,40 @@ function bulkImportGrades() {
   }
 
   Logger.log(count + '件を成績シートに転記しました。');
+}
+
+// 成績シートに「北辰実施回」列がなければ テスト名列の直後に挿入する
+function fixGradeSheetHeader() {
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName('成績');
+  if (!sheet) {
+    SpreadsheetApp.getUi().alert('成績シートが見つかりません。');
+    return;
+  }
+
+  const lastCol = sheet.getLastColumn();
+  const headerRow = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+
+  if (headerRow.indexOf('北辰実施回') !== -1) {
+    SpreadsheetApp.getUi().alert('成績シートのヘッダーは正常です。\n「北辰実施回」列はすでに存在しています。');
+    return;
+  }
+
+  const testNameCol1 = headerRow.indexOf('テスト名') + 1; // 1-based
+  if (testNameCol1 === 0) {
+    SpreadsheetApp.getUi().alert('「テスト名」列が見つかりません。手動で確認してください。');
+    return;
+  }
+
+  // テスト名列の直後に列を挿入して「北辰実施回」ヘッダーをセット
+  sheet.insertColumnAfter(testNameCol1);
+  sheet.getRange(1, testNameCol1 + 1).setValue('北辰実施回').setFontWeight('bold');
+
+  SpreadsheetApp.getUi().alert(
+    '「北辰実施回」列を追加しました（' + testNameCol1 + '列目の直後）。\n' +
+    '既存データはそのまま保持されています。\n' +
+    '次回から北辰テストの取り込みで回数が正しく入ります。'
+  );
 }
 
 // 2026年度 中3 第1回 北辰テスト（みずほ台）— PDFより手動データ転記
