@@ -1332,15 +1332,22 @@ function renderKarte(data,name){
   }
 
   // 志望校
-  const targets=(data.target||[]).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const monthOrd={'4月':1,'5月':2,'6月':3,'7月':4,'8月':5,'9月':6,'10月':7,'11月':8,'12月':9,'1月':10,'2月':11};
+  const targets=(data.target||[]).sort((a,b)=>{
+    const am=monthOrd[a['月']]||0,bm=monthOrd[b['月']]||0;
+    if(am&&bm) return bm-am;
+    return (b.date||'').localeCompare(a.date||'');
+  });
   const targetsWithData=targets.filter(t=>[t['第一志望'],t['第二志望'],t['第三志望'],t['第四志望']].some(Boolean));
   if(targetsWithData.length){
     html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>志望校</div><div class="card-body hidden">`;
     targetsWithData.forEach((t,idx)=>{
+      const mon=t['月']||'';
       const d=t.date||'';
+      const timeLabel=mon?`${mon}時点`:(d?`${d} 時点`:'');
       const label=idx===0?`<span style="font-size:11px;background:#1D9E75;color:#fff;border-radius:4px;padding:1px 6px;margin-left:6px">最新</span>`:'';
       html+=`<div style="margin-bottom:${idx<targetsWithData.length-1?'16px':'0'}">`;
-      html+=`<div style="font-size:12px;color:#888;margin-bottom:6px;font-weight:600">${d} 時点${label}</div>`;
+      html+=`<div style="font-size:12px;color:#888;margin-bottom:6px;font-weight:600">${timeLabel}${label}</div>`;
       html+=`<ol style="margin:0;padding-left:1.4em;line-height:1.9">`;
       [t['第一志望'],t['第二志望'],t['第三志望'],t['第四志望']].filter(Boolean).forEach(s=>{
         html+=`<li style="font-size:14px;font-weight:600">${s}</li>`;
@@ -1421,8 +1428,9 @@ async function generateKarte(name){
     }).filter(Boolean).join(' | ');
     return lines?`[${r.date||''}] ${lines}`:'';
   }).filter(Boolean).join('\n');
-  const tm=(d.target||[]).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  const tv=tm.length?[tm[0]['第一志望'],tm[0]['第二志望'],tm[0]['第三志望'],tm[0]['第四志望']].filter(Boolean).map((s,i)=>`第${i+1}志望:${s}`).join(' '):'記録なし';
+  const _mo={'4月':1,'5月':2,'6月':3,'7月':4,'8月':5,'9月':6,'10月':7,'11月':8,'12月':9,'1月':10,'2月':11};
+  const tm=(d.target||[]).sort((a,b)=>{const am=_mo[a['月']]||0,bm=_mo[b['月']]||0;if(am&&bm)return bm-am;return (b.date||'').localeCompare(a.date||'');});
+  const tv=tm.length?[tm[0]['第一志望'],tm[0]['第二志望'],tm[0]['第三志望'],tm[0]['第四志望']].filter(Boolean).map((s,i)=>`第${i+1}志望:${s}`).join(' ')+(tm[0]['月']?`（${tm[0]['月']}時点）`:''):'記録なし';
 
   const prompt=`あなたは学習塾「エイメイ学院」のベテラン講師です。以下の記録をもとに、${name}さんの総合的な生徒カルテ文を作成してください。
 

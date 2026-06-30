@@ -42,7 +42,7 @@ const HEADERS = {
   '成績': ['日付','生徒名','校舎名','学年','テスト名','北辰実施回','国語','数学','英語','理科','社会','合計','クラス順位','学年順位','国語偏差値','数学偏差値','英語偏差値','理科偏差値','社会偏差値','3科偏差値','5科偏差値','コメント'],
   'カルテ': ['日付','生徒名','校舎名','カルテ文'],
   '音声記録': ['日付','生徒名','校舎名','種類','まとめ文'],
-  '志望校': ['日付','生徒名','校舎名','学年','第一志望','第二志望','第三志望','第四志望'],
+  '志望校': ['日付','生徒名','校舎名','学年','月','第一志望','第二志望','第三志望','第四志望'],
   '通知表': ['日付','生徒名','校舎名','学年',
     '中1_国語_1学期','中1_国語_2学期','中1_国語_3学期','中1_国語_年',
     '中1_数学_1学期','中1_数学_2学期','中1_数学_3学期','中1_数学_年',
@@ -157,6 +157,7 @@ function doPost(e) {
       rowData['まとめ文'] = data.summary || '';
     } else if (sheet_name === '志望校') {
       rowData['学年'] = data.grade || '';
+      rowData['月'] = data.month || '';
       rowData['第一志望'] = data.school1 || '';
       rowData['第二志望'] = data.school2 || '';
       rowData['第三志望'] = data.school3 || '';
@@ -431,6 +432,9 @@ function onOpen() {
     .addSeparator()
     .addItem('【みずほ台】2026年 中3 第1回 北辰テストを取り込む', 'importHokushin2026_3nen_1kai')
     .addItem('【みずほ台】2026年 中3 第2回 北辰テストを取り込む', 'importHokushin2026_3nen_2kai')
+    .addSeparator()
+    .addItem('志望校入力シートを初期化', 'setupTargetSchoolInputSheet')
+    .addItem('志望校を一括転記', 'bulkImportTargetSchools')
     .addToUi();
 }
 
@@ -690,6 +694,99 @@ function importSS2_3Nen1ChukanKimatsu()  { importFromExternal_('3年1学期期�
 function importSS2_3Nen2ChukanChuukan()  { importFromExternal_('3年2学期中間',   '中3-2学期中間', '中3', SS2_ID); }
 function importSS2_3Nen2ChukanKimatsu()  { importFromExternal_('3年2学期期末',   '中3-2学期期末', '中3', SS2_ID); }
 function importSS2_3NenGakumatsu()       { importFromExternal_('3年学年末',      '中3-学年末',   '中3', SS2_ID); }
+
+function setupTargetSchoolInputSheet() {
+  const ss = getSpreadsheet();
+  let sheet = ss.getSheetByName('志望校入力');
+  if (!sheet) {
+    sheet = ss.insertSheet('志望校入力');
+  }
+  sheet.clearContents();
+  sheet.clearFormats();
+
+  const headers = ['月','生徒名','校舎名','学年','第一志望','第二志望','第三志望','第四志望','転記済み'];
+  sheet.appendRow(headers);
+  sheet.getRange(1, 1, 1, headers.length).setBackground('#1D5487').setFontColor('#ffffff').setFontWeight('bold');
+
+  sheet.setColumnWidth(1, 80);
+  sheet.setColumnWidth(2, 110);
+  sheet.setColumnWidth(3, 160);
+  sheet.setColumnWidth(4, 70);
+  sheet.setColumnWidth(5, 160);
+  sheet.setColumnWidth(6, 160);
+  sheet.setColumnWidth(7, 160);
+  sheet.setColumnWidth(8, 160);
+  sheet.setColumnWidth(9, 70);
+
+  const months = ['4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月'];
+  sheet.getRange(2, 1, 200, 1).setDataValidation(
+    SpreadsheetApp.newDataValidation().requireValueInList(months, true).setAllowInvalid(false).build()
+  );
+
+  const grades = ['小1','小2','小3','小4','小5','小6','中1','中2','中3','高1','高2','高3','既卒'];
+  sheet.getRange(2, 4, 200, 1).setDataValidation(
+    SpreadsheetApp.newDataValidation().requireValueInList(grades, true).setAllowInvalid(false).build()
+  );
+
+  const schools = [
+    'エイメイ学院 みずほ台校舎','エイメイ学院 鶴瀬校舎','エイメイ学院 ふじみ野校舎',
+    'エイメイ学院 トナリエふじみ野校舎','エイメイ学院 富士見羽沢校舎','エイメイ学院 水谷校舎',
+    '明成個別 鶴瀬東校舎','明成個別 鶴瀬西校舎','明成個別 三芳藤久保校舎','明成個別 ふじみ野大井校舎',
+    '明成個別 トナリエふじみ野校舎','明成個別 ふじみ野西口校舎','明成個別 ふじみ野上福岡校舎',
+    '明成個別 新河岸校舎','明成個別 南古谷校舎','明成個別 川越南大塚校舎','明成個別 志木校舎','明成個別 朝霞台校舎',
+    'Elena個別女子 水谷校舎','Elena個別女子 ふじみ野西口校舎',
+    'EIMEI予備校 鶴瀬校舎','EIMEI予備校 ふじみ野駅前校舎',
+    'Luce個別指導 みずほ台校舎','Luce個別指導 鶴瀬校舎'
+  ];
+  sheet.getRange(2, 3, 200, 1).setDataValidation(
+    SpreadsheetApp.newDataValidation().requireValueInList(schools, true).setAllowInvalid(false).build()
+  );
+
+  sheet.getRange(2, 9, 200, 1).setBackground('#f5f5f5');
+
+  SpreadsheetApp.getUi().alert('「志望校入力」シートを作成しました。\n月を選択して志望校を入力し、「志望校を一括転記」を実行してください。');
+}
+
+function bulkImportTargetSchools() {
+  const ss = getSpreadsheet();
+  const inputSheet = ss.getSheetByName('志望校入力');
+  if (!inputSheet) {
+    SpreadsheetApp.getUi().alert('「志望校入力」シートが見つかりません。\nまず「志望校入力シートを初期化」を実行してください。');
+    return;
+  }
+
+  const targetSheet = ensureSheet(ss, '志望校');
+  const data = inputSheet.getDataRange().getValues();
+  const headers = data[0];
+  const doneCol = headers.indexOf('転記済み');
+  const today = new Date().toLocaleDateString('ja-JP');
+
+  let count = 0;
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    const nameIdx = headers.indexOf('生徒名');
+    if (!row[nameIdx]) continue;
+    if (row[doneCol] === '済') continue;
+
+    const entry = {
+      '日付': today,
+      '生徒名': String(row[nameIdx] || '').trim(),
+      '校舎名': canonicalSchool(String(row[headers.indexOf('校舎名')] || '')),
+      '学年': row[headers.indexOf('学年')] || '',
+      '月': row[headers.indexOf('月')] || '',
+      '第一志望': row[headers.indexOf('第一志望')] || '',
+      '第二志望': row[headers.indexOf('第二志望')] || '',
+      '第三志望': row[headers.indexOf('第三志望')] || '',
+      '第四志望': row[headers.indexOf('第四志望')] || '',
+    };
+
+    targetSheet.appendRow(buildRow(HEADERS['志望校'], entry));
+    inputSheet.getRange(i + 1, doneCol + 1).setValue('済').setBackground('#d9ead3');
+    count++;
+  }
+
+  SpreadsheetApp.getUi().alert(count + '件を志望校シートに転記しました。');
+}
 
 function bulkImportGrades() {
   const ss = getSpreadsheet();
