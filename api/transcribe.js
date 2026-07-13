@@ -1,10 +1,10 @@
+import { checkAuth } from './_auth.js';
+
 export const config = { api: { bodyParser: false } };
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-openai-key');
   if (req.method === 'OPTIONS') { res.status(200).end(); return; }
+  if (!checkAuth(req, res)) return;
 
   const apiKey = req.headers['x-openai-key'] || process.env.OPENAI_API_KEY;
   if (!apiKey) {

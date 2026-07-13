@@ -87,9 +87,27 @@ function buildRow(headers, data) {
   return headers.map(h => data[h] !== undefined ? data[h] : '');
 }
 
+// Vercel側(api/save.js, api/karte.js)とだけ共有する秘密トークン。
+// スクリプトエディタで一度だけ setAuthToken('ランダムな長い文字列') を実行して設定する。
+function getAuthToken_() {
+  return PropertiesService.getScriptProperties().getProperty('AUTH_TOKEN');
+}
+
+function setAuthToken(token) {
+  PropertiesService.getScriptProperties().setProperty('AUTH_TOKEN', token);
+}
+
+function isAuthorized_(token) {
+  const expected = getAuthToken_();
+  return !!expected && token === expected;
+}
+
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
+    if (!isAuthorized_(data.token)) {
+      return ContentService.createTextOutput(JSON.stringify({ error: 'unauthorized' })).setMimeType(ContentService.MimeType.JSON);
+    }
     const sheet_name = data.sheet;
     if (!HEADERS[sheet_name]) {
       return ContentService.createTextOutput(JSON.stringify({ error: 'unknown sheet' })).setMimeType(ContentService.MimeType.JSON);
@@ -183,6 +201,9 @@ function doPost(e) {
 
 function doGet(e) {
   const action = e.parameter.action;
+  if (!isAuthorized_(e.parameter.token)) {
+    return ContentService.createTextOutput(JSON.stringify({ error: 'unauthorized' })).setMimeType(ContentService.MimeType.JSON);
+  }
   if (action === 'getStudent') {
     return getStudentData(e);
   }
@@ -430,6 +451,7 @@ function onOpen() {
     .addItem('スプレッドシート名を「生徒カルテ」に変更', 'renameToKarte')
     .addItem('外部SSのシート名を確認', 'checkExternalSheetNames')
     .addSeparator()
+    .addItem('【みずほ台】2026年 中2 第1回 北辰テストを取り込む', 'importHokushin2026_2nen_1kai')
     .addItem('【みずほ台】2026年 中3 第1回 北辰テストを取り込む', 'importHokushin2026_3nen_1kai')
     .addItem('【みずほ台】2026年 中3 第2回 北辰テストを取り込む', 'importHokushin2026_3nen_2kai')
     .addSeparator()
@@ -915,6 +937,46 @@ function migrateGradeSheetToNewFormat() {
   }
 
   SpreadsheetApp.getUi().alert(fixedCount + '件の旧形式データを新形式に変換しました。\n合計 ' + (data.length - 1) + '件中。');
+}
+
+// 2026年度 中2 第1回 北辰テスト（みずほ台）— PDFより手動データ転記
+function importHokushin2026_2nen_1kai() {
+  const gradeSheet = ensureSheet(getSpreadsheet(), '成績');
+
+  const DATE   = '2026/06/28';
+  const SCHOOL = 'みずほ台校舎';
+  const GRADE  = '中2';
+  const TEST   = '北辰テスト';
+  const ROUND  = '第1回';
+
+  // [名前, 国語点, 数学点, 社会点, 理科点, 英語点, 5科計,
+  //  国語偏, 数学偏, 社会偏, 理科偏, 英語偏, 3科偏, 5科偏]
+  const students = [
+    ['森口夏希', 77, 65, 86, 84, 81, 393, 64, 61, 66, 66, 64, 63.8, 65.7],
+    ['西川咲希', 64, 60, 69, 90, 78, 361, 55, 58, 57, 69, 63, 59.6, 61.6],
+    ['村上紘基', 63, 37, 75, 69, 54, 298, 55, 46, 60, 58, 52, 51.2, 54.5],
+    ['佐野太楽', 32, 48, 71, 51, 41, 243, 36, 52, 58, 49, 47, 46.1, 48.9],
+    ['大亀裕士', 53, 28, 76, 39, 24, 220, 48, 41, 61, 43, 39, 43.6, 46.9],
+    ['秦綾駕',   50, 42, 27, 25, 55, 199, 47, 48, 33, 36, 53, 50.0, 45.0],
+    ['佐藤匠',   19, 38, 35, 44, 40, 176, 28, 46, 38, 46, 46, 42.3, 42.9],
+  ];
+
+  students.forEach(([name, jpn, math, soc, sci, eng, total, jpnH, mathH, socH, sciH, engH, h3, h5]) => {
+    gradeSheet.appendRow(buildRow(HEADERS['成績'], {
+      '日付': DATE, '生徒名': name, '校舎名': SCHOOL, '学年': GRADE,
+      'テスト名': TEST, '北辰実施回': ROUND,
+      '国語': jpn, '数学': math, '英語': eng, '理科': sci, '社会': soc,
+      '合計': total, 'クラス順位': '', '学年順位': '',
+      '国語偏差値': jpnH, '数学偏差値': mathH, '英語偏差値': engH,
+      '理科偏差値': sciH, '社会偏差値': socH,
+      '3科偏差値': h3, '5科偏差値': h5, 'コメント': ''
+    }));
+  });
+
+  SpreadsheetApp.getUi().alert(
+    students.length + '件を成績シートに取り込みました。\n' +
+    '2026年度 中2 第1回 北辰テスト（みずほ台）'
+  );
 }
 
 // 2026年度 中3 第1回 北辰テスト（みずほ台）— PDFより手動データ転記

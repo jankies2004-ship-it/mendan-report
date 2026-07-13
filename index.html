@@ -276,11 +276,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
   .a4-topbar{display:none!important}
   .a4-page{width:100%!important;padding:15mm 18mm!important;box-shadow:none!important;margin:0!important;min-height:auto!important}
 }
+
+/* Login Gate */
+#login-gate{position:fixed;inset:0;background:#f5f5f0;display:flex;align-items:center;justify-content:center;z-index:9999;padding:1rem}
+#login-gate .login-box{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:2rem 1.75rem;width:100%;max-width:340px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
+#login-gate h1{font-size:17px;font-weight:600;color:#222;margin-bottom:6px}
+#login-gate p{font-size:13px;color:#666;margin-bottom:1.25rem}
+#login-gate input[type=password]{width:100%;font-size:15px;padding:11px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit;margin-bottom:0.75rem}
+#login-gate input[type=password]:focus{border-color:#378ADD}
+#login-gate button{width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+#login-gate button:disabled{background:#aaa;cursor:not-allowed}
+#login-gate .login-error{color:#991b1b;font-size:13px;margin-top:0.5rem}
+.logout-link{position:absolute;right:0;top:2px;font-size:12px;color:#999;cursor:pointer;text-decoration:underline}
 </style>
 </head>
 <body>
-<div class="app">
+<div id="login-gate">
+  <div class="login-box">
+    <h1>ログイン</h1>
+    <p>共有パスワードを入力してください。</p>
+    <form id="login-form" onsubmit="return handleLogin(event)">
+      <input type="password" id="login-password" placeholder="パスワード" autocomplete="current-password" autofocus>
+      <button type="submit" id="login-btn">ログイン</button>
+      <div id="login-error" class="login-error"></div>
+    </form>
+  </div>
+</div>
+<div class="app" id="main-app" style="display:none">
   <div class="header">
+    <span class="logout-link" onclick="handleLogout()">ログアウト</span>
     <h1>エイメイ学院 面談・成績管理</h1>
     <p>面談記録・成績入力・生徒カルテの作成ができます。</p>
   </div>
@@ -812,7 +836,62 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 
 </div>
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwtLtrArQ1ECX0cNLh85rMJ6MaV3t-A3qDNxuPpbgg-LjTU8mMDOfdDEN2jZqzs5LP5zw/exec';
+// ===== Auth =====
+function getAuthToken(){ return localStorage.getItem('authToken') || ''; }
+
+function authHeaders(extra){
+  return Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+getAuthToken()}, extra||{});
+}
+
+async function authFetch(url, opts){
+  const res = await fetch(url, Object.assign({}, opts, {headers: authHeaders((opts&&opts.headers)||{})}));
+  if(res.status===401){ handleAuthFailure(); throw new Error('認証が切れました。再度ログインしてください。'); }
+  return res;
+}
+
+async function postToGas(payload){
+  const res = await authFetch('/api/save', {method:'POST', body: JSON.stringify(payload)});
+  return res.json();
+}
+
+function handleAuthFailure(){
+  localStorage.removeItem('authToken');
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-gate').style.display='flex';
+}
+
+function handleLogout(){
+  handleAuthFailure();
+}
+
+async function handleLogin(ev){
+  ev.preventDefault();
+  const pw = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  err.textContent='';
+  btn.disabled=true; btn.textContent='確認中...';
+  try{
+    const res = await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
+    const data = await res.json();
+    if(!res.ok || !data.token){ throw new Error(data.error||'ログインに失敗しました'); }
+    localStorage.setItem('authToken', data.token);
+    document.getElementById('login-gate').style.display='none';
+    document.getElementById('main-app').style.display='block';
+  }catch(e){
+    err.textContent = e.message;
+  }finally{
+    btn.disabled=false; btn.textContent='ログイン';
+  }
+  return false;
+}
+
+(function checkAuthOnLoad(){
+  if(getAuthToken()){
+    document.getElementById('login-gate').style.display='none';
+    document.getElementById('main-app').style.display='block';
+  }
+})();
 
 // ===== State =====
 const sState = { grade:'', attitude:'', result:'', career_interest:'', checks:new Set(), selectedDate:null };
@@ -823,7 +902,7 @@ let generatedReport = '', generatedParentMemo = '', generatedKarte = '', karteDa
 
 // ===== Gemini =====
 async function callGemini(prompt){
-  const res=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+  const res=await authFetch('/api/claude',{method:'POST',body:JSON.stringify({prompt})});
   const data=await res.json();
   if(data.error)throw new Error(data.error);
   return data.text||'';
@@ -1042,7 +1121,7 @@ async function saveStudentToSheet(){
   btn.disabled=true; btn.textContent='保存中...';
   const payload={sheet:'生徒面談',date:getDateStr(sState),name:v('name')||'お子様',school:v('school'),grade:sState.grade,checks:[...sState.checks].join(','),enjoy:v('enjoy'),life_memo:v('life_memo'),attitude:sState.attitude,strong:v('strong'),weak:v('weak_sub'),result:sState.result,study_memo:v('study_memo'),career_interest:sState.career_interest,target:v('target'),career_memo:v('career_memo'),good:v('good'),policy:v('policy'),note:v('note'),report:generatedReport};
   try{
-    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    await postToGas(payload);
     msg.innerHTML='<div class="success-msg">スプレッドシートに保存しました！</div>';
     btn.textContent='保存済み';
   }catch(e){
@@ -1104,7 +1183,7 @@ async function saveParentToSheet(){
   btn.disabled=true; btn.textContent='保存中...';
   const payload={sheet:'保護者面談',date:getDateStr(pState),name:v('p-name'),school:v('p-school'),grade:pState.p_grade,relation:pState.p_relation,rhythm:pState.p_rhythm,checks:[...pState.checks].join(','),home_memo:v('p-home-memo'),request_memo:v('p-request-memo'),proposal_memo:v('p-proposal-memo'),impression:v('p-impression'),action:v('p-action'),memo:generatedParentMemo};
   try{
-    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    await postToGas(payload);
     msg.innerHTML='<div class="success-msg">スプレッドシートに保存しました！</div>';
     btn.textContent='保存済み';
   }catch(e){
@@ -1138,7 +1217,7 @@ async function saveGrade(){
   const payload={sheet:'成績',date:new Date().toLocaleDateString('ja-JP'),name,school:v('g-school'),grade:gState.g_grade,test:['中1','中2','中3'].includes(gState.g_grade)&&gState.g_test?`${gState.g_grade}-${gState.g_test}`:gState.g_test,test_round:v('g-test-round'),...scores,total:count>0?total:'',class_rank:v('g-class-rank'),grade_rank:v('g-grade-rank'),'国語偏差値':v('g-hensa-ko'),'数学偏差値':v('g-hensa-su'),'英語偏差値':v('g-hensa-ei'),'理科偏差値':v('g-hensa-ri'),'社会偏差値':v('g-hensa-sh'),'3科偏差値':v('g-hensa-3k'),'5科偏差値':v('g-hensa-5k'),comment:v('g-comment')};
 
   try{
-    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    await postToGas(payload);
     msg.innerHTML='<div class="success-msg">スプレッドシートに保存しました！</div>';
     btn.textContent='保存済み';
   }catch(e){
@@ -1156,7 +1235,7 @@ async function searchKarte(){
   area.innerHTML='<div class="loading">データを取得中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
   try{
     const q='/api/karte?name='+encodeURIComponent(name)+(karteSchool?'&school='+encodeURIComponent(karteSchool):'');
-    const res=await fetch(q);
+    const res=await authFetch(q);
     if(!res.ok)throw new Error('HTTP '+res.status);
     karteData=await res.json();
     renderKarte(karteData,name);
@@ -1181,7 +1260,7 @@ async function refreshKarteStudents(){
   try{
     let url='/api/karte?action=listStudents&school='+encodeURIComponent(school);
     if(grade)url+='&grade='+encodeURIComponent(grade);
-    const res=await fetch(url);
+    const res=await authFetch(url);
     const data=await res.json();
     const students=data.students||[];
     const label=grade?`${grade}・${students.length}名`:students.length+'名';
@@ -1475,7 +1554,7 @@ async function saveKarteToSheet(name){
   const today=new Date().toLocaleDateString('ja-JP');
   const payload={sheet:'カルテ',date:today,name,karte:generatedKarte};
   try{
-    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    await postToGas(payload);
     msg.innerHTML='<div class="success-msg">カルテをシートに保存しました！</div>';
   }catch(e){
     msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
@@ -1499,7 +1578,7 @@ async function saveTargetSchools(){
   btn.disabled=true; btn.textContent='保存中...';
   const payload={sheet:'志望校',date:new Date().toLocaleDateString('ja-JP'),name,school:v('g-school'),grade:gState.g_grade,school1:v('g-school1'),school2:v('g-school2'),school3:v('g-school3'),school4:v('g-school4')};
   try{
-    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    await postToGas(payload);
     msg.innerHTML='<div class="success-msg">志望校を保存しました！</div>';
     btn.textContent='保存済み';
   }catch(e){
@@ -1536,7 +1615,7 @@ async function saveReportCard(){
     });
   });
   try{
-    await fetch(GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    await postToGas(payload);
     msg.innerHTML='<div class="success-msg">通知表を保存しました！</div>';
     btn.textContent='保存済み';
   }catch(e){
@@ -1641,11 +1720,7 @@ async function saveAudioToSheet() {
   const payload = { sheet: '音声記録', date: today, name: v('a-name') || '', school: v('a-school') || '', type: typeLabel, summary: generatedAudioSummary };
   const msg = document.getElementById('audio-sheet-msg');
   try {
-    await fetch(GAS_URL, {
-      method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    await postToGas(payload);
     msg.innerHTML = '<div class="success-msg">シートに保存しました！</div>';
   } catch (e) {
     msg.innerHTML = '<div class="error-msg">保存に失敗しました。</div>';

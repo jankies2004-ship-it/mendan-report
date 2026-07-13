@@ -1,5 +1,8 @@
+import { checkAuth } from './_auth.js';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).end(); return; }
+  if (!checkAuth(req, res)) return;
 
   const { prompt } = req.body;
   if (!prompt) { res.status(400).json({ error: 'prompt required' }); return; }
