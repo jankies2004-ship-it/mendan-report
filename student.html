@@ -49,32 +49,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 .tab-btns{display:flex;gap:6px;margin-bottom:12px}
 .tab-btn{flex:1;padding:8px;background:#f5f5f0;border:1px solid #ddd;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:#555;transition:background 0.15s}
 .tab-btn.active{background:#185FA5;color:#fff;border-color:#185FA5}
-
-/* Login Gate */
-#login-gate{position:fixed;inset:0;background:#f5f5f0;display:flex;align-items:center;justify-content:center;z-index:9999;padding:1rem}
-#login-gate .login-box{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:2rem 1.75rem;width:100%;max-width:340px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
-#login-gate h1{font-size:17px;font-weight:600;color:#222;margin-bottom:6px}
-#login-gate p{font-size:13px;color:#666;margin-bottom:1.25rem}
-#login-gate input[type=password]{width:100%;font-size:15px;padding:11px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit;margin-bottom:0.75rem}
-#login-gate input[type=password]:focus{border-color:#378ADD}
-#login-gate button{width:100%;padding:12px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
-#login-gate button:disabled{background:#aaa;cursor:not-allowed}
-#login-gate .login-error{color:#991b1b;font-size:13px;margin-top:0.5rem}
 </style>
 </head>
 <body>
-<div id="login-gate">
-  <div class="login-box">
-    <h1>ログイン</h1>
-    <p>共有パスワードを入力してください。</p>
-    <form id="login-form" onsubmit="return handleLogin(event)">
-      <input type="password" id="login-password" placeholder="パスワード" autocomplete="current-password" autofocus>
-      <button type="submit" id="login-btn">ログイン</button>
-      <div id="login-error" class="login-error"></div>
-    </form>
-  </div>
-</div>
-<div class="app" id="main-app" style="display:none">
+<div class="app">
   <div class="header">
     <h1>成績入力フォーム</h1>
     <p>テスト結果・通知表・志望校を入力して、それぞれ「保存」ボタンを押してください。</p>
@@ -234,55 +212,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 
 </div>
 <script>
-// ===== Auth =====
-function getAuthToken(){ return localStorage.getItem('authToken') || ''; }
-
-async function authFetch(url, opts){
-  const headers = Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+getAuthToken()}, (opts&&opts.headers)||{});
-  const res = await fetch(url, Object.assign({}, opts, {headers}));
-  if(res.status===401){ handleAuthFailure(); throw new Error('認証が切れました。再度ログインしてください。'); }
-  return res;
-}
-
 async function postToGas(payload){
-  const res = await authFetch('/api/save', {method:'POST', body: JSON.stringify(payload)});
+  const res = await fetch('/api/save-public', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
   return res.json();
 }
-
-function handleAuthFailure(){
-  localStorage.removeItem('authToken');
-  document.getElementById('main-app').style.display='none';
-  document.getElementById('login-gate').style.display='flex';
-}
-
-async function handleLogin(ev){
-  ev.preventDefault();
-  const pw = document.getElementById('login-password').value;
-  const btn = document.getElementById('login-btn');
-  const err = document.getElementById('login-error');
-  err.textContent='';
-  btn.disabled=true; btn.textContent='確認中...';
-  try{
-    const res = await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
-    const data = await res.json();
-    if(!res.ok || !data.token){ throw new Error(data.error||'ログインに失敗しました'); }
-    localStorage.setItem('authToken', data.token);
-    document.getElementById('login-gate').style.display='none';
-    document.getElementById('main-app').style.display='block';
-  }catch(e){
-    err.textContent = e.message;
-  }finally{
-    btn.disabled=false; btn.textContent='ログイン';
-  }
-  return false;
-}
-
-(function checkAuthOnLoad(){
-  if(getAuthToken()){
-    document.getElementById('login-gate').style.display='none';
-    document.getElementById('main-app').style.display='block';
-  }
-})();
 
 function v(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
 
