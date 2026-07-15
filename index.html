@@ -693,6 +693,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
     <!-- 志望校 -->
     <div class="card" style="margin-top:1.5rem">
       <div class="card-title">志望校（任意）</div>
+      <div class="field"><label>調査月</label>
+        <select id="g-school-month" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit">
+          <option value="">-- 月を選択 --</option>
+          <option>4月</option><option>5月</option><option>6月</option><option>7月</option><option>8月</option><option>9月</option><option>10月</option><option>11月</option><option>12月</option><option>1月</option><option>2月</option>
+        </select>
+      </div>
       <div class="field"><label>第一志望</label><input type="text" id="g-school1" placeholder="例：○○高校" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit"></div>
       <div class="field"><label>第二志望</label><input type="text" id="g-school2" placeholder="" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit"></div>
       <div class="field"><label>第三志望</label><input type="text" id="g-school3" placeholder="" style="width:100%;font-size:14px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit"></div>
@@ -1010,6 +1016,14 @@ function selectRadio(field,val,el){
 }
 
 function v(id){return(document.getElementById(id)||{}).value||'';}
+
+const MONTH_ORDER={'4月':1,'5月':2,'6月':3,'7月':4,'8月':5,'9月':6,'10月':7,'11月':8,'12月':9,'1月':10,'2月':11};
+function monthLabelFromDate(s){
+  if(!s) return '';
+  const d=new Date(s);
+  if(isNaN(d.getTime())) return '';
+  return (d.getMonth()+1)+'月';
+}
 
 // ===== 生徒面談 steps =====
 function goStep(n){
@@ -1411,19 +1425,17 @@ function renderKarte(data,name){
   }
 
   // 志望校
-  const monthOrd={'4月':1,'5月':2,'6月':3,'7月':4,'8月':5,'9月':6,'10月':7,'11月':8,'12月':9,'1月':10,'2月':11};
-  const targets=(data.target||[]).sort((a,b)=>{
-    const am=monthOrd[a['月']]||0,bm=monthOrd[b['月']]||0;
-    if(am&&bm) return bm-am;
-    return (b.date||'').localeCompare(a.date||'');
+  const targets=(data.target||[]).map(t=>({...t,_mon:t['調査月']||monthLabelFromDate(t.date)})).sort((a,b)=>{
+    const am=MONTH_ORDER[a._mon]||0,bm=MONTH_ORDER[b._mon]||0;
+    if(am!==bm) return bm-am;
+    return (new Date(b.date||0)).getTime()-(new Date(a.date||0)).getTime();
   });
   const targetsWithData=targets.filter(t=>[t['第一志望'],t['第二志望'],t['第三志望'],t['第四志望']].some(Boolean));
   if(targetsWithData.length){
     html+=`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>志望校</div><div class="card-body hidden">`;
     targetsWithData.forEach((t,idx)=>{
-      const mon=t['月']||'';
-      const d=t.date||'';
-      const timeLabel=mon?`${mon}時点`:(d?`${d} 時点`:'');
+      const mon=t._mon||'';
+      const timeLabel=mon?`${mon}時点`:'';
       const label=idx===0?`<span style="font-size:11px;background:#1D9E75;color:#fff;border-radius:4px;padding:1px 6px;margin-left:6px">最新</span>`:'';
       html+=`<div style="margin-bottom:${idx<targetsWithData.length-1?'16px':'0'}">`;
       html+=`<div style="font-size:12px;color:#888;margin-bottom:6px;font-weight:600">${timeLabel}${label}</div>`;
@@ -1507,9 +1519,12 @@ async function generateKarte(name){
     }).filter(Boolean).join(' | ');
     return lines?`[${r.date||''}] ${lines}`:'';
   }).filter(Boolean).join('\n');
-  const _mo={'4月':1,'5月':2,'6月':3,'7月':4,'8月':5,'9月':6,'10月':7,'11月':8,'12月':9,'1月':10,'2月':11};
-  const tm=(d.target||[]).sort((a,b)=>{const am=_mo[a['月']]||0,bm=_mo[b['月']]||0;if(am&&bm)return bm-am;return (b.date||'').localeCompare(a.date||'');});
-  const tv=tm.length?[tm[0]['第一志望'],tm[0]['第二志望'],tm[0]['第三志望'],tm[0]['第四志望']].filter(Boolean).map((s,i)=>`第${i+1}志望:${s}`).join(' ')+(tm[0]['月']?`（${tm[0]['月']}時点）`:''):'記録なし';
+  const tm=(d.target||[]).map(t=>({...t,_mon:t['調査月']||monthLabelFromDate(t.date)})).sort((a,b)=>{
+    const am=MONTH_ORDER[a._mon]||0,bm=MONTH_ORDER[b._mon]||0;
+    if(am!==bm) return bm-am;
+    return (new Date(b.date||0)).getTime()-(new Date(a.date||0)).getTime();
+  });
+  const tv=tm.length?[tm[0]['第一志望'],tm[0]['第二志望'],tm[0]['第三志望'],tm[0]['第四志望']].filter(Boolean).map((s,i)=>`第${i+1}志望:${s}`).join(' ')+(tm[0]._mon?`（${tm[0]._mon}時点）`:''):'記録なし';
 
   const prompt=`あなたは学習塾「エイメイ学院」のベテラン講師です。以下の記録をもとに、${name}さんの総合的な生徒カルテ文を作成してください。
 
@@ -1576,7 +1591,7 @@ async function saveTargetSchools(){
   const name=v('g-name');
   if(!name){msg.innerHTML='<div class="error-msg">生徒名を入力してください</div>';return;}
   btn.disabled=true; btn.textContent='保存中...';
-  const payload={sheet:'志望校',date:new Date().toLocaleDateString('ja-JP'),name,school:v('g-school'),grade:gState.g_grade,school1:v('g-school1'),school2:v('g-school2'),school3:v('g-school3'),school4:v('g-school4')};
+  const payload={sheet:'志望校',date:new Date().toLocaleDateString('ja-JP'),name,school:v('g-school'),grade:gState.g_grade,month:v('g-school-month'),school1:v('g-school1'),school2:v('g-school2'),school3:v('g-school3'),school4:v('g-school4')};
   try{
     await postToGas(payload);
     msg.innerHTML='<div class="success-msg">志望校を保存しました！</div>';

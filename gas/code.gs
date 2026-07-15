@@ -36,13 +36,27 @@ function canonicalSchool(school) {
   return SCHOOL_ALIASES[s] || s;
 }
 
+// みずほ台の2校舎(エイメイ学院/Luce個別指導)は、生徒検索・カルテ閲覧で
+// どちらの校舎を選んでも両方の生徒が表示されるようにするグループ分け。
+const SCHOOL_GROUPS = {
+  'みずほ台校舎': ['みずほ台校舎', 'みずほ台校舎（Luce）'],
+  'みずほ台校舎（Luce）': ['みずほ台校舎', 'みずほ台校舎（Luce）']
+};
+
+function schoolMatches_(rowSchool, filterSchool) {
+  if (!filterSchool) return true;
+  if (rowSchool === filterSchool) return true;
+  const group = SCHOOL_GROUPS[filterSchool];
+  return !!group && group.indexOf(rowSchool) !== -1;
+}
+
 const HEADERS = {
   '生徒面談': ['日付','生徒名','校舎名','学年','チェック項目','楽しいこと','生活メモ','授業態度','得意科目','苦手科目','成績推移','勉強メモ','進路関心度','志望校','進路メモ','いいところ','指導方針','特記事項','報告文'],
   '保護者面談': ['日付','生徒名','校舎名','学年','続柄','生活リズム','チェック項目','家庭メモ','相談・要望メモ','塾の提案','保護者印象','次回アクション','まとめ文'],
   '成績': ['日付','生徒名','校舎名','学年','テスト名','北辰実施回','国語','数学','英語','理科','社会','合計','クラス順位','学年順位','国語偏差値','数学偏差値','英語偏差値','理科偏差値','社会偏差値','3科偏差値','5科偏差値','コメント'],
   'カルテ': ['日付','生徒名','校舎名','カルテ文'],
   '音声記録': ['日付','生徒名','校舎名','種類','まとめ文'],
-  '志望校': ['日付','生徒名','校舎名','学年','月','第一志望','第二志望','第三志望','第四志望'],
+  '志望校': ['日付','生徒名','校舎名','学年','調査月','第一志望','第二志望','第三志望','第四志望'],
   '通知表': ['日付','生徒名','校舎名','学年',
     '中1_国語_1学期','中1_国語_2学期','中1_国語_3学期','中1_国語_年',
     '中1_数学_1学期','中1_数学_2学期','中1_数学_3学期','中1_数学_年',
@@ -175,7 +189,7 @@ function doPost(e) {
       rowData['まとめ文'] = data.summary || '';
     } else if (sheet_name === '志望校') {
       rowData['学年'] = data.grade || '';
-      rowData['月'] = data.month || '';
+      rowData['調査月'] = data.month || '';
       rowData['第一志望'] = data.school1 || '';
       rowData['第二志望'] = data.school2 || '';
       rowData['第三志望'] = data.school3 || '';
@@ -234,7 +248,7 @@ function getStudentsBySchool(e) {
       const rowSchool = canonicalSchool(schoolIdx >= 0 ? String(rows[i][schoolIdx] || '') : '');
       const rowGrade  = gradeIdx >= 0 ? String(rows[i][gradeIdx] || '').trim() : '';
       if (!rowName) continue;
-      if (school && rowSchool !== school) continue;
+      if (!schoolMatches_(rowSchool, school)) continue;
       if (grade && rowGrade !== grade) continue;
       names.add(rowName);
     }
@@ -262,7 +276,7 @@ function getStudentData(e) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
       const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
-      if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
+      if (rowName === name.trim() && schoolMatches_(rowSchool, school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
         // 英語キーエイリアス
@@ -284,7 +298,7 @@ function getStudentData(e) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
       const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
-      if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
+      if (rowName === name.trim() && schoolMatches_(rowSchool, school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
         entry.date          = entry['日付'];
@@ -311,7 +325,7 @@ function getStudentData(e) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
       const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
-      if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
+      if (rowName === name.trim() && schoolMatches_(rowSchool, school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
         entry.date         = entry['日付'];
@@ -334,7 +348,7 @@ function getStudentData(e) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
       const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
-      if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
+      if (rowName === name.trim() && schoolMatches_(rowSchool, school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
         entry.date    = entry['日付'];
@@ -354,7 +368,7 @@ function getStudentData(e) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
       const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
-      if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
+      if (rowName === name.trim() && schoolMatches_(rowSchool, school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
         entry.date = entry['日付'];
@@ -372,7 +386,7 @@ function getStudentData(e) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
       const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
-      if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
+      if (rowName === name.trim() && schoolMatches_(rowSchool, school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
         entry.date = entry['日付'];
@@ -390,7 +404,7 @@ function getStudentData(e) {
       const row = rows[i];
       const rowName = String(row[headers.indexOf('生徒名')] || '').trim();
       const rowSchool = canonicalSchool(String(row[headers.indexOf('校舎名')] || ''));
-      if (rowName === name.trim() && (!school || rowSchool === school.trim())) {
+      if (rowName === name.trim() && schoolMatches_(rowSchool, school.trim())) {
         const entry = {};
         headers.forEach((h, idx) => { entry[h] = row[idx]; });
         entry.date  = entry['日付'];
@@ -457,6 +471,7 @@ function onOpen() {
     .addSeparator()
     .addItem('志望校入力シートを初期化', 'setupTargetSchoolInputSheet')
     .addItem('志望校を一括転記', 'bulkImportTargetSchools')
+    .addItem('志望校の月を日付から補完', 'backfillTargetSchoolMonth')
     .addToUi();
 }
 
@@ -795,7 +810,7 @@ function bulkImportTargetSchools() {
       '生徒名': String(row[nameIdx] || '').trim(),
       '校舎名': canonicalSchool(String(row[headers.indexOf('校舎名')] || '')),
       '学年': row[headers.indexOf('学年')] || '',
-      '月': row[headers.indexOf('月')] || '',
+      '調査月': row[headers.indexOf('月')] || '',
       '第一志望': row[headers.indexOf('第一志望')] || '',
       '第二志望': row[headers.indexOf('第二志望')] || '',
       '第三志望': row[headers.indexOf('第三志望')] || '',
@@ -808,6 +823,38 @@ function bulkImportTargetSchools() {
   }
 
   SpreadsheetApp.getUi().alert(count + '件を志望校シートに転記しました。');
+}
+
+function backfillTargetSchoolMonth() {
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName('志望校');
+  if (!sheet) {
+    SpreadsheetApp.getUi().alert('「志望校」シートが見つかりません。');
+    return;
+  }
+
+  const rows = sheet.getDataRange().getValues();
+  const headers = rows[0];
+  const dateIdx = headers.indexOf('日付');
+  const monthIdx = headers.indexOf('調査月');
+  if (dateIdx === -1 || monthIdx === -1) {
+    SpreadsheetApp.getUi().alert('「志望校」シートのヘッダーに「日付」または「調査月」列が見つかりません。');
+    return;
+  }
+
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  let count = 0;
+  for (let i = 1; i < rows.length; i++) {
+    const existing = String(rows[i][monthIdx] || '').trim();
+    if (existing) continue;
+    const dateVal = rows[i][dateIdx];
+    const d = (dateVal instanceof Date) ? dateVal : new Date(dateVal);
+    if (isNaN(d.getTime())) continue;
+    sheet.getRange(i + 1, monthIdx + 1).setValue(monthNames[d.getMonth()]);
+    count++;
+  }
+
+  SpreadsheetApp.getUi().alert(count + '件の「月」を日付から補完しました。');
 }
 
 function bulkImportGrades() {
