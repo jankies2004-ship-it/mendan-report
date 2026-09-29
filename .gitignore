@@ -1,3 +1,6 @@
 .vercel
 .env*.local
 .env.prod
+# テスト環境（テスト用GASのclasp設定・秘密情報・一時ファイル）
+.clasp.test.json
+.test-env/
