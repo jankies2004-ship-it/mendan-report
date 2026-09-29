@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   try {
     // action を付けるとGAS側で指導記録などの処理に振り分けられるため、ここでは必ず除去する
     // （GAS側でも合言葉 SHIDO_KEY がない呼び出しは拒否する）
-    const { action, shidoKey, ...body } = req.body;
+    const { action, shidoAction, shidoKey, ...body } = req.body;
     const payload = { ...body, token: process.env.AUTH_TOKEN };
     const gasRes = await fetch(GAS_URL, {
       method: 'POST',

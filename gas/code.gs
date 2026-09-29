@@ -122,8 +122,9 @@ function doPost(e) {
     if (!isAuthorized_(data.token)) {
       return ContentService.createTextOutput(JSON.stringify({ error: 'unauthorized' })).setMimeType(ContentService.MimeType.JSON);
     }
-    // 指導記録などの新機能は action で振り分ける（gas/shido.gs）
-    if (data.action) return handleShidoPost_(data);
+    // 指導記録などの新機能は shidoAction で振り分ける（gas/shido.gs）。
+    // 既存の保護者面談は「次回アクション」を action というキーで送るため、action では判定しない
+    if (data.shidoAction) return handleShidoPost_(data);
     const sheet_name = data.sheet;
     if (!HEADERS[sheet_name]) {
       return ContentService.createTextOutput(JSON.stringify({ error: 'unknown sheet' })).setMimeType(ContentService.MimeType.JSON);

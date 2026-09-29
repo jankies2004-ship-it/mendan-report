@@ -23,12 +23,13 @@ export default async function handler(req, res) {
       return;
     }
     if (req.method === 'POST') {
-      const action = req.body && req.body.action;
+      const { action, shidoAction: _a, shidoKey: _k, token: _t, ...rest } = req.body || {};
       if (!POST_ACTIONS.includes(action)) { res.status(400).json({ error: 'unknown action' }); return; }
+      // GAS側では既存の保存（保護者面談の action=次回アクション）と区別するため shidoAction で送る
       const gasRes = await fetch(GAS_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...req.body, token: process.env.AUTH_TOKEN, shidoKey })
+        body: JSON.stringify({ ...rest, shidoAction: action, token: process.env.AUTH_TOKEN, shidoKey })
       });
       const text = await gasRes.text();
       let data;

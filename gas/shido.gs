@@ -223,8 +223,8 @@ function listStudentsDetailed_(school) {
 function handleShidoPost_(data) {
   try {
     if (!isShidoKeyValid_(data.shidoKey)) return jsonOut_({ error: 'unauthorized' });
-    if (data.action === 'saveShidoRecords') return jsonOut_(saveShidoRecords_(data.records));
-    if (data.action === 'saveProgress') return jsonOut_(saveProgress_(data.progress));
+    if (data.shidoAction === 'saveShidoRecords') return jsonOut_(saveShidoRecords_(data.records));
+    if (data.shidoAction === 'saveProgress') return jsonOut_(saveProgress_(data.progress));
     return jsonOut_({ error: 'unknown action' });
   } catch (err) {
     return jsonOut_({ error: err.message });
