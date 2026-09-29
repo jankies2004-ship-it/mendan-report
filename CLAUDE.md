@@ -1,10 +1,10 @@
 # エイメイ学院 生徒カルテ — CLAUDE.md
 
 ## スタック
-- **フロントエンド**: `index.html`（単一ファイル、2502行、フレームワークなし） / `student.html`（成績単体入力フォーム、313行）
+- **フロントエンド**: `index.html`（単一ファイル、2903行、フレームワークなし） / `student.html`（成績単体入力フォーム、313行）
 - **バックエンド**: Google Apps Script（スプレッドシートDB、`clasp` で `gas/` を push）
   - `gas/code.gs`（1233行）— 既存機能（面談・成績・カルテ・通知表・志望校、取り込み処理）
-  - `gas/shido.gs`（287行）— 指導記録・マスタ・進度（新機能は action で振り分け）
+  - `gas/shido.gs`（443行）— 指導記録・マスタ・進度・カルテ用データ（新機能は action で振り分け）
 - **API中継（Vercel）**: `api/*.js`
   - `_auth.js` 共通認証 / `_gas.js` GAS_URL取得（**未設定ならエラー。本番URLへのフォールバックはしない**）
   - `save.js`（既存シートへの追記）/ `karte.js`（生徒一覧・カルテ取得）/ `shido.js`（指導系。許可した action のみ中継）
@@ -43,29 +43,39 @@
 - 保存は記録ID（ブラウザ側で生成、行ごとに固定）で重複排除 → 通信失敗後の再送でも二重登録しない。1件でも不正なら全件保存しない
 - 「順調」の記録はタグ・対応・メモを保存しない
 - 先頭が `= + - @` の文字列は `safeCell_` で数式化を防ぐ
-- 「気になる」連続回数・「順調」連続回数は **生徒×教科** 単位で数える（Phase 2以降）
+- **生徒の同一判定は「空白を除いた生徒名＋校舎グループ」**（`studentKey_` / `studentKeyOf`）。学年は表示用で、判定・集計に使わない（進級しても記録は分断されない）
+- 校舎グループ：みずほ台校舎 と みずほ台校舎（Luce）は同じ校舎として扱う（`SCHOOL_GROUPS` / `SK_SCHOOL_GROUPS`）
+- 指導記録に保存する学年は、絞り込みの学年ではなく記録上の最新の学年
+- 「気になる」連続回数・「順調」連続回数は **生徒×教科** 単位で、最新の記録からさかのぼって数える。最終記録から14日以上空いた教科はカルテで⚠表示
+- 進度は1生徒×1教科で1行。同じ生徒（同一判定キー）×教科なら上書きし、生徒名の元の表記は残す
 - 新規画面の表示は必ず `esc()` でエスケープする
 
 ## index.html 主要関数と行番号
 | 関数 | 行 | 役割 |
 |---|---|---|
-| `initCal` | 1064 | カレンダー初期化（存在する要素のみ描画） |
-| `switchTab` / `switchGroup` | 1148 / 1143 | タブ切替。指導系/面談系の2グループ、カルテは両方に配置。最終タブを localStorage に保存 |
-| `generateReport` | 1242 | 生徒面談の報告文生成 |
-| `generateParentMemo` | 1306 | 保護者面談まとめ文生成 |
-| `saveGrade` | 1376 | テスト成績をGASに保存 |
-| `toggleCard` | 1457 | カルテ各セクションの折りたたみ制御 |
-| `renderKarte` | 1463 | カルテ画面HTML生成（成績/通知表/志望校/タイムライン） |
-| `generateKarte` | 1650 | AIカルテ文生成（Claude API呼び出し） |
-| `saveTargetSchools` | 1746 | 志望校をGASに保存 |
-| `saveReportCard` | 1772 | 通知表をGASに保存 |
-| `generateAudioSummary` | 1821 | テキストまとめ生成 |
-| `skEnsureLoaded` | 1985 | 指導記録タブの初期化（下書き復元・マスタ/生徒一覧取得） |
-| `skLoadDraft` | 1953 | 下書き（localStorage `shidoDraft_v1`）の復元 |
-| `skRenderList` / `skRowHtml` | 2101 / 2118 | 生徒一覧・各行（出席/状態/来室回数/気になる詳細） |
-| `skOnListClick` | 2155 | 一覧の操作（イベント委譲、`data-act`） |
-| `skConfirmSave` / `skDoSave` | 2241 / 2260 | 確認モーダル → まとめて保存 |
-| `showA4Preview` | 2298 | A4印刷プレビュー生成 |
+| `initCal` | 1125 | カレンダー初期化（存在する要素のみ描画） |
+| `switchTab` / `switchGroup` | 1209 / 1204 | タブ切替。指導系/面談系の2グループ、カルテは両方に配置。最終タブを localStorage に保存 |
+| `generateReport` | 1304 | 生徒面談の報告文生成 |
+| `generateParentMemo` | 1368 | 保護者面談まとめ文生成 |
+| `saveGrade` | 1438 | テスト成績をGASに保存 |
+| `searchKarte` | 1464 | カルテ取得（既存データ＋指導記録・進度を並行取得。指導側の失敗は既存表示に影響させない） |
+| `toggleCard` | 1523 | カルテ各セクションの折りたたみ制御 |
+| `renderKarte` | 1529 | カルテ画面HTML生成（指導の状況/成績/成績グラフ/通知表/志望校/タイムライン） |
+| `generateKarte` | 1723 | AIカルテ文生成（Claude API呼び出し） |
+| `saveTargetSchools` | 1819 | 志望校をGASに保存 |
+| `saveReportCard` | 1845 | 通知表をGASに保存 |
+| `generateAudioSummary` | 1894 | テキストまとめ生成 |
+| `skLoadDraft` | 2026 | 下書き（localStorage `shidoDraft_v1`）の復元 |
+| `skEnsureLoaded` | 2058 | 指導記録タブの初期化（下書き復元・マスタ/生徒一覧取得） |
+| `skRenderList` / `skRowHtml` | 2174 / 2191 | 生徒一覧・各行（出席/状態/来室回数/気になる詳細） |
+| `skOnListClick` | 2228 | 一覧の操作（イベント委譲、`data-act`） |
+| `skConfirmSave` / `skDoSave` | 2314 / 2333 | 確認モーダル → まとめて保存 |
+| `pgEnsureLoaded` / `pgRender` / `pgSave` | 2388 / 2455 / 2497 | 進度タブ（校舎→生徒→教科→保存） |
+| `shidoSubjectStats` | 2526 | 教科ごとの連続回数・最終記録・来室合計 |
+| `renderShidoKarte` | 2539 | カルテの「指導の状況」カード群（進度・直近5件・教科ごとの状況・タグ・来室） |
+| `karteVisitsHtml` | 2617 | 来室回数の棒グラフ（SVG、タップで詳細） |
+| `renderGradeCharts` | 2680 | 成績の推移グラフ（定期テスト合計・北辰5科偏差値を別グラフ） |
+| `showA4Preview` | 2699 | A4印刷プレビュー生成（指導記録はまだ含まない） |
 
 ## gas 主要関数
 | 関数 | ファイル:行 | 役割 |
@@ -75,10 +85,14 @@
 | `getStudentData` | code.gs:265 | 生徒名で全シートを横断検索してJSON返却 |
 | `resetNoticeSheet` | code.gs:487 | 通知表シートを正しいヘッダーで再作成 |
 | `bulkImportGrades` | code.gs:869 | 成績入力シートから成績シートへ一括転記 |
-| `setupShidoSheets` | shido.gs:95 | 指導系4シートを作成（既存シートは変更しない） |
-| `getShidoMasters_` | shido.gs:131 | タグ（教科別・表示順）と講師の一覧 |
-| `listStudentsDetailed_` | shido.gs:164 | 校舎の生徒一覧（表記ゆれ統合・学年一覧・最新学年） |
-| `saveShidoRecords_` | shido.gs:242 | 指導記録のまとめ保存（検証・ロック・記録ID重複排除） |
+| `studentKey_` | shido.gs:55 | 生徒の同一判定キー（正規化名＋校舎グループ） |
+| `setupShidoSheets` | shido.gs:107 | 指導系4シートを作成（既存シートは変更しない） |
+| `isShidoKeyValid_` | shido.gs:134 | 合言葉 SHIDO_KEY の照合（未設定なら常に拒否） |
+| `getShidoMasters_` | shido.gs:153 | タグ（教科別・表示順）と講師の一覧 |
+| `listStudentsDetailed_` | shido.gs:186 | 校舎の生徒一覧（表記ゆれ統合・学年一覧・最新学年） |
+| `saveShidoRecords_` | shido.gs:266 | 指導記録のまとめ保存（検証・ロック・記録ID重複排除） |
+| `getStudentShido_` | shido.gs:315 | 生徒1人分の指導記録（指導日順）と進度 |
+| `saveProgress_` | shido.gs:389 | 進度の保存（同一生徒×教科は上書き） |
 
 ## CSS主要クラス（index.html L30〜）
 - `.card` / `.card-title` / `.card-body` / `.card-toggle` — カルテカード折りたたみUI
@@ -87,3 +101,5 @@
 - `.nc-grade-btn` — 通知表タブボタン
 - `.group-nav` / `.group-btn` — 指導系/面談系の切替（L280〜）
 - `.sk-*` — 指導記録画面（L285〜）。タップ領域は最小40〜44px
+- `.pg-*` / `.days-chip` — 進度画面（L339〜）
+- `.kt-*` / `.chart-*` — カルテの指導の状況・グラフ（L353〜）。グラフは1系列=青 #378ADD（折れ線は #185FA5）、気になる=#D97706、凡例あり

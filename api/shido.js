@@ -3,8 +3,8 @@
 import { checkAuth } from './_auth.js';
 import { getGasUrl } from './_gas.js';
 
-const GET_ACTIONS = ['getShidoMasters', 'listStudentsDetailed'];
-const POST_ACTIONS = ['saveShidoRecords'];
+const GET_ACTIONS = ['getShidoMasters', 'listStudentsDetailed', 'getStudentShido'];
+const POST_ACTIONS = ['saveShidoRecords', 'saveProgress'];
 
 export default async function handler(req, res) {
   if (!checkAuth(req, res)) return;

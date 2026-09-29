@@ -336,6 +336,49 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 .sk-modal-actions button{flex:1;min-height:48px;border-radius:10px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer}
 .sk-worry-mark{color:#B45309;font-weight:700}
 
+/* 進度 */
+.pg-list{display:flex;flex-direction:column;gap:8px}
+.pg-item{display:block;width:100%;text-align:left;border:1px solid #e5e5e5;border-radius:10px;padding:10px 12px;background:#fff;font-family:inherit;cursor:pointer;min-height:44px}
+.pg-item:hover{background:#f8f8f5}
+.pg-item.selected{border-color:#378ADD;background:#F7FBFF}
+.pg-item-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pg-subj{font-size:15px;font-weight:700;color:#222}
+.pg-unit{font-size:13px;color:#444;margin-top:3px;line-height:1.5}
+.pg-meta{font-size:11px;color:#888;margin-top:3px}
+.pg-empty{font-size:13px;color:#999}
+.days-chip{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;background:#E6F1FB;color:#185FA5}
+.days-chip.soon{background:#FEF3C7;color:#854F0B}
+.days-chip.past{background:#f0f0f0;color:#888;font-weight:500}
+
+/* カルテ：指導の状況 */
+.kt-rec{border-left:3px solid #ddd;padding:6px 0 6px 12px;margin-bottom:10px}
+.kt-rec.worry{border-left-color:#D97706;background:#FFFBEB;border-radius:0 8px 8px 0;padding-right:8px}
+.kt-rec-head{font-size:12px;color:#666;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.kt-status{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:10px}
+.kt-status.ok{background:#EAF3DE;color:#0F6E56}
+.kt-status.ng{background:#FEF3C7;color:#854F0B}
+.kt-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.kt-chip{font-size:11px;padding:2px 8px;border-radius:10px;background:#f3f3ef;color:#444}
+.kt-chip.act{background:#E6F1FB;color:#185FA5}
+.kt-memo{font-size:13px;color:#333;margin-top:5px;line-height:1.6;white-space:pre-wrap}
+.kt-sub-row{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #f0f0f0;flex-wrap:wrap}
+.kt-sub-row:last-child{border-bottom:none}
+.kt-warn{color:#A32D2D;font-size:12px;font-weight:600}
+.kt-tagbar{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px}
+.kt-tagbar-name{flex:0 0 42%;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kt-tagbar-track{flex:1;height:10px;background:#f3f3ef;border-radius:5px;overflow:hidden}
+.kt-tagbar-fill{height:100%;background:#378ADD;border-radius:5px}
+.kt-tagbar-n{flex:0 0 28px;text-align:right;color:#555;font-weight:600}
+.kt-seg{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.kt-seg button{min-height:36px;padding:6px 12px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:12px;font-family:inherit;cursor:pointer;color:#555}
+.kt-seg button.selected{background:#185FA5;border-color:#185FA5;color:#fff;font-weight:600}
+/* 横スクロールの初期位置を右端（最新）にするため rtl。中身は ltr で描画 */
+.chart-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;direction:rtl}
+.chart-wrap svg{display:block;direction:ltr}
+.chart-tip{font-size:12px;color:#444;min-height:18px;margin-top:6px}
+.chart-legend{display:flex;gap:12px;font-size:11px;color:#666;margin-bottom:6px}
+.chart-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+
 /* Login Gate */
 #login-gate{position:fixed;inset:0;background:#f5f5f0;display:flex;align-items:center;justify-content:center;z-index:9999;padding:1rem}
 #login-gate .login-box{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:2rem 1.75rem;width:100%;max-width:340px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
@@ -444,9 +487,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
     <div id="sk-modal"></div>
   </div>
 
-  <!-- ===== 進度（Phase 2） ===== -->
+  <!-- ===== 進度 ===== -->
   <div id="screen-progress" class="screen">
-    <div class="empty-state">「進度」は準備中です</div>
+    <div class="card">
+      <div class="section-tag tag-study">進度</div>
+      <div class="field"><label>校舎</label><select id="pg-school" onchange="pgOnSchoolChange()"></select></div>
+      <div class="field">
+        <label>学年</label>
+        <select id="pg-grade" onchange="pgRenderStudentOptions()">
+          <option value="">すべての学年</option>
+          <optgroup label="小学生"><option>小1</option><option>小2</option><option>小3</option><option>小4</option><option>小5</option><option>小6</option></optgroup>
+          <optgroup label="中学生"><option>中1</option><option>中2</option><option>中3</option></optgroup>
+          <optgroup label="高校生・既卒"><option>高1</option><option>高2</option><option>高3</option><option>既卒</option></optgroup>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>生徒</label>
+        <select id="pg-student" onchange="pgOnStudentChange()"><option value="">-- 校舎を選択してください --</option></select>
+      </div>
+    </div>
+    <div id="pg-area"></div>
   </div>
 
   <!-- ===== 指導集計（Phase 3） ===== -->
@@ -1022,6 +1082,7 @@ async function handleLogin(ev){
     document.getElementById('login-gate').style.display='none';
     document.getElementById('main-app').style.display='block';
     if(document.getElementById('screen-shido').classList.contains('active'))skEnsureLoaded();
+    if(document.getElementById('screen-progress').classList.contains('active'))pgEnsureLoaded();
   }catch(e){
     err.textContent = e.message;
   }finally{
@@ -1154,6 +1215,7 @@ function switchTab(name){
   try{localStorage.setItem('lastTab',name);}catch(e){}
   window.scrollTo(0,0);
   if(name==='shido'&&getAuthToken())skEnsureLoaded();
+  if(name==='progress'&&getAuthToken())pgEnsureLoaded();
 }
 
 // ===== Shared helpers =====
@@ -1407,9 +1469,13 @@ async function searchKarte(){
   area.innerHTML='<div class="loading">データを取得中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
   try{
     const q='/api/karte?name='+encodeURIComponent(name)+(karteSchool?'&school='+encodeURIComponent(karteSchool):'');
+    const q2='/api/shido?action=getStudentShido&name='+encodeURIComponent(name)+(karteSchool?'&school='+encodeURIComponent(karteSchool):'');
+    // 指導記録の取得に失敗しても、既存のカルテは表示する
+    const shidoP=authFetch(q2).then(r=>r.json()).then(j=>j&&!j.error?j:null).catch(()=>null);
     const res=await authFetch(q);
     if(!res.ok)throw new Error('HTTP '+res.status);
     karteData=await res.json();
+    karteData.shido=await shidoP;
     renderKarte(karteData,name);
   }catch(e){
     area.innerHTML=`<div class="error-msg">データ取得に失敗しました。<br><small>${e.message}</small></div>`;
@@ -1462,10 +1528,13 @@ function toggleCard(title){
 
 function renderKarte(data,name){
   const area=document.getElementById('karte-area');
-  const hasData=(data.student&&data.student.length)||(data.parent&&data.parent.length)||(data.grade&&data.grade.length)||(data.audio&&data.audio.length)||(data.notice&&data.notice.length);
+  const hasShido=data.shido&&((data.shido.records||[]).length||(data.shido.progress||[]).length);
+  const hasData=(data.student&&data.student.length)||(data.parent&&data.parent.length)||(data.grade&&data.grade.length)||(data.audio&&data.audio.length)||(data.notice&&data.notice.length)||hasShido;
   if(!hasData){area.innerHTML=`<div class="empty-state">「${name}」の記録が見つかりませんでした。<br>氏名の表記を確認してください。</div>`;return;}
 
-  let html='';
+  // 指導の状況（進度・直近の指導記録・連続回数・つまずきタグ・来室回数）
+  karteShido=null;
+  let html=renderShidoKarte(data.shido);
 
   // 成績表
   const grades=data.grade||[];
@@ -1532,6 +1601,9 @@ function renderKarte(data,name){
       html+=`</table></div></div></div>`;
     }
   }
+
+  // 成績の推移（グラフ）
+  html+=renderGradeCharts(data.grade);
 
   // 通知表
   const ncSubjs=['国語','数学','英語','理科','社会','音楽','美術','保健体育','技術家庭'];
@@ -1645,6 +1717,7 @@ function renderKarte(data,name){
     <button class="a4-preview-btn" onclick="showA4Preview('${en}')" style="margin-top:1rem">A4でまとめを見る</button>
   </div><div id="karte-result-area"></div>`;
   area.innerHTML=html;
+  karteRenderShidoDynamic();
 }
 
 async function generateKarte(name){
@@ -1932,10 +2005,10 @@ function skRow(name){
 }
 function skIsDirty(r){return r.checked||r.status!=='順調'||r.visits!==1||r.tags.length||r.actions.length||r.memo;}
 function skChecked(){return Object.values(skState.rows).filter(r=>r.checked);}
+// 学年は表示用。絞り込みの学年ではなく、記録上の最新の学年を保存する（集計は生徒名＋校舎で行う）
 function skGradeFor(r){
   const s=skFindStudent(r.name);
-  if(!s)return r.grade||skState.grade||'';
-  return skState.grade&&s.grades.includes(skState.grade)?skState.grade:s.grade;
+  return s?s.grade:(r.grade||skState.grade||'');
 }
 
 // --- 下書き（ブラウザに自動保存） ---
@@ -2292,6 +2365,334 @@ async function skDoSave(rows){
     skRenderList();
     result.scrollIntoView({block:'nearest',behavior:'smooth'});
   }
+}
+
+// ===== 日付の共通処理（YYYY-MM-DD） =====
+function ymdToDate(s){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');return m?new Date(+m[1],+m[2]-1,+m[3]):null;}
+function daysFromToday(s){const d=ymdToDate(s);if(!d)return null;const t=new Date();t.setHours(0,0,0,0);return Math.round((d-t)/86400000);}
+function fmtMD(s){const d=ymdToDate(s);return d?`${d.getMonth()+1}/${d.getDate()}`:esc(s||'');}
+// 定期テストまでの残り日数の表示
+function testDaysChip(testDate){
+  const n=daysFromToday(testDate);
+  if(n===null)return '<span class="days-chip past">テスト日未設定</span>';
+  if(n<0)return `<span class="days-chip past">テスト終了（${-n}日前）</span>`;
+  if(n===0)return '<span class="days-chip soon">今日がテスト</span>';
+  return `<span class="days-chip${n<=7?' soon':''}">テストまであと${n}日</span>`;
+}
+// 生徒の同一判定キー（gas/shido.gs の studentKey_ と同じ規則）
+function studentKeyOf(name,school){const g=SK_SCHOOL_GROUPS[school];return skNorm(name)+'|'+(g?g[0]:school);}
+
+// ===== 進度 =====
+const pgState={school:'',students:[],student:'',progress:[],subject:'',inited:false,loadingFor:''};
+
+function pgEnsureLoaded(){
+  if(pgState.inited)return;
+  pgState.inited=true;
+  const sel=document.getElementById('pg-school');
+  sel.innerHTML=document.getElementById('karte-school').innerHTML;
+  // 指導記録タブで選んだ校舎を引き継ぐ
+  let school=skState.school;
+  if(!school){try{school=(JSON.parse(localStorage.getItem(SK_DRAFT_KEY)||'{}')||{}).school||'';}catch(e){}}
+  sel.value=school||'';
+  if(sel.value)pgOnSchoolChange();
+}
+
+async function pgOnSchoolChange(){
+  pgState.school=v('pg-school');
+  pgState.students=[];pgState.student='';pgState.progress=[];pgState.subject='';
+  document.getElementById('pg-area').innerHTML='';
+  const st=document.getElementById('pg-student');
+  if(!pgState.school){st.innerHTML='<option value="">-- 校舎を選択してください --</option>';return;}
+  st.innerHTML='<option value="">読み込み中...</option>';st.disabled=true;
+  const school=pgState.school;
+  try{
+    const res=await authFetch('/api/shido?action=listStudentsDetailed&school='+encodeURIComponent(school));
+    const data=await res.json();
+    if(data.error)throw new Error(data.error);
+    if(school!==pgState.school)return;
+    pgState.students=data.students||[];
+    pgRenderStudentOptions();
+  }catch(e){
+    st.innerHTML='<option value="">取得に失敗しました</option>';
+    document.getElementById('pg-area').innerHTML=`<div class="error-msg">生徒一覧の取得に失敗しました：${esc(e.message)}</div>`;
+  }finally{st.disabled=false;}
+}
+
+function pgRenderStudentOptions(){
+  const g=v('pg-grade');
+  const list=pgState.students.filter(s=>!g||s.grades.includes(g));
+  const st=document.getElementById('pg-student');
+  st.innerHTML=`<option value="">-- 生徒を選択（${list.length}名）--</option>`+
+    list.map(s=>`<option value="${esc(s.name)}">${esc(s.name)}${s.grade?`（${esc(s.grade)}）`:''}</option>`).join('');
+  st.value=list.some(s=>s.name===pgState.student)?pgState.student:'';
+}
+
+async function pgOnStudentChange(){
+  pgState.student=v('pg-student');
+  pgState.subject='';
+  await pgLoadProgress();
+}
+
+async function pgLoadProgress(){
+  const area=document.getElementById('pg-area');
+  const name=pgState.student,school=pgState.school;
+  if(!name){area.innerHTML='';return;}
+  area.innerHTML='<div class="loading">進度を読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
+  try{
+    const res=await authFetch('/api/shido?action=getStudentShido&name='+encodeURIComponent(name)+'&school='+encodeURIComponent(school));
+    const data=await res.json();
+    if(data.error)throw new Error(data.error);
+    if(name!==pgState.student||school!==pgState.school)return;
+    pgState.progress=data.progress||[];
+    pgRender();
+  }catch(e){
+    area.innerHTML=`<div class="error-msg">進度の取得に失敗しました：${esc(e.message)}</div>`;
+  }
+}
+
+function pgFind(subject){return pgState.progress.find(p=>p.subject===subject);}
+
+function pgRender(){
+  const area=document.getElementById('pg-area');
+  const items=SK_SUBJECTS.map(s=>{
+    const p=pgFind(s);
+    const sel=s===pgState.subject?' selected':'';
+    if(!p)return `<button type="button" class="pg-item${sel}" onclick="pgSelectSubject('${s}')"><div class="pg-item-head"><span class="pg-subj">${s}</span><span class="pg-empty">未登録（タップして入力）</span></div></button>`;
+    return `<button type="button" class="pg-item${sel}" onclick="pgSelectSubject('${s}')">
+      <div class="pg-item-head"><span class="pg-subj">${s}</span>${testDaysChip(p.testDate)}</div>
+      <div class="pg-unit">${p.unit?esc(p.unit):'<span class="pg-empty">単元未入力</span>'}${p.textbook?`<span style="color:#888">（${esc(p.textbook)}）</span>`:''}</div>
+      ${p.testRange?`<div class="pg-meta">範囲：${esc(p.testRange)}</div>`:''}
+      <div class="pg-meta">${p.testDate?`テスト日 ${fmtMD(p.testDate)}　`:''}更新 ${fmtMD(p.updated)}</div>
+    </button>`;
+  }).join('');
+  area.innerHTML=`<div class="card"><div class="card-title" style="cursor:default">${esc(pgState.student)} さんの進度</div>
+    <div class="pg-list">${items}</div></div><div id="pg-form"></div>`;
+  pgRenderForm();
+}
+
+function pgSelectSubject(s){
+  pgState.subject=s;
+  pgRender();
+  const f=document.getElementById('pg-form');
+  if(f)f.scrollIntoView({block:'start',behavior:'smooth'});
+}
+
+function pgRenderForm(){
+  const f=document.getElementById('pg-form');
+  if(!f)return;
+  const s=pgState.subject;
+  if(!s){f.innerHTML='';return;}
+  const p=pgFind(s)||{};
+  f.innerHTML=`<div class="card">
+    <div class="card-title" style="cursor:default">${s} の進度を更新</div>
+    <div class="field"><label>教科書</label><input type="text" id="pg-textbook" value="${esc(p.textbook||'')}" placeholder="例：東京書籍 新しい数学2"></div>
+    <div class="field"><label>現在の単元</label><input type="text" id="pg-unit" value="${esc(p.unit||'')}" placeholder="例：1次関数 / 変化の割合"></div>
+    <div class="field"><label>次の定期テスト日</label><input type="date" id="pg-testdate" class="sk-date" value="${esc(p.testDate||'')}"></div>
+    <div class="field"><label>テスト範囲</label><textarea class="memo" id="pg-testrange" style="min-height:60px" placeholder="例：教科書 p.40〜72、ワーク p.20〜45">${esc(p.testRange||'')}</textarea></div>
+    <button class="btn-save" id="pg-save-btn" onclick="pgSave()">${s} の進度を保存</button>
+    <div id="pg-msg"></div>
+  </div>`;
+}
+
+async function pgSave(){
+  const btn=document.getElementById('pg-save-btn');
+  const msg=document.getElementById('pg-msg');
+  if(btn.disabled)return;
+  const testDate=v('pg-testdate');
+  if(testDate&&!/^\d{4}-\d{2}-\d{2}$/.test(testDate)){msg.innerHTML='<div class="error-msg">テスト日の形式が正しくありません</div>';return;}
+  const stu=pgState.students.find(x=>x.name===pgState.student);
+  const progress={student:pgState.student,school:pgState.school,grade:stu?stu.grade:'',subject:pgState.subject,
+    textbook:v('pg-textbook'),unit:v('pg-unit'),testDate,testRange:v('pg-testrange')};
+  btn.disabled=true;btn.textContent='保存中...';
+  try{
+    const res=await authFetch('/api/shido',{method:'POST',body:JSON.stringify({action:'saveProgress',progress})});
+    let data;
+    try{data=await res.json();}catch(_){throw new Error(`サーバーから正しい応答がありませんでした（HTTP ${res.status}）`);}
+    if(!res.ok||data.error||!data.ok)throw new Error(data.error||('HTTP '+res.status));
+    const subject=pgState.subject;
+    await pgLoadProgress();
+    pgState.subject=subject;pgRender();
+    const m=document.getElementById('pg-msg');
+    if(m)m.innerHTML='<div class="success-msg">保存しました</div>';
+  }catch(e){
+    msg.innerHTML=`<div class="error-msg">保存に失敗しました：${esc(e instanceof TypeError?'通信できませんでした':e.message)}<br>入力内容は残っています。もう一度保存してください。</div>`;
+    btn.disabled=false;btn.textContent=`${pgState.subject} の進度を保存`;
+  }
+}
+
+// ===== カルテ：指導の状況 =====
+let karteShido=null,karteTagPeriod='m3',karteVisitSubject='';
+
+function shidoSubjectStats(records){
+  const by={};
+  records.forEach(r=>{(by[r.subject]=by[r.subject]||[]).push(r);});
+  return Object.keys(by).sort((a,b)=>SK_SUBJECTS.indexOf(a)-SK_SUBJECTS.indexOf(b)).map(subject=>{
+    const rs=by[subject];let ok=0,ng=0;
+    for(let i=rs.length-1;i>=0&&rs[i].status==='順調';i--)ok++;
+    for(let i=rs.length-1;i>=0&&rs[i].status==='気になる';i--)ng++;
+    const last=rs[rs.length-1];
+    return{subject,count:rs.length,okStreak:ok,ngStreak:ng,lastDate:last.date,sinceLast:-daysFromToday(last.date),
+      visits:rs.reduce((a,r)=>a+r.visits,0)};
+  });
+}
+
+function renderShidoKarte(shido){
+  if(!shido)return '<div class="warn-msg" style="margin-bottom:1rem">指導記録・進度を読み込めませんでした（成績・面談の記録は表示しています）</div>';
+  const recs=shido.records||[],prog=shido.progress||[];
+  if(!recs.length&&!prog.length)return '';
+  karteShido=shido;
+  let html='';
+  const card=(title,body)=>`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>${title}</div><div class="card-body hidden">${body}</div></div>`;
+
+  // 進度と定期テスト
+  if(prog.length){
+    const ps=[...prog].sort((a,b)=>SK_SUBJECTS.indexOf(a.subject)-SK_SUBJECTS.indexOf(b.subject));
+    const upcoming=ps.map(p=>daysFromToday(p.testDate)).filter(n=>n!==null&&n>=0).sort((a,b)=>a-b)[0];
+    const body=ps.map(p=>`<div class="kt-sub-row"><div><b>${esc(p.subject)}</b>　${p.unit?esc(p.unit):'<span class="pg-empty">単元未入力</span>'}
+      ${p.textbook?`<div class="pg-meta">${esc(p.textbook)}</div>`:''}${p.testRange?`<div class="pg-meta">範囲：${esc(p.testRange)}</div>`:''}</div>
+      <div style="text-align:right">${testDaysChip(p.testDate)}<div class="pg-meta">更新 ${fmtMD(p.updated)}</div></div></div>`).join('');
+    html+=card(`教科の進度・定期テスト${upcoming!==undefined?`<span style="font-weight:500;color:#888">（次のテストまであと${upcoming}日）</span>`:''}`,body);
+  }
+
+  if(recs.length){
+    // 直近の指導記録（最新5件）
+    const recent=recs.slice(-5).reverse();
+    const worryN=recent.filter(r=>r.status==='気になる').length;
+    const recBody=recent.map(r=>{
+      const w=r.status==='気になる';
+      return `<div class="kt-rec${w?' worry':''}"><div class="kt-rec-head"><b style="color:#222">${fmtMD(r.date)}</b>${esc(r.subject)}<span>${esc(r.teacher)}</span>
+        <span class="kt-status ${w?'ng':'ok'}">${esc(r.status)}</span><span>来室 ${r.visits}</span></div>
+        ${r.tags.length||r.actions.length?`<div class="kt-chips">${r.tags.map(t=>`<span class="kt-chip">${esc(t)}</span>`).join('')}${r.actions.map(a=>`<span class="kt-chip act">${esc(a)}</span>`).join('')}</div>`:''}
+        ${r.memo?`<div class="kt-memo">${esc(r.memo)}</div>`:''}</div>`;
+    }).join('');
+    html+=card(`直近の指導記録${worryN?`<span style="font-weight:600;color:#B45309">（気になる ${worryN}件）</span>`:''}`,recBody);
+
+    // 教科ごとの状況（連続回数・最終記録）
+    const stats=shidoSubjectStats(recs);
+    const statBody=stats.map(s=>{
+      const streak=s.ngStreak?`<span class="kt-status ng">気になるが${s.ngStreak}回連続</span>`:`<span class="kt-status ok">順調が${s.okStreak}回連続</span>`;
+      const gap=s.sinceLast>=14?`<div class="kt-warn">⚠ ${s.sinceLast}日間 記録がありません</div>`:'';
+      return `<div class="kt-sub-row"><div><b>${esc(s.subject)}</b>　${streak}${gap}</div>
+        <div style="text-align:right;font-size:12px;color:#666">最終記録 ${fmtMD(s.lastDate)}（${s.sinceLast<=0?'今日':s.sinceLast+'日前'}）<div class="pg-meta">記録 ${s.count}回・来室 計${s.visits}回</div></div></div>`;
+    }).join('');
+    html+=card('教科ごとの状況（連続回数・最終記録）',statBody+'<div class="pg-meta" style="margin-top:6px">連続回数は最新の記録からさかのぼって数えます。最終記録から14日以上空いている教科には⚠を表示します（記録漏れの確認用）。</div>');
+
+    // つまずきタグ
+    html+=card('つまずきタグ（多い順）','<div id="kt-tags"></div>');
+    // 来室回数の推移
+    html+=card('来室回数の推移（コマごと）','<div id="kt-visits"></div>');
+  }
+  return html;
+}
+
+function karteRenderShidoDynamic(){
+  if(!karteShido)return;
+  const tagsEl=document.getElementById('kt-tags');
+  if(tagsEl)tagsEl.innerHTML=karteTagsHtml();
+  const vEl=document.getElementById('kt-visits');
+  if(vEl)vEl.innerHTML=karteVisitsHtml();
+}
+
+function karteSetTagPeriod(p){karteTagPeriod=p;karteRenderShidoDynamic();}
+function karteSetVisitSubject(s){karteVisitSubject=s;karteRenderShidoDynamic();}
+
+function karteTagsHtml(){
+  const periods=[['w4','直近4週間',28],['m3','直近3か月',91],['all','全期間',null]];
+  const days=(periods.find(p=>p[0]===karteTagPeriod)||periods[1])[2];
+  const counts={};
+  karteShido.records.forEach(r=>{
+    if(days!==null){const d=daysFromToday(r.date);if(d===null||-d>days)return;}
+    r.tags.forEach(t=>{counts[t]=(counts[t]||0)+1;});
+  });
+  const list=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const max=list.length?list[0][1]:1;
+  const seg=`<div class="kt-seg">${periods.map(p=>`<button type="button" class="${p[0]===karteTagPeriod?'selected':''}" onclick="karteSetTagPeriod('${p[0]}')">${p[1]}</button>`).join('')}</div>`;
+  if(!list.length)return seg+'<div class="pg-empty">この期間のつまずきタグはありません</div>';
+  return seg+list.map(([t,n])=>`<div class="kt-tagbar"><span class="kt-tagbar-name" title="${esc(t)}">${esc(t)}</span><span class="kt-tagbar-track"><span class="kt-tagbar-fill" style="display:block;width:${Math.round(n/max*100)}%"></span></span><span class="kt-tagbar-n">${n}</span></div>`).join('');
+}
+
+// 棒の上端だけ角丸にしたパス
+function roundedTopBar(x,y,w,h,r){r=Math.min(r,h,w/2);if(h<=0)return '';return `M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`;}
+
+function karteVisitsHtml(){
+  const subjects=[...new Set(karteShido.records.map(r=>r.subject))].sort((a,b)=>SK_SUBJECTS.indexOf(a)-SK_SUBJECTS.indexOf(b));
+  if(karteVisitSubject&&!subjects.includes(karteVisitSubject))karteVisitSubject='';
+  const recs=karteShido.records.filter(r=>!karteVisitSubject||r.subject===karteVisitSubject).slice(-30);
+  const seg=`<div class="kt-seg"><button type="button" class="${karteVisitSubject?'':'selected'}" onclick="karteSetVisitSubject('')">すべて</button>${subjects.map(s=>`<button type="button" class="${s===karteVisitSubject?'selected':''}" onclick="karteSetVisitSubject('${esc(s)}')">${esc(s)}</button>`).join('')}</div>`;
+  if(!recs.length)return seg+'<div class="pg-empty">記録がありません</div>';
+  const barW=16,gap=10,padL=24,padT=18,plotH=110,padB=22;
+  const maxV=Math.max(3,...recs.map(r=>r.visits));
+  const W=padL+recs.length*(barW+gap)+gap,H=padT+plotH+padB;
+  const y=v=>padT+plotH-(v/maxV)*plotH;
+  const avg=recs.reduce((a,r)=>a+r.visits,0)/recs.length;
+  const maxIdx=recs.reduce((m,r,i)=>r.visits>recs[m].visits?i:m,0);
+  let svg=`<svg width="${W}" height="${H}" role="img" aria-label="来室回数の推移（${recs.length}コマ）" onmousemove="chartTip(event)" onclick="chartTip(event)">`;
+  // 目盛り（控えめ）
+  [0,maxV].forEach(t=>{svg+=`<line x1="${padL}" x2="${W}" y1="${y(t)}" y2="${y(t)}" stroke="#eee" stroke-width="1"/><text x="${padL-6}" y="${y(t)+4}" font-size="10" fill="#999" text-anchor="end">${t}</text>`;});
+  recs.forEach((r,i)=>{
+    const x=padL+gap+i*(barW+gap);
+    const w=r.status==='気になる';
+    const tip=`${fmtMD(r.date)} ${r.subject} 来室${r.visits}回（${r.status}）`;
+    svg+=`<path d="${roundedTopBar(x,y(r.visits),barW,padT+plotH-y(r.visits),4)}" fill="${w?'#D97706':'#378ADD'}"/>`;
+    if(i===recs.length-1||i===maxIdx)svg+=`<text x="${x+barW/2}" y="${y(r.visits)-4}" font-size="10" fill="#444" text-anchor="middle">${r.visits}</text>`;
+    if(i===0||i===recs.length-1||i%5===0)svg+=`<text x="${x+barW/2}" y="${H-6}" font-size="10" fill="#999" text-anchor="middle">${fmtMD(r.date)}</text>`;
+    // 当たり判定は棒より広く取る
+    svg+=`<rect x="${x-gap/2}" y="${padT}" width="${barW+gap}" height="${plotH}" fill="transparent" data-tip="${esc(tip)}"/>`;
+  });
+  svg+='</svg>';
+  const legend='<div class="chart-legend"><span><i style="background:#378ADD"></i>順調</span><span><i style="background:#D97706"></i>気になる</span></div>';
+  return seg+legend+`<div class="chart-wrap">${svg}</div><div class="chart-tip">棒をタップすると詳細を表示します</div>
+    <div class="pg-meta">直近${recs.length}コマの平均 ${avg.toFixed(1)}回/コマ</div>`;
+}
+
+// グラフのツールチップ（ホバー・タップ共通）
+function chartTip(e){
+  const t=e.target.closest('[data-tip]');
+  if(!t)return;
+  const tip=e.currentTarget.parentElement.nextElementSibling;
+  if(tip&&tip.classList.contains('chart-tip'))tip.textContent=t.dataset.tip;
+}
+
+// 成績の推移（定期テスト合計・北辰5科偏差値は別グラフにする）
+function gradeLineChart(points,{label,fmt}){
+  if(points.length<2)return '';
+  const step=64,padL=34,padR=24,padT=18,plotH=100,padB=34;
+  const vals=points.map(p=>p.value);
+  let lo=Math.min(...vals),hi=Math.max(...vals);
+  if(hi===lo){hi+=5;lo-=5;}
+  const pad=(hi-lo)*0.15;lo-=pad;hi+=pad;
+  const W=padL+(points.length-1)*step+padR,H=padT+plotH+padB;
+  const x=i=>padL+i*step,y=v=>padT+plotH-((v-lo)/(hi-lo))*plotH;
+  const maxIdx=vals.indexOf(Math.max(...vals));
+  let svg=`<svg width="${W}" height="${H}" role="img" aria-label="${esc(label)}" onmousemove="chartTip(event)" onclick="chartTip(event)">`;
+  svg+=`<line x1="${padL}" x2="${W-padR/2}" y1="${padT+plotH}" y2="${padT+plotH}" stroke="#eee"/>`;
+  svg+=`<polyline points="${points.map((p,i)=>`${x(i)},${y(p.value)}`).join(' ')}" fill="none" stroke="#185FA5" stroke-width="2" stroke-linejoin="round"/>`;
+  points.forEach((p,i)=>{
+    svg+=`<circle cx="${x(i)}" cy="${y(p.value)}" r="4" fill="#185FA5" stroke="#fff" stroke-width="2"/>`;
+    if(i===points.length-1||i===maxIdx)svg+=`<text x="${x(i)}" y="${y(p.value)-9}" font-size="11" fill="#333" text-anchor="middle" font-weight="600">${fmt(p.value)}</text>`;
+    svg+=`<text x="${x(i)}" y="${H-18}" font-size="10" fill="#999" text-anchor="middle">${esc(p.short)}</text>`;
+    svg+=`<circle cx="${x(i)}" cy="${y(p.value)}" r="14" fill="transparent" data-tip="${esc(p.label+'：'+fmt(p.value))}"/>`;
+  });
+  svg+='</svg>';
+  return `<div style="font-size:12px;font-weight:600;color:#555;margin:4px 0">${esc(label)}</div><div class="chart-wrap">${svg}</div><div class="chart-tip"></div>`;
+}
+
+function renderGradeCharts(grades){
+  if(!grades||!grades.length)return '';
+  const isH=r=>String(r.test||'').includes('北辰テスト');
+  const testOrder={'1学期中間':1,'1学期期末':2,'2学期中間':3,'2学期期末':4,'学年末':5,'3学期':5};
+  const gOrder={'中1':1,'中2':2,'中3':3};
+  const key=r=>{const m=String(r.test||'').match(/^(中[123])/);const g=m?gOrder[m[1]]||0:0;const t=String(r.test||'').replace(/^中[123]-/,'');return g*100+(testOrder[t]||0);};
+  const regular=grades.filter(r=>!isH(r)&&!isNaN(parseFloat(r.total))).sort((a,b)=>key(a)-key(b))
+    .map(r=>({value:parseFloat(r.total),label:String(r.test||''),short:String(r.test||'').replace(/学期/,'').replace(/^中([123])-/,'$1年').slice(0,6)}));
+  const hRound=r=>{const m=String(r['北辰実施回']||'').match(/第(\d+)回/);return m?parseInt(m[1]):0;};
+  const hokushin=grades.filter(r=>isH(r)&&!isNaN(parseFloat(r['5科偏差値']))).sort((a,b)=>hRound(a)-hRound(b))
+    .map(r=>({value:parseFloat(r['5科偏差値']),label:'北辰 '+(r['北辰実施回']||''),short:String(r['北辰実施回']||'')}));
+  const body=gradeLineChart(regular,{label:'定期テスト 5科合計',fmt:v=>String(Math.round(v))})+
+    gradeLineChart(hokushin,{label:'北辰テスト 5科偏差値',fmt:v=>v.toFixed(1)});
+  if(!body)return '';
+  return `<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>成績の推移（グラフ）</div><div class="card-body hidden">${body}
+    <div class="pg-meta" style="margin-top:6px">点をタップすると値を表示します。各テストの科目別の点数は「成績履歴」の表を参照してください。</div></div></div>`;
 }
 
 // ===== A4 プレビュー =====

@@ -42,7 +42,19 @@ const SHIDO_STUDENT_SOURCES = [
 
 const SHIDO_GRADE_ORDER = ['小1','小2','小3','小4','小5','小6','中1','中2','中3','高1','高2','高3','既卒'];
 
-const SHIDO_GET_ACTIONS = ['getShidoMasters','listStudentsDetailed'];
+const SHIDO_GET_ACTIONS = ['getShidoMasters','listStudentsDetailed','getStudentShido'];
+
+// 校舎グループの代表名（みずほ台校舎 / みずほ台校舎（Luce）は同じ校舎として扱う）
+function schoolGroupKey_(school) {
+  const s = canonicalSchool(school);
+  const group = SCHOOL_GROUPS[s];
+  return group ? group[0] : s;
+}
+
+// 生徒の同一判定キー：空白を除いた名前 + 校舎グループ。学年は含めない（進級しても同じ生徒）
+function studentKey_(name, school) {
+  return normName_(name) + '|' + schoolGroupKey_(school);
+}
 
 function jsonOut_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
@@ -131,6 +143,7 @@ function handleShidoGet_(e) {
     const action = e.parameter.action;
     if (action === 'getShidoMasters') return jsonOut_(getShidoMasters_());
     if (action === 'listStudentsDetailed') return jsonOut_(listStudentsDetailed_(e.parameter.school || ''));
+    if (action === 'getStudentShido') return jsonOut_(getStudentShido_(e.parameter.name || '', e.parameter.school || ''));
     return jsonOut_({ error: 'unknown action' });
   } catch (err) {
     return jsonOut_({ error: err.message });
@@ -211,6 +224,7 @@ function handleShidoPost_(data) {
   try {
     if (!isShidoKeyValid_(data.shidoKey)) return jsonOut_({ error: 'unauthorized' });
     if (data.action === 'saveShidoRecords') return jsonOut_(saveShidoRecords_(data.records));
+    if (data.action === 'saveProgress') return jsonOut_(saveProgress_(data.progress));
     return jsonOut_({ error: 'unknown action' });
   } catch (err) {
     return jsonOut_({ error: err.message });
@@ -291,6 +305,138 @@ function saveShidoRecords_(records) {
     });
     if (rows.length) sheet.getRange(lastRow + 1, 1, rows.length, headers.length).setValues(rows);
     return { ok: true, saved: rows.length, skipped: skipped };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// ===== 生徒1人分の指導記録・進度（カルテ・進度タブ用） =====
+// school が空なら名前だけで照合する（カルテの「名前で直接検索」）
+function getStudentShido_(name, school) {
+  if (!normName_(name)) throw new Error('生徒名が指定されていません');
+  const ss = getSpreadsheet();
+  const match = (rowName, rowSchool) => school
+    ? studentKey_(rowName, rowSchool) === studentKey_(name, school)
+    : normName_(rowName) === normName_(name);
+
+  const records = [];
+  const recSheet = ss.getSheetByName('指導記録');
+  if (recSheet) {
+    readSheetObjects_(recSheet).forEach(r => {
+      if (!match(String(r['生徒'] || ''), String(r['校舎'] || ''))) return;
+      records.push({
+        id: String(r['記録ID'] || ''),
+        inputAt: fmtDateTime_(r['入力日時']),
+        date: fmtDate_(r['指導日']),
+        school: canonicalSchool(String(r['校舎'] || '')),
+        teacher: String(r['講師'] || ''),
+        subject: String(r['教科'] || ''),
+        grade: String(r['学年'] || ''),
+        status: String(r['状態'] || ''),
+        visits: Number(r['来室回数']) || 0,
+        tags: splitList_(r['つまずきタグ']),
+        actions: splitList_(r['対応']),
+        memo: String(r['一言メモ'] || ''),
+        done: isChecked_(r['対応済みフラグ'])
+      });
+    });
+  }
+  // 指導日の昇順（同じ日は入力順）
+  records.sort((a, b) => a.date !== b.date ? (a.date < b.date ? -1 : 1) : (a.inputAt < b.inputAt ? -1 : a.inputAt > b.inputAt ? 1 : 0));
+
+  const progress = [];
+  const pSheet = ss.getSheetByName('進度');
+  if (pSheet) {
+    readSheetObjects_(pSheet).forEach(r => {
+      if (!match(String(r['生徒'] || ''), String(r['校舎'] || ''))) return;
+      progress.push({
+        student: String(r['生徒'] || ''),
+        school: canonicalSchool(String(r['校舎'] || '')),
+        grade: String(r['学年'] || ''),
+        subject: String(r['教科'] || ''),
+        textbook: String(r['教科書'] || ''),
+        unit: String(r['現在の単元'] || ''),
+        testDate: fmtDate_(r['次の定期テスト日']),
+        testRange: String(r['テスト範囲'] || ''),
+        updated: fmtDate_(r['更新日'])
+      });
+    });
+  }
+  return { records: records, progress: progress };
+}
+
+function fmtDate_(v) {
+  if (v instanceof Date) return Utilities.formatDate(v, 'Asia/Tokyo', 'yyyy-MM-dd');
+  return String(v || '').trim();
+}
+
+function fmtDateTime_(v) {
+  if (v instanceof Date) return Utilities.formatDate(v, 'Asia/Tokyo', 'yyyy-MM-dd HH:mm:ss');
+  return String(v || '').trim();
+}
+
+function splitList_(v) {
+  return String(v || '').split(SHIDO_LIST_SEP).map(s => s.trim()).filter(Boolean);
+}
+
+function isChecked_(v) {
+  if (v === true) return true;
+  const s = String(v).trim().toUpperCase();
+  return s === 'TRUE' || s === '済' || s === '○' || s === '1';
+}
+
+// ===== 進度の保存（1行 = 1生徒×1教科。既存行があれば上書き） =====
+function saveProgress_(p) {
+  if (!p || typeof p !== 'object') throw new Error('進度の内容がありません');
+  const str = (v, max) => String(v === undefined || v === null ? '' : v).trim().slice(0, max);
+  const rec = {
+    student: str(p.student, 50),
+    school: canonicalSchool(str(p.school, 50)),
+    grade: str(p.grade, 10),
+    subject: str(p.subject, 10),
+    textbook: str(p.textbook, 100),
+    unit: str(p.unit, 200),
+    testDate: str(p.testDate, 10),
+    testRange: str(p.testRange, 500)
+  };
+  if (!rec.student) throw new Error('生徒が未選択です');
+  if (!rec.school) throw new Error('校舎が未選択です');
+  if (SHIDO_SUBJECTS.indexOf(rec.subject) === -1) throw new Error('教科が不正です');
+  if (rec.testDate && !/^\d{4}-\d{2}-\d{2}$/.test(rec.testDate)) throw new Error('定期テスト日が不正です');
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const sheet = ensureShidoSheet_(getSpreadsheet(), '進度');
+    const headers = SHIDO_HEADERS['進度'];
+    const rows = sheet.getDataRange().getValues();
+    const h = rows[0];
+    const key = studentKey_(rec.student, rec.school);
+    let rowIndex = -1;
+    for (let i = 1; i < rows.length; i++) {
+      if (studentKey_(rows[i][h.indexOf('生徒')], rows[i][h.indexOf('校舎')]) === key
+          && String(rows[i][h.indexOf('教科')]) === rec.subject) { rowIndex = i + 1; break; }
+    }
+    const today = Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd');
+    const values = buildRow(headers, {
+      '生徒': safeCell_(rec.student),
+      '校舎': safeCell_(rec.school),
+      '学年': safeCell_(rec.grade),
+      '教科': rec.subject,
+      '教科書': safeCell_(rec.textbook),
+      '現在の単元': safeCell_(rec.unit),
+      '次の定期テスト日': rec.testDate,
+      'テスト範囲': safeCell_(rec.testRange),
+      '更新日': today
+    });
+    if (rowIndex > 0) {
+      // 既存の生徒名の表記は残す（照合は正規化キーで行うため）
+      values[headers.indexOf('生徒')] = rows[rowIndex - 1][h.indexOf('生徒')];
+      sheet.getRange(rowIndex, 1, 1, headers.length).setValues([values]);
+    } else {
+      sheet.getRange(sheet.getLastRow() + 1, 1, 1, headers.length).setValues([values]);
+    }
+    return { ok: true, updated: rowIndex > 0, updatedOn: today };
   } finally {
     lock.releaseLock();
   }
