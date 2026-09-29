@@ -1103,7 +1103,7 @@ const sState = { grade:'', attitude:'', result:'', career_interest:'', checks:ne
 const pState = { p_grade:'', p_relation:'', p_rhythm:'', checks:new Set(), selectedDate:null };
 const gState = { g_grade:'', g_test:'' };
 
-let generatedReport = '', generatedParentMemo = '', generatedKarte = '', karteData = null, karteSchool = '';
+let generatedReport = '', generatedParentMemo = '', generatedKarte = '', karteData = null, karteSchool = '', karteCurrentName = '';
 
 // ===== Gemini =====
 async function callGemini(prompt){
@@ -1237,6 +1237,20 @@ function selectRadio(field,val,el){
 
 function v(id){return(document.getElementById(id)||{}).value||'';}
 
+// ===== HTMLエスケープ =====
+// innerHTML に差し込む値（シートの値・入力値・AI生成文・エラーメッセージ）は必ずエスケープする。
+// インラインの onclick などJSの中には値を入れない（エスケープしても属性値として復号されるため）
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// エスケープ済みの文字列を途中で切るとき、末尾の途中まで切れた &…; を取り除く
+function escSlice(s,n){return String(s).slice(0,n).replace(/&[#a-zA-Z0-9]*$/,'');}
+// 表示専用にシートのデータを丸ごとエスケープしたコピーを作る（元データはAIのプロンプト等に使うため変更しない）
+function escDeep(v){
+  if(typeof v==='string')return esc(v);
+  if(Array.isArray(v))return v.map(escDeep);
+  if(v&&typeof v==='object'){const o={};Object.keys(v).forEach(k=>{o[k]=escDeep(v[k]);});return o;}
+  return v;
+}
+
 const MONTH_ORDER={'4月':1,'5月':2,'6月':3,'7月':4,'8月':5,'9月':6,'10月':7,'11月':8,'12月':9,'1月':10,'2月':11};
 function monthLabelFromDate(s){
   if(!s) return '';
@@ -1339,13 +1353,13 @@ ${style}
   try{
     generatedReport=await callGemini(prompt);
     if(!generatedReport)throw new Error('レスポンスが空です');
-    ra.innerHTML=`<div class="result-box">${generatedReport}</div>
+    ra.innerHTML=`<div class="result-box">${esc(generatedReport)}</div>
       <div class="result-actions">
         <button class="copy-btn" onclick="copyText(generatedReport,this)">コピーする</button>
         <button class="sheet-btn" id="s-save-btn" onclick="saveStudentToSheet()">スプレッドシートに保存</button>
       </div><div id="s-sheet-msg"></div>`;
   }catch(e){
-    ra.innerHTML=`<div class="error-msg">生成に失敗しました：${e.message}</div>`;
+    ra.innerHTML=`<div class="error-msg">生成に失敗しました：${esc(e.message)}</div>`;
   }finally{btn.disabled=false;btn.textContent='保護者向け報告文を生成する';}
 }
 
@@ -1401,13 +1415,13 @@ async function generateParentMemo(){
   try{
     generatedParentMemo=await callGemini(prompt);
     if(!generatedParentMemo)throw new Error('レスポンスが空です');
-    ra.innerHTML=`<div class="result-box">${generatedParentMemo}</div>
+    ra.innerHTML=`<div class="result-box">${esc(generatedParentMemo)}</div>
       <div class="result-actions">
         <button class="copy-btn" onclick="copyText(generatedParentMemo,this)">コピーする</button>
         <button class="sheet-btn" id="p-save-btn" onclick="saveParentToSheet()">スプレッドシートに保存</button>
       </div><div id="p-sheet-msg"></div>`;
   }catch(e){
-    ra.innerHTML=`<div class="error-msg">生成に失敗しました：${e.message}</div>`;
+    ra.innerHTML=`<div class="error-msg">生成に失敗しました：${esc(e.message)}</div>`;
   }finally{btn.disabled=false;btn.textContent='面談記録まとめ文を生成する';}
 }
 
@@ -1478,7 +1492,7 @@ async function searchKarte(){
     karteData.shido=await shidoP;
     renderKarte(karteData,name);
   }catch(e){
-    area.innerHTML=`<div class="error-msg">データ取得に失敗しました。<br><small>${e.message}</small></div>`;
+    area.innerHTML=`<div class="error-msg">データ取得に失敗しました。<br><small>${esc(e.message)}</small></div>`;
   }
 }
 
@@ -1501,9 +1515,9 @@ async function refreshKarteStudents(){
     const res=await authFetch(url);
     const data=await res.json();
     const students=data.students||[];
-    const label=grade?`${grade}・${students.length}名`:students.length+'名';
+    const label=grade?`${esc(grade)}・${students.length}名`:students.length+'名';
     sel.innerHTML=`<option value="">-- 生徒を選択（${label}）--</option>`+
-      students.map(n=>`<option value="${n}">${n}</option>`).join('');
+      students.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
     sel.disabled=false;
   }catch(e){
     sel.innerHTML='<option value="">取得に失敗しました</option>';
@@ -1526,15 +1540,20 @@ function toggleCard(title){
   if(body)body.classList.toggle('hidden');
 }
 
-function renderKarte(data,name){
+function renderKarte(rawData,rawName){
   const area=document.getElementById('karte-area');
-  const hasShido=data.shido&&((data.shido.records||[]).length||(data.shido.progress||[]).length);
+  karteCurrentName=rawName;
+  const shido=rawData.shido; // renderShidoKarte 側で個別にエスケープする
+  // 以降の表示はエスケープ済みのコピーと名前を使う
+  const data=escDeep({...rawData,shido:null});
+  const name=esc(rawName);
+  const hasShido=shido&&((shido.records||[]).length||(shido.progress||[]).length);
   const hasData=(data.student&&data.student.length)||(data.parent&&data.parent.length)||(data.grade&&data.grade.length)||(data.audio&&data.audio.length)||(data.notice&&data.notice.length)||hasShido;
   if(!hasData){area.innerHTML=`<div class="empty-state">「${name}」の記録が見つかりませんでした。<br>氏名の表記を確認してください。</div>`;return;}
 
   // 指導の状況（進度・直近の指導記録・連続回数・つまずきタグ・来室回数）
   karteShido=null;
-  let html=renderShidoKarte(data.shido);
+  let html=renderShidoKarte(shido);
 
   // 成績表
   const grades=data.grade||[];
@@ -1603,7 +1622,7 @@ function renderKarte(data,name){
   }
 
   // 成績の推移（グラフ）
-  html+=renderGradeCharts(data.grade);
+  html+=renderGradeCharts(rawData.grade); // 関数内でエスケープする
 
   // 通知表
   const ncSubjs=['国語','数学','英語','理科','社会','音楽','美術','保健体育','技術家庭'];
@@ -1697,24 +1716,24 @@ function renderKarte(data,name){
       if(item.type==='s'){
         const parts=[d.attitude&&`授業：${d.attitude}`,d.strong&&`得意：${d.strong}`,d.weak&&`苦手：${d.weak}`,d.result&&`成績推移：${d.result}`].filter(Boolean);
         content=parts.join(' / ');
-        if(d.report)content+=`<div class="tl-quote">"${d.report.slice(0,80)}…"</div>`;
+        if(d.report)content+=`<div class="tl-quote">"${escSlice(d.report,80)}…"</div>`;
       }else if(item.type==='p'){
         const parts=[d.relation&&`${d.relation}`,d.rhythm&&`リズム：${d.rhythm}`].filter(Boolean);
         content=parts.join(' / ');
-        if(d.memo)content+=`<div class="tl-quote">"${d.memo.slice(0,80)}…"</div>`;
+        if(d.memo)content+=`<div class="tl-quote">"${escSlice(d.memo,80)}…"</div>`;
       }else{
         if(d.type)content+=`<span style="font-size:11px;color:#777">${d.type}</span>`;
-        if(d.summary)content+=`<div class="tl-quote">"${d.summary.slice(0,80)}…"</div>`;
+        if(d.summary)content+=`<div class="tl-quote">"${escSlice(d.summary,80)}…"</div>`;
       }
       html+=`<div class="tl-item ${cls}"><div class="tl-date">${item.date}</div><span class="tl-badge ${badge}">${label}</span><div class="tl-content">${content||'記録なし'}</div></div>`;
     });
     html+=`</div></div></div>`;
   }
 
-  const en=name.replace(/'/g,"\\'");
+  // 生徒名は onclick に埋め込まず、karteCurrentName から参照する
   html+=`<div style="display:flex;gap:8px;margin-top:0">
-    <button class="karte-gen-btn" id="karte-gen-btn" onclick="generateKarte('${en}')" style="flex:1;margin-top:1rem">AIカルテ文を生成する</button>
-    <button class="a4-preview-btn" onclick="showA4Preview('${en}')" style="margin-top:1rem">A4でまとめを見る</button>
+    <button class="karte-gen-btn" id="karte-gen-btn" onclick="generateKarte(karteCurrentName)" style="flex:1;margin-top:1rem">AIカルテ文を生成する</button>
+    <button class="a4-preview-btn" onclick="showA4Preview(karteCurrentName)" style="margin-top:1rem">A4でまとめを見る</button>
   </div><div id="karte-result-area"></div>`;
   area.innerHTML=html;
   karteRenderShidoDynamic();
@@ -1785,13 +1804,13 @@ ${tv}
   try{
     generatedKarte=await callGemini(prompt);
     if(!generatedKarte)throw new Error('レスポンスが空です');
-    ra.innerHTML=`<div class="karte-result">${generatedKarte}</div>
+    ra.innerHTML=`<div class="karte-result">${esc(generatedKarte)}</div>
       <div class="result-actions" style="margin-top:10px">
         <button class="copy-btn" onclick="copyText(generatedKarte,this)">コピーする</button>
-        <button class="sheet-btn" onclick="saveKarteToSheet('${name.replace(/'/g,'\\\'')}')" >カルテをシートに保存</button>
+        <button class="sheet-btn" onclick="saveKarteToSheet(karteCurrentName)">カルテをシートに保存</button>
       </div><div id="karte-sheet-msg"></div>`;
   }catch(e){
-    ra.innerHTML=`<div class="error-msg">生成に失敗しました：${e.message}</div>`;
+    ra.innerHTML=`<div class="error-msg">生成に失敗しました：${esc(e.message)}</div>`;
   }finally{btn.disabled=false;btn.textContent='AIカルテ文を生成する';}
 }
 
@@ -1948,13 +1967,13 @@ ${text}
     generatedAudioSummary = await callGemini(promptMap[type]);
     if (!generatedAudioSummary) throw new Error('レスポンスが空です');
 
-    ra.innerHTML = `<div class="result-box">${generatedAudioSummary}</div>
+    ra.innerHTML = `<div class="result-box">${esc(generatedAudioSummary)}</div>
       <div class="result-actions">
         <button class="copy-btn" onclick="copyText(generatedAudioSummary,this)">コピーする</button>
         <button class="sheet-btn" onclick="saveAudioToSheet()">シートに保存</button>
       </div><div id="audio-sheet-msg"></div>`;
   } catch (e) {
-    ra.innerHTML = `<div class="error-msg">生成に失敗しました：${e.message}</div>`;
+    ra.innerHTML = `<div class="error-msg">生成に失敗しました：${esc(e.message)}</div>`;
   } finally {
     btn.disabled = false; btn.textContent = 'まとめを生成する';
   }
@@ -1987,7 +2006,6 @@ const skState={school:'',grade:'',date:'',dateSetOn:'',teacher:'',subject:'',all
   loadedSchool:null,saving:false};
 let skMasters=null,skMastersLoading=null,skInited=false,skDraftTimer=null;
 
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 // 空白（全角・半角）を除いた生徒名の照合キー。保存する文字列自体は変えない
 function skNorm(s){return String(s||'').replace(/[\s　]/g,'');}
 function skToday(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -2615,7 +2633,8 @@ function karteTagsHtml(){
 function roundedTopBar(x,y,w,h,r){r=Math.min(r,h,w/2);if(h<=0)return '';return `M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`;}
 
 function karteVisitsHtml(){
-  const subjects=[...new Set(karteShido.records.map(r=>r.subject))].sort((a,b)=>SK_SUBJECTS.indexOf(a)-SK_SUBJECTS.indexOf(b));
+  // onclick に入れるため、固定の教科名だけを使う（シートの値をそのままJSに入れない）
+  const subjects=SK_SUBJECTS.filter(s=>karteShido.records.some(r=>r.subject===s));
   if(karteVisitSubject&&!subjects.includes(karteVisitSubject))karteVisitSubject='';
   const recs=karteShido.records.filter(r=>!karteVisitSubject||r.subject===karteVisitSubject).slice(-30);
   const seg=`<div class="kt-seg"><button type="button" class="${karteVisitSubject?'':'selected'}" onclick="karteSetVisitSubject('')">すべて</button>${subjects.map(s=>`<button type="button" class="${s===karteVisitSubject?'selected':''}" onclick="karteSetVisitSubject('${esc(s)}')">${esc(s)}</button>`).join('')}</div>`;
@@ -2696,14 +2715,16 @@ function renderGradeCharts(grades){
 }
 
 // ===== A4 プレビュー =====
-function showA4Preview(name){
-  const d=karteData||{};
+function showA4Preview(rawName){
+  // 表示用にエスケープしたコピーを使う
+  const d=escDeep({...(karteData||{}),shido:null});
+  const name=esc(rawName);
   const today=new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
 
   // 学年を最新レコードから取得
   const allRecs=[...(d.student||[]),...(d.grade||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const gradeLabel=(allRecs[0]||{}).grade||'';
-  const school=karteSchool;
+  const school=esc(karteSchool);
   const subLabel=[school,gradeLabel].filter(Boolean).join(' / ');
 
   let html=`
@@ -2851,7 +2872,7 @@ function showA4Preview(name){
 
   // AIカルテ総評
   if(generatedKarte){
-    html+=`<div class="a4-sec"><div class="a4-sec-title">AI カルテ総評</div><div class="a4-karte">${generatedKarte}</div></div>`;
+    html+=`<div class="a4-sec"><div class="a4-sec-title">AI カルテ総評</div><div class="a4-karte">${esc(generatedKarte)}</div></div>`;
   }
 
   document.getElementById('a4-page').innerHTML=html;
