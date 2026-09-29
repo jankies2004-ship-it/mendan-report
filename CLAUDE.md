@@ -13,7 +13,9 @@
 
 ## 環境変数（Vercel）
 - `GAS_URL`（必須。Production=本番GAS、Preview=テスト用GAS）/ `AUTH_TOKEN` / `APP_PASSWORD` / `ANTHROPIC_API_KEY`
-- `AUTH_TOKEN` はGAS側スクリプトプロパティ `AUTH_TOKEN` と一致させる（テスト環境は本番と別の値にする）
+- `SHIDO_KEY`（指導系の合言葉。`api/shido.js` だけがGASへ付与する。未設定なら `api/shido.js` はエラー）
+- `AUTH_TOKEN` / `SHIDO_KEY` はGAS側スクリプトプロパティの同名の値と一致させる（テスト環境は本番と別の値にする）
+- GAS側は `SHIDO_KEY` 未設定または不一致なら指導系の処理をすべて `unauthorized` で拒否する（旧 save-public 等の経路からは届かない）
 
 ## GAS重要事項
 - `clasp push`はHEADのみ更新。変更を反映するには必ず`clasp deploy --deploymentId ...`も実行する

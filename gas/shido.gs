@@ -116,9 +116,18 @@ function readSheetObjects_(sheet) {
   return out;
 }
 
+// 指導系の処理は AUTH_TOKEN に加えて合言葉 SHIDO_KEY（スクリプトプロパティ）を要求する。
+// api/shido.js だけが付与するため、旧 save-public など他の経路からは届かない。
+// SHIDO_KEY 未設定時は常に拒否する。
+function isShidoKeyValid_(key) {
+  const expected = PropertiesService.getScriptProperties().getProperty('SHIDO_KEY');
+  return !!expected && typeof key === 'string' && key === expected;
+}
+
 // ===== GET =====
 function handleShidoGet_(e) {
   try {
+    if (!isShidoKeyValid_(e.parameter.shidoKey)) return jsonOut_({ error: 'unauthorized' });
     const action = e.parameter.action;
     if (action === 'getShidoMasters') return jsonOut_(getShidoMasters_());
     if (action === 'listStudentsDetailed') return jsonOut_(listStudentsDetailed_(e.parameter.school || ''));
@@ -200,6 +209,7 @@ function listStudentsDetailed_(school) {
 // ===== POST =====
 function handleShidoPost_(data) {
   try {
+    if (!isShidoKeyValid_(data.shidoKey)) return jsonOut_({ error: 'unauthorized' });
     if (data.action === 'saveShidoRecords') return jsonOut_(saveShidoRecords_(data.records));
     return jsonOut_({ error: 'unknown action' });
   } catch (err) {
