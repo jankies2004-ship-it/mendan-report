@@ -1,10 +1,11 @@
 import { checkAuth } from './_auth.js';
-
-const GAS_URL = process.env.GAS_URL || 'https://script.google.com/macros/s/AKfycbwtLtrArQ1ECX0cNLh85rMJ6MaV3t-A3qDNxuPpbgg-LjTU8mMDOfdDEN2jZqzs5LP5zw/exec';
+import { getGasUrl } from './_gas.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).end(); return; }
   if (!checkAuth(req, res)) return;
+  const GAS_URL = getGasUrl(res);
+  if (!GAS_URL) return;
 
   try {
     const payload = { ...req.body, token: process.env.AUTH_TOKEN };

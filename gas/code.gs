@@ -122,6 +122,8 @@ function doPost(e) {
     if (!isAuthorized_(data.token)) {
       return ContentService.createTextOutput(JSON.stringify({ error: 'unauthorized' })).setMimeType(ContentService.MimeType.JSON);
     }
+    // 指導記録などの新機能は action で振り分ける（gas/shido.gs）
+    if (data.action) return handleShidoPost_(data);
     const sheet_name = data.sheet;
     if (!HEADERS[sheet_name]) {
       return ContentService.createTextOutput(JSON.stringify({ error: 'unknown sheet' })).setMimeType(ContentService.MimeType.JSON);
@@ -223,6 +225,9 @@ function doGet(e) {
   }
   if (action === 'listStudents') {
     return getStudentsBySchool(e);
+  }
+  if (SHIDO_GET_ACTIONS.indexOf(action) !== -1) {
+    return handleShidoGet_(e);
   }
   return ContentService.createTextOutput(JSON.stringify({ error: 'unknown action' })).setMimeType(ContentService.MimeType.JSON);
 }
@@ -474,6 +479,8 @@ function onOpen() {
     .addItem('志望校入力シートを初期化', 'setupTargetSchoolInputSheet')
     .addItem('志望校を一括転記', 'bulkImportTargetSchools')
     .addItem('志望校の月を日付から補完', 'backfillTargetSchoolMonth')
+    .addSeparator()
+    .addItem('指導系シートを作成（指導記録・タグ/講師マスタ・進度）', 'setupShidoSheets')
     .addToUi();
 }
 

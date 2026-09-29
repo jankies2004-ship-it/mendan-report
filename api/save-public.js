@@ -1,9 +1,9 @@
 // student.html(成績入力フォーム)専用の認証不要な書き込みエンドポイント。
 // 生徒面談・保護者面談・カルテ等の閲覧側は/api/save + ログイン必須のまま。
 // 書き込めるシートを成績関連の3種類だけに制限し、悪用時の被害範囲を抑える。
-const ALLOWED_SHEETS = ['成績', '志望校', '通知表'];
+import { getGasUrl } from './_gas.js';
 
-const GAS_URL = process.env.GAS_URL || 'https://script.google.com/macros/s/AKfycbwtLtrArQ1ECX0cNLh85rMJ6MaV3t-A3qDNxuPpbgg-LjTU8mMDOfdDEN2jZqzs5LP5zw/exec';
+const ALLOWED_SHEETS = ['成績', '志望校', '通知表'];
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).end(); return; }
@@ -13,9 +13,13 @@ export default async function handler(req, res) {
     res.status(400).json({ error: 'このシートへの書き込みは許可されていません' });
     return;
   }
+  const GAS_URL = getGasUrl(res);
+  if (!GAS_URL) return;
 
   try {
-    const payload = { ...req.body, token: process.env.AUTH_TOKEN };
+    // action を付けるとGAS側で指導記録などの処理に振り分けられるため、ここでは必ず除去する
+    const { action, ...body } = req.body;
+    const payload = { ...body, token: process.env.AUTH_TOKEN };
     const gasRes = await fetch(GAS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

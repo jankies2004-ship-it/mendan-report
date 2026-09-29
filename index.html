@@ -277,6 +277,65 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
   .a4-page{width:100%!important;padding:15mm 18mm!important;box-shadow:none!important;margin:0!important;min-height:auto!important}
 }
 
+/* Group Nav（指導系 / 面談系） */
+.group-nav{display:flex;gap:6px;margin-bottom:8px}
+.group-btn{flex:1;min-height:44px;padding:10px 8px;border:1px solid #ddd;border-radius:10px;background:#fff;font-size:15px;font-weight:700;color:#666;cursor:pointer;font-family:inherit}
+.group-btn.active{background:#185FA5;border-color:#185FA5;color:#fff}
+
+/* 指導記録 */
+.sk-subjects{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.sk-subj{min-height:46px;padding:10px 4px;border:1px solid #ddd;border-radius:10px;background:#fff;font-size:15px;font-weight:600;color:#333;cursor:pointer;font-family:inherit}
+.sk-subj.selected{background:#185FA5;border-color:#185FA5;color:#fff}
+.sk-date{width:100%;font-size:15px;padding:9px 12px;border:1px solid #ddd;border-radius:8px;outline:none;font-family:inherit;background:#fff;color:#222;min-height:44px}
+.sk-inline-check{display:flex;align-items:center;gap:8px;font-size:13px;color:#555;margin-top:8px;cursor:pointer;min-height:36px}
+.sk-inline-check input{width:20px;height:20px;accent-color:#185FA5}
+.sk-criteria{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:6px 12px;margin-bottom:1rem;font-size:12px;color:#555;line-height:1.7}
+.sk-criteria summary{cursor:pointer;font-weight:600;color:#185FA5;font-size:13px;padding:6px 0}
+.sk-criteria .ok{color:#0F6E56;font-weight:700}
+.sk-criteria .ng{color:#B45309;font-weight:700}
+.sk-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.sk-allbtn{min-height:44px;padding:10px 14px;border:1px solid #185FA5;color:#185FA5;background:#fff;border-radius:10px;font-weight:600;font-size:14px;font-family:inherit;cursor:pointer}
+.sk-count{font-size:13px;color:#666;margin-left:auto}
+.sk-add{display:flex;gap:8px;margin-top:12px}
+.sk-add input{flex:1;min-width:0;font-size:15px;padding:10px 12px;border:1px solid #ddd;border-radius:10px;font-family:inherit;outline:none}
+.sk-add input:focus{border-color:#378ADD}
+.sk-add button{min-height:44px;padding:10px 16px;background:#fff;border:1px solid #ccc;border-radius:10px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer}
+.sk-row{border:1px solid #e5e5e5;border-radius:12px;padding:6px 8px;margin-bottom:8px;background:#fff}
+.sk-row.on{border-color:#378ADD;background:#F7FBFF}
+.sk-row.worry{border-color:#F59E0B;background:#FFFBEB}
+.sk-row-main{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sk-att{display:flex;align-items:center;gap:10px;flex:1 1 140px;min-height:48px;padding:4px 6px;cursor:pointer;user-select:none;border-radius:8px}
+.sk-att input{width:24px;height:24px;accent-color:#185FA5;flex-shrink:0;pointer-events:none}
+.sk-name{font-size:16px;font-weight:600;color:#222}
+.sk-grade{font-size:11px;color:#888;margin-left:4px;font-weight:500}
+.sk-ctrls{display:flex;gap:6px;align-items:center;margin-left:auto;flex-shrink:0}
+.sk-status{display:flex;border:1px solid #ddd;border-radius:10px;overflow:hidden}
+.sk-status button{min-height:44px;padding:0 10px;white-space:nowrap;border:none;background:#fff;font-size:14px;font-weight:600;color:#999;font-family:inherit;cursor:pointer}
+.sk-status button+button{border-left:1px solid #ddd}
+.sk-status button.ok.selected{background:#1D9E75;color:#fff}
+.sk-status button.ng.selected{background:#F59E0B;color:#fff}
+.sk-step{display:flex;align-items:center;border:1px solid #ddd;border-radius:10px;overflow:hidden;background:#fff}
+.sk-step button{width:44px;height:44px;border:none;background:#f5f5f0;font-size:20px;font-weight:700;color:#333;cursor:pointer;font-family:inherit}
+.sk-step-val{min-width:32px;text-align:center;line-height:1.1}
+.sk-step-val b{font-size:17px;display:block}
+.sk-step-val small{font-size:9px;color:#888}
+.sk-detail{margin-top:8px;padding:10px 4px 4px;border-top:1px dashed #F59E0B}
+.sk-detail-lbl{font-size:12px;font-weight:700;color:#854F0B;margin:4px 0 6px}
+.sk-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.sk-chip{min-height:40px;padding:8px 12px;border:1px solid #ddd;border-radius:20px;background:#fff;font-size:13px;color:#333;cursor:pointer;font-family:inherit}
+.sk-chip.selected{background:#FEF3C7;border-color:#F59E0B;color:#854F0B;font-weight:600}
+.sk-savebar{position:fixed;left:0;right:0;bottom:0;z-index:300;background:rgba(255,255,255,0.97);border-top:1px solid #e5e5e5;padding:10px 16px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -2px 12px rgba(0,0,0,0.06)}
+.sk-savebar-inner{max-width:720px;margin:0 auto}
+.sk-savebar .btn-save{margin-top:0;min-height:52px}
+.sk-spacer{height:96px}
+.sk-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:2000;display:flex;align-items:flex-end;justify-content:center;padding:16px}
+.sk-modal{background:#fff;border-radius:14px;padding:1.25rem;width:100%;max-width:480px;max-height:80vh;overflow-y:auto}
+.sk-modal h3{font-size:16px;margin-bottom:8px}
+.sk-modal-list{font-size:13px;color:#444;line-height:1.8;margin:8px 0 14px;padding:8px 12px;background:#f8f8f5;border-radius:8px}
+.sk-modal-actions{display:flex;gap:8px}
+.sk-modal-actions button{flex:1;min-height:48px;border-radius:10px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer}
+.sk-worry-mark{color:#B45309;font-weight:700}
+
 /* Login Gate */
 #login-gate{position:fixed;inset:0;background:#f5f5f0;display:flex;align-items:center;justify-content:center;z-index:9999;padding:1rem}
 #login-gate .login-box{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:2rem 1.75rem;width:100%;max-width:340px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
@@ -309,12 +368,90 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
     <p>面談記録・成績入力・生徒カルテの作成ができます。</p>
   </div>
 
-  <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('student',this)">生徒面談</button>
-    <button class="tab-btn" onclick="switchTab('parent',this)">保護者面談</button>
-    <button class="tab-btn" onclick="switchTab('grade',this)">成績入力</button>
-    <button class="tab-btn" onclick="switchTab('karte',this)">生徒カルテ</button>
-    <button class="tab-btn" onclick="switchTab('audio',this)">テキストまとめ</button>
+  <div id="nav-wrap">
+    <div class="group-nav">
+      <button class="group-btn active" data-group="shido" onclick="switchGroup('shido')">指導系</button>
+      <button class="group-btn" data-group="mendan" onclick="switchGroup('mendan')">面談系</button>
+    </div>
+    <div class="tab-nav" data-group="shido">
+      <button class="tab-btn" data-tab="shido" onclick="switchTab('shido')">指導記録</button>
+      <button class="tab-btn" data-tab="progress" onclick="switchTab('progress')">進度</button>
+      <button class="tab-btn" data-tab="summary" onclick="switchTab('summary')">指導集計</button>
+      <button class="tab-btn" data-tab="karte" onclick="switchTab('karte')">生徒カルテ</button>
+    </div>
+    <div class="tab-nav hidden" data-group="mendan">
+      <button class="tab-btn active" data-tab="student" onclick="switchTab('student')">生徒面談</button>
+      <button class="tab-btn" data-tab="parent" onclick="switchTab('parent')">保護者面談</button>
+      <button class="tab-btn" data-tab="grade" onclick="switchTab('grade')">成績入力</button>
+      <button class="tab-btn" data-tab="audio" onclick="switchTab('audio')">テキストまとめ</button>
+      <button class="tab-btn" data-tab="karte" onclick="switchTab('karte')">生徒カルテ</button>
+    </div>
+  </div>
+
+  <!-- ===== 指導記録 ===== -->
+  <div id="screen-shido" class="screen">
+    <div class="card">
+      <div class="section-tag tag-study">指導記録</div>
+      <div class="field"><label>校舎</label><select id="sk-school" onchange="skOnSchoolChange()"></select></div>
+      <div class="field">
+        <label>学年</label>
+        <select id="sk-grade" onchange="skOnGradeChange()">
+          <option value="">すべての学年</option>
+          <optgroup label="小学生"><option>小1</option><option>小2</option><option>小3</option><option>小4</option><option>小5</option><option>小6</option></optgroup>
+          <optgroup label="中学生"><option>中1</option><option>中2</option><option>中3</option></optgroup>
+          <optgroup label="高校生・既卒"><option>高1</option><option>高2</option><option>高3</option><option>既卒</option></optgroup>
+        </select>
+      </div>
+      <div class="field"><label>指導日</label><input type="date" id="sk-date" class="sk-date" onchange="skOnHeaderChange()"></div>
+      <div class="field">
+        <label>講師</label>
+        <select id="sk-teacher" onchange="skOnHeaderChange()"><option value="">読み込み中...</option></select>
+        <label class="sk-inline-check"><input type="checkbox" id="sk-all-teachers" onchange="skOnAllTeachersChange()">全校舎の講師を表示</label>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>教科</label>
+        <div class="sk-subjects" id="sk-subjects"></div>
+      </div>
+    </div>
+
+    <details class="sk-criteria" open>
+      <summary>「順調」「気になる」の基準</summary>
+      <div><span class="ok">順調：</span>全問を確認し、間違い直しまで終えていて、記述で根拠を示せていた</div>
+      <div><span class="ng">気になる（目安）：</span>同じミスが2回続いた / 「なぜ？」に答えられなかった / 宿題が出ていない / 前回より明らかに理解が浅い</div>
+    </details>
+
+    <div class="card">
+      <div class="sk-toolbar">
+        <button class="sk-allbtn" id="sk-allbtn" onclick="skToggleAll()">全員チェック</button>
+        <span class="sk-count" id="sk-count"></span>
+      </div>
+      <div id="sk-msg"></div>
+      <div id="sk-list"><div class="empty-state">校舎を選択すると生徒一覧が表示されます</div></div>
+      <div class="sk-add">
+        <input type="text" id="sk-add-name" list="sk-datalist" placeholder="名前で検索して追加" onkeydown="if(event.key==='Enter')skAddStudent()">
+        <datalist id="sk-datalist"></datalist>
+        <button onclick="skAddStudent()">追加</button>
+      </div>
+    </div>
+    <div id="sk-result"></div>
+    <div class="sk-spacer"></div>
+
+    <div class="sk-savebar">
+      <div class="sk-savebar-inner">
+        <button class="btn-save" id="sk-save-btn" onclick="skConfirmSave()" disabled>まとめて保存</button>
+      </div>
+    </div>
+    <div id="sk-modal"></div>
+  </div>
+
+  <!-- ===== 進度（Phase 2） ===== -->
+  <div id="screen-progress" class="screen">
+    <div class="empty-state">「進度」は準備中です</div>
+  </div>
+
+  <!-- ===== 指導集計（Phase 3） ===== -->
+  <div id="screen-summary" class="screen">
+    <div class="empty-state">「指導集計」は準備中です</div>
   </div>
 
   <!-- ===== 生徒面談 ===== -->
@@ -884,6 +1021,7 @@ async function handleLogin(ev){
     localStorage.setItem('authToken', data.token);
     document.getElementById('login-gate').style.display='none';
     document.getElementById('main-app').style.display='block';
+    if(document.getElementById('screen-shido').classList.contains('active'))skEnsureLoaded();
   }catch(e){
     err.textContent = e.message;
   }finally{
@@ -925,7 +1063,8 @@ function calState(key) { return key==='p' ? pState : key==='g' ? gState : sState
 
 function initCal() {
   const t = new Date();
-  ['s','p','g'].forEach(k => { cals[k].year = t.getFullYear(); cals[k].month = t.getMonth(); renderCal(k); });
+  // 成績入力(g)にはカレンダー要素がないため、画面に存在するものだけ描画する
+  ['s','p','g'].forEach(k => { cals[k].year = t.getFullYear(); cals[k].month = t.getMonth(); if(document.getElementById('cal-grid-'+k)) renderCal(k); });
 }
 
 function renderCal(key) {
@@ -990,12 +1129,31 @@ document.addEventListener('click',e=>{
 function getDateStr(st){ const d=st.selectedDate; if(!d)return'（日付未選択）'; const m=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月']; return d.y+'年'+m[d.m]+d.d+'日'; }
 
 // ===== Tab =====
-function switchTab(name,btn){
+// 生徒カルテ(karte)は両グループに置き、開いてもグループは切り替えない
+const TAB_GROUP={shido:'shido',progress:'shido',summary:'shido',student:'mendan',parent:'mendan',grade:'mendan',audio:'mendan'};
+const groupLastTab={shido:'shido',mendan:'student'};
+let currentGroup='shido';
+
+function setGroup(g){
+  currentGroup=g;
+  document.querySelectorAll('.group-btn').forEach(b=>b.classList.toggle('active',b.dataset.group===g));
+  document.querySelectorAll('.tab-nav[data-group]').forEach(n=>n.classList.toggle('hidden',n.dataset.group!==g));
+}
+
+function switchGroup(g){
+  switchTab(groupLastTab[g]);
+  setGroup(g);
+}
+
+function switchTab(name){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
-  btn.classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  if(TAB_GROUP[name]){setGroup(TAB_GROUP[name]);}
+  groupLastTab[currentGroup]=name;
+  try{localStorage.setItem('lastTab',name);}catch(e){}
   window.scrollTo(0,0);
+  if(name==='shido'&&getAuthToken())skEnsureLoaded();
 }
 
 // ===== Shared helpers =====
@@ -1742,6 +1900,400 @@ async function saveAudioToSheet() {
   }
 }
 
+// ===== 指導記録 =====
+const SK_SUBJECTS=['国語','数学','英語','理科','社会','その他'];
+const SK_ACTIONS=['動画を案内した','宿題を追加した','保護者に連絡が必要','次回もう一度確認','責任教師に共有'];
+const SK_DRAFT_KEY='shidoDraft_v1';
+// gas/code.gs の SCHOOL_GROUPS と同じ（みずほ台の2校舎は相互に表示）
+const SK_SCHOOL_GROUPS={'みずほ台校舎':['みずほ台校舎','みずほ台校舎（Luce）'],'みずほ台校舎（Luce）':['みずほ台校舎','みずほ台校舎（Luce）']};
+const skState={school:'',grade:'',date:'',dateSetOn:'',teacher:'',subject:'',allTeachers:false,
+  students:[],   // 校舎の生徒一覧 [{name,key,grades,grade}]
+  rows:{},       // 生徒名 -> 入力内容
+  extras:[],     // 名前検索で追加した生徒
+  view:[],       // 表示中の生徒名（行の data-i と対応）
+  loadedSchool:null,saving:false};
+let skMasters=null,skMastersLoading=null,skInited=false,skDraftTimer=null;
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// 空白（全角・半角）を除いた生徒名の照合キー。保存する文字列自体は変えない
+function skNorm(s){return String(s||'').replace(/[\s　]/g,'');}
+function skToday(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function skNewId(){
+  if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();
+  return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)+'-'+Math.random().toString(36).slice(2,10);
+}
+function skSchoolMatch(rowSchool,filter){return rowSchool===filter||(SK_SCHOOL_GROUPS[filter]||[]).includes(rowSchool);}
+
+function skNewRow(name,grade){return{name,grade:grade||'',checked:false,status:'順調',visits:1,tags:[],actions:[],memo:'',rid:skNewId()};}
+function skFindStudent(name){const k=skNorm(name);return skState.students.find(s=>s.key===k||skNorm(s.name)===k);}
+function skRow(name){
+  if(!skState.rows[name])skState.rows[name]=skNewRow(name,'');
+  return skState.rows[name];
+}
+function skIsDirty(r){return r.checked||r.status!=='順調'||r.visits!==1||r.tags.length||r.actions.length||r.memo;}
+function skChecked(){return Object.values(skState.rows).filter(r=>r.checked);}
+function skGradeFor(r){
+  const s=skFindStudent(r.name);
+  if(!s)return r.grade||skState.grade||'';
+  return skState.grade&&s.grades.includes(skState.grade)?skState.grade:s.grade;
+}
+
+// --- 下書き（ブラウザに自動保存） ---
+function skSaveDraftNow(){
+  clearTimeout(skDraftTimer);
+  const rows={};
+  Object.values(skState.rows).forEach(r=>{if(skIsDirty(r))rows[r.name]=r;});
+  const d={v:1,school:skState.school,grade:skState.grade,date:skState.date,dateSetOn:skState.dateSetOn,teacher:skState.teacher,
+    subject:skState.subject,allTeachers:skState.allTeachers,extras:skState.extras,rows};
+  try{localStorage.setItem(SK_DRAFT_KEY,JSON.stringify(d));}catch(e){}
+}
+function skSaveDraft(){clearTimeout(skDraftTimer);skDraftTimer=setTimeout(skSaveDraftNow,300);}
+window.addEventListener('pagehide',()=>{if(skInited)skSaveDraftNow();});
+
+function skLoadDraft(){
+  const today=skToday();
+  let d=null;
+  try{d=JSON.parse(localStorage.getItem(SK_DRAFT_KEY)||'null');}catch(e){}
+  if(!d||d.v!==1){skState.date=today;skState.dateSetOn=today;return false;}
+  skState.school=String(d.school||'');
+  skState.grade=String(d.grade||'');
+  skState.teacher=String(d.teacher||'');
+  skState.subject=SK_SUBJECTS.includes(d.subject)?d.subject:'';
+  skState.allTeachers=!!d.allTeachers;
+  skState.extras=Array.isArray(d.extras)?d.extras.map(String):[];
+  const strs=a=>Array.isArray(a)?a.map(String):[];
+  Object.entries(d.rows||{}).forEach(([name,r])=>{
+    if(!r||typeof r!=='object')return;
+    skState.rows[name]={name,grade:String(r.grade||''),checked:!!r.checked,status:r.status==='気になる'?'気になる':'順調',
+      visits:Number.isInteger(r.visits)?Math.min(30,Math.max(0,r.visits)):1,tags:strs(r.tags),actions:strs(r.actions),
+      memo:String(r.memo||''),rid:/^[A-Za-z0-9-]{8,64}$/.test(r.rid||'')?r.rid:skNewId()};
+  });
+  const hasChecked=skChecked().length>0;
+  // 指導日は「入力途中の記録がある」か「今日選んだ日付」のときだけ引き継ぐ（前日の日付のまま入力するのを防ぐ）
+  if(d.date&&(hasChecked||d.dateSetOn===today)){skState.date=d.date;skState.dateSetOn=d.dateSetOn||today;}
+  else{skState.date=today;skState.dateSetOn=today;}
+  return hasChecked;
+}
+
+async function skDiscardDraft(){
+  if(!await skConfirm('<p>入力途中の内容（チェック・気になるの詳細）を破棄しますか？</p>','破棄する'))return;
+  skState.rows={};skState.extras=[];
+  skSaveDraftNow();skShowMsg('');skRenderList();
+}
+
+// --- 初期化・読み込み ---
+async function skEnsureLoaded(){
+  if(!skInited){
+    skInited=true;
+    const schoolSel=document.getElementById('sk-school');
+    schoolSel.innerHTML=document.getElementById('karte-school').innerHTML;
+    const restored=skLoadDraft();
+    schoolSel.value=skState.school;
+    if(schoolSel.value!==skState.school){skState.school='';schoolSel.value='';}
+    document.getElementById('sk-grade').value=skState.grade;
+    document.getElementById('sk-date').value=skState.date;
+    document.getElementById('sk-all-teachers').checked=skState.allTeachers;
+    skRenderSubjects();
+    skRenderTeachers();
+    const list=document.getElementById('sk-list');
+    list.addEventListener('click',skOnListClick);
+    list.addEventListener('input',skOnListInput);
+    if(restored)skShowMsg('前回の入力途中の内容を復元しました。 <button class="copy-btn" style="margin-left:6px;padding:6px 10px" onclick="skDiscardDraft()">破棄する</button>','info');
+  }
+  const jobs=[];
+  if(!skMasters)jobs.push(skLoadMasters());
+  if(skState.school&&skState.loadedSchool!==skState.school)jobs.push(skLoadStudents());
+  else skRenderList();
+  await Promise.all(jobs);
+}
+
+function skLoadMasters(){
+  if(skMastersLoading)return skMastersLoading;
+  skMastersLoading=(async()=>{
+    try{
+      const res=await authFetch('/api/shido?action=getShidoMasters');
+      const data=await res.json();
+      if(data.error)throw new Error(data.error);
+      skMasters={tags:data.tags||{},teachers:data.teachers||[]};
+    }catch(e){
+      skShowMsg('講師・タグの読み込みに失敗しました：'+esc(e.message),'error');
+    }finally{skMastersLoading=null;}
+    skRenderTeachers();
+    skRenderList();
+  })();
+  return skMastersLoading;
+}
+
+async function skLoadStudents(){
+  const school=skState.school;
+  const list=document.getElementById('sk-list');
+  if(!school){skState.students=[];skState.loadedSchool=null;skRenderList();return;}
+  list.innerHTML='<div class="loading">生徒一覧を読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
+  try{
+    const res=await authFetch('/api/shido?action=listStudentsDetailed&school='+encodeURIComponent(school));
+    const data=await res.json();
+    if(data.error)throw new Error(data.error);
+    if(school!==skState.school)return;
+    skState.students=data.students||[];
+    skState.loadedSchool=school;
+    document.getElementById('sk-datalist').innerHTML=skState.students.map(s=>`<option value="${esc(s.name)}">`).join('');
+    skRenderList();
+  }catch(e){
+    if(school!==skState.school)return;
+    list.innerHTML=`<div class="error-msg">生徒一覧の取得に失敗しました：${esc(e.message)}</div><button class="sk-allbtn" style="margin-top:8px" onclick="skLoadStudents()">再読み込み</button>`;
+  }
+}
+
+// --- 上部（校舎・学年・日付・講師・教科） ---
+async function skOnSchoolChange(){
+  const sel=document.getElementById('sk-school');
+  const next=sel.value;
+  const n=skChecked().length;
+  if(n&&!await skConfirm(`<p>チェック済みの ${n}名 の入力内容が消えます。校舎を切り替えますか？</p>`,'切り替える')){sel.value=skState.school;return;}
+  skState.school=next;skState.rows={};skState.extras=[];skState.students=[];skState.loadedSchool=null;
+  document.getElementById('sk-datalist').innerHTML='';
+  skShowMsg('');
+  skRenderTeachers();skSaveDraft();
+  await skLoadStudents();
+}
+function skOnGradeChange(){skState.grade=v('sk-grade');skRenderList();skSaveDraft();}
+function skOnHeaderChange(){
+  const d=v('sk-date');
+  if(d!==skState.date){skState.date=d;skState.dateSetOn=skToday();}
+  skState.teacher=v('sk-teacher');
+  skSaveDraft();
+}
+function skOnAllTeachersChange(){skState.allTeachers=document.getElementById('sk-all-teachers').checked;skRenderTeachers();skSaveDraft();}
+function skSelectSubject(s){skState.subject=s;skRenderSubjects();skRenderList();skSaveDraft();}
+
+function skRenderSubjects(){
+  document.getElementById('sk-subjects').innerHTML=SK_SUBJECTS.map(s=>
+    `<button type="button" class="sk-subj${s===skState.subject?' selected':''}" onclick="skSelectSubject('${s}')">${s}</button>`).join('');
+}
+
+function skRenderTeachers(){
+  const sel=document.getElementById('sk-teacher');
+  let names=[],head='-- 講師を選択 --';
+  if(skMasters){
+    // 所属校舎が空欄の講師は全校舎に表示
+    names=skMasters.teachers
+      .filter(t=>skState.allTeachers||!skState.school||!t.schools.length||t.schools.some(s=>skSchoolMatch(s,skState.school)))
+      .map(t=>t.name);
+    if(!skMasters.teachers.length)head='（講師マスタが空です）';
+  }else head='（講師を読み込めません）';
+  names=[...new Set(names)];
+  if(skState.teacher&&!names.includes(skState.teacher))names.unshift(skState.teacher);
+  sel.innerHTML=`<option value="">${head}</option>`+names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  sel.value=skState.teacher;
+}
+
+// --- 生徒一覧 ---
+function skComputeView(){
+  const g=skState.grade,seen=new Set(),out=[];
+  const push=n=>{const k=skNorm(n);if(seen.has(k))return;seen.add(k);out.push(n);};
+  skState.students.forEach(s=>{if(!g||s.grades.includes(g))push(s.name);});
+  skState.extras.forEach(push);
+  // 学年を切り替えても、チェック済みの生徒は一覧から消さない
+  Object.values(skState.rows).forEach(r=>{if(r.checked)push(r.name);});
+  return out;
+}
+
+function skRenderList(){
+  const list=document.getElementById('sk-list');
+  if(!skState.school){
+    skState.view=[];
+    list.innerHTML='<div class="empty-state">校舎を選択すると生徒一覧が表示されます</div>';
+    skUpdateCount();return;
+  }
+  if(skState.loadedSchool!==skState.school){skUpdateCount();return;}
+  skState.view=skComputeView();
+  if(!skState.view.length){
+    list.innerHTML=`<div class="empty-state">${skState.grade?esc(skState.grade)+'の':''}生徒が見つかりません。<br>下の欄から名前で追加できます。</div>`;
+  }else{
+    list.innerHTML=skState.view.map((n,i)=>skRowHtml(n,i)).join('');
+  }
+  skUpdateCount();
+}
+
+function skRowHtml(name,i){
+  const r=skRow(name);
+  const s=skFindStudent(name);
+  const grade=s?s.grade:r.grade;
+  const worry=r.status==='気になる';
+  const cls='sk-row'+(r.checked?' on':'')+(worry?' worry':'');
+  let h=`<div class="${cls}" data-i="${i}"><div class="sk-row-main">
+    <div class="sk-att" data-act="att"><input type="checkbox" tabindex="-1"${r.checked?' checked':''}><span class="sk-name">${esc(name)}${grade?`<span class="sk-grade">${esc(grade)}</span>`:''}</span></div>
+    <div class="sk-ctrls">
+      <div class="sk-status"><button type="button" class="ok${worry?'':' selected'}" data-act="ok">順調</button><button type="button" class="ng${worry?' selected':''}" data-act="ng">気になる</button></div>
+      <div class="sk-step"><button type="button" data-act="minus" aria-label="来室回数を減らす">−</button><div class="sk-step-val"><b>${r.visits}</b><small>来室</small></div><button type="button" data-act="plus" aria-label="来室回数を増やす">＋</button></div>
+    </div></div>`;
+  if(worry)h+=skDetailHtml(r);
+  return h+'</div>';
+}
+
+function skTagOptions(r){
+  const t=(skMasters&&skMasters.tags)||{};
+  const opts=[...(t['共通']||[]),...(skState.subject?(t[skState.subject]||[]):[])];
+  // 教科を切り替えても、選択済みのタグは消さずに表示する
+  r.tags.forEach(x=>{if(!opts.includes(x))opts.push(x);});
+  return [...new Set(opts)];
+}
+
+function skDetailHtml(r){
+  const tags=skTagOptions(r);
+  const chip=(act,val,sel)=>`<button type="button" class="sk-chip${sel?' selected':''}" data-act="${act}" data-v="${esc(val)}">${esc(val)}</button>`;
+  return `<div class="sk-detail">
+    <div class="sk-detail-lbl">つまずき${skState.subject?'':'（教科を選ぶと教科別の候補が出ます）'}</div>
+    <div class="sk-chips">${tags.length?tags.map(t=>chip('tag',t,r.tags.includes(t))).join(''):'<span style="font-size:12px;color:#999">タグがありません</span>'}</div>
+    <div class="sk-detail-lbl">対応</div>
+    <div class="sk-chips">${SK_ACTIONS.map(a=>chip('action',a,r.actions.includes(a))).join('')}</div>
+    <div class="sk-detail-lbl">一言メモ</div>
+    <textarea class="memo" data-act="memo" style="min-height:60px" placeholder="例：比例の式で x と y を逆にしてしまう">${esc(r.memo)}</textarea>
+  </div>`;
+}
+
+function skOnListClick(e){
+  if(skState.saving)return;
+  const el=e.target.closest('[data-act]');
+  if(!el||el.dataset.act==='memo')return;
+  const rowEl=el.closest('.sk-row');
+  if(!rowEl)return;
+  const i=+rowEl.dataset.i;
+  const r=skRow(skState.view[i]);
+  const act=el.dataset.act;
+  // 状態や回数を触った生徒は出席扱いにする
+  if(act==='att')r.checked=!r.checked;
+  else if(act==='ok'){r.status='順調';r.checked=true;}
+  else if(act==='ng'){r.status='気になる';r.checked=true;}
+  else if(act==='minus'){r.visits=Math.max(0,r.visits-1);r.checked=true;}
+  else if(act==='plus'){r.visits=Math.min(30,r.visits+1);r.checked=true;}
+  else if(act==='tag'||act==='action'){
+    const arr=act==='tag'?r.tags:r.actions,val=el.dataset.v,k=arr.indexOf(val);
+    if(k>=0)arr.splice(k,1);else arr.push(val);
+  }
+  rowEl.outerHTML=skRowHtml(skState.view[i],i);
+  skUpdateCount();skSaveDraft();
+}
+
+function skOnListInput(e){
+  if(e.target.dataset.act!=='memo')return;
+  const rowEl=e.target.closest('.sk-row');
+  skRow(skState.view[+rowEl.dataset.i]).memo=e.target.value;
+  skSaveDraft();
+}
+
+function skToggleAll(){
+  if(skState.saving||!skState.view.length)return;
+  const all=skState.view.every(n=>skRow(n).checked);
+  skState.view.forEach(n=>{skRow(n).checked=!all;});
+  skRenderList();skSaveDraft();
+}
+
+function skAddStudent(){
+  const input=document.getElementById('sk-add-name');
+  const raw=input.value.trim();
+  if(!raw)return;
+  if(!skState.school){skShowMsg('先に校舎を選択してください','error');return;}
+  if(skState.loadedSchool!==skState.school)return;
+  const k=skNorm(raw);
+  const s=skFindStudent(raw);
+  const known=Object.values(skState.rows).find(r=>skNorm(r.name)===k);
+  const name=s?s.name:known?known.name:raw;
+  if(!skState.extras.some(n=>skNorm(n)===k))skState.extras.push(name);
+  const r=skRow(name);
+  if(!s&&!r.grade)r.grade=skState.grade;
+  r.checked=true;
+  input.value='';
+  skShowMsg(s||known?'':`「${esc(name)}」は既存の記録にない名前です。表記（空白の有無など）を確認してください。`,'error');
+  skRenderList();skSaveDraft();
+  const idx=skState.view.findIndex(n=>skNorm(n)===k);
+  const el=document.querySelector(`#sk-list .sk-row[data-i="${idx}"]`);
+  if(el)el.scrollIntoView({block:'center',behavior:'smooth'});
+}
+
+function skUpdateCount(){
+  const c=skChecked();
+  const w=c.filter(r=>r.status==='気になる').length;
+  document.getElementById('sk-count').textContent=c.length?`出席 ${c.length}名${w?`（気になる ${w}名）`:''}`:'';
+  const all=skState.view.length&&skState.view.every(n=>skRow(n).checked);
+  document.getElementById('sk-allbtn').textContent=all?'全員のチェックを外す':'全員チェック';
+  if(skState.saving)return;
+  const btn=document.getElementById('sk-save-btn');
+  btn.textContent=c.length?`まとめて保存（${c.length}名）`:'まとめて保存';
+  btn.disabled=!c.length;
+}
+
+function skShowMsg(html,type){
+  document.getElementById('sk-msg').innerHTML=html?`<div class="${type==='error'?'error-msg':'success-msg'}" style="margin:0 0 10px">${html}</div>`:'';
+}
+
+// ページ内の確認ダイアログ（bodyHtml はエスケープ済みで渡す）
+function skConfirm(bodyHtml,okLabel){
+  return new Promise(resolve=>{
+    const m=document.getElementById('sk-modal');
+    m.innerHTML=`<div class="sk-modal-bg"><div class="sk-modal" role="dialog" aria-modal="true">${bodyHtml}
+      <div class="sk-modal-actions"><button class="btn btn-ghost" data-r="0">キャンセル</button><button class="btn btn-primary" data-r="1">${esc(okLabel)}</button></div></div></div>`;
+    m.querySelectorAll('[data-r]').forEach(b=>{b.onclick=()=>{m.innerHTML='';resolve(b.dataset.r==='1');};});
+  });
+}
+
+// --- 保存 ---
+async function skConfirmSave(){
+  if(skState.saving)return;
+  const miss=[];
+  if(!skState.school)miss.push('校舎');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(skState.date))miss.push('指導日');
+  if(!skState.teacher)miss.push('講師');
+  if(!skState.subject)miss.push('教科');
+  if(miss.length){skShowMsg(esc(miss.join('・'))+' を選択してください','error');window.scrollTo({top:0,behavior:'smooth'});return;}
+  const rows=skChecked();
+  if(!rows.length)return;
+  const worry=rows.filter(r=>r.status==='気になる').length;
+  const notToday=skState.date!==skToday()?'<div class="warn-msg">※ 指導日が今日ではありません</div>':'';
+  const body=`<h3>${rows.length}名を保存します（うち気になる ${worry}名）</h3>
+    <div style="font-size:13px;color:#555">${esc(skState.date)}　${esc(skState.teacher)}　${esc(skState.subject)}</div>${notToday}
+    <div class="sk-modal-list">${rows.map(r=>`${r.status==='気になる'?'<span class="sk-worry-mark">● 気になる</span> ':''}${esc(r.name)}（来室 ${r.visits}）`).join('<br>')}</div>`;
+  if(!await skConfirm(body,'保存する'))return;
+  await skDoSave(rows);
+}
+
+async function skDoSave(rows){
+  skState.saving=true;
+  const btn=document.getElementById('sk-save-btn');
+  const list=document.getElementById('sk-list');
+  const result=document.getElementById('sk-result');
+  btn.disabled=true;btn.textContent='保存中...';
+  list.style.opacity='0.6';
+  result.innerHTML='';
+  // 記録IDは行ごとに固定。通信失敗後に再送しても、GAS側で重複分はスキップされる
+  const records=rows.map(r=>{
+    const worry=r.status==='気になる';
+    return{id:r.rid,date:skState.date,school:skState.school,teacher:skState.teacher,subject:skState.subject,
+      student:r.name,grade:skGradeFor(r),status:r.status,visits:r.visits,
+      tags:worry?r.tags:[],actions:worry?r.actions:[],memo:worry?r.memo.trim():''};
+  });
+  try{
+    const res=await authFetch('/api/shido',{method:'POST',body:JSON.stringify({action:'saveShidoRecords',records})});
+    let data;
+    try{data=await res.json();}catch(_){throw new Error(`サーバーから正しい応答がありませんでした（HTTP ${res.status}）`);}
+    if(!res.ok||data.error||!data.ok)throw new Error(data.error||('HTTP '+res.status));
+    rows.forEach(r=>{skState.rows[r.name]=skNewRow(r.name,r.grade);});
+    skSaveDraftNow();
+    skShowMsg('');
+    // skipped は「前回の送信で実は保存できていた」記録（応答だけ届かなかった場合など）
+    const total=data.saved+data.skipped;
+    result.innerHTML=`<div class="success-msg">${total}件を保存しました${data.skipped?`（うち${data.skipped}件は前回の送信で保存済みでした）`:''}</div>`;
+  }catch(e){
+    const msg=e instanceof TypeError?'通信できませんでした':e.message;
+    result.innerHTML=`<div class="error-msg">保存に失敗しました：${esc(msg)}<br>入力内容は残っています。通信状況を確認して、もう一度「まとめて保存」を押してください（二重に登録されることはありません）。</div>`;
+  }finally{
+    skState.saving=false;
+    list.style.opacity='';
+    skRenderList();
+    result.scrollIntoView({block:'nearest',behavior:'smooth'});
+  }
+}
+
 // ===== A4 プレビュー =====
 function showA4Preview(name){
   const d=karteData||{};
@@ -1925,10 +2477,17 @@ window.onload=()=>{
     document.querySelector('.header h1').textContent='成績入力フォーム';
     document.querySelector('.header p').textContent='テスト結果を入力して「スプレッドシートに保存」を押してください。';
 
-    document.querySelector('.tab-nav').style.display='none';
+    document.getElementById('nav-wrap').style.display='none';
     document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.getElementById('screen-grade').classList.add('active');
+    return;
   }
+
+  // 前回開いていたタブを復元（初回は指導記録）
+  let last='shido';
+  try{ last=localStorage.getItem('lastTab')||'shido'; }catch(e){}
+  if(!document.getElementById('screen-'+last)) last='shido';
+  switchTab(last);
 };
 </script>
 <!-- A4 Preview Overlay -->
