@@ -218,9 +218,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 
 </div>
 <script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// GASの応答を確認し、保存できていなければ例外にする。
+// uncertain=true は「保存できたか分からない」（通信断・Googleのエラーページなど）
 async function postToGas(payload){
-  const res = await fetch('/api/save-public', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
-  return res.json();
+  let res;
+  try{ res = await fetch('/api/save-public', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)}); }
+  catch(e){ const err=new Error('通信できませんでした'); err.uncertain=true; throw err; }
+  let data;
+  try{ data = await res.json(); }catch(_){ data = null; }
+  if(!data || data.raw!==undefined){ const err=new Error(`サーバーから正しい応答がありませんでした（HTTP ${res.status}）`); err.uncertain=true; throw err; }
+  if(!res.ok || data.error || data.ok!==true) throw new Error(data.error||('HTTP '+res.status));
+  return data;
+}
+
+function saveFailMsg(e){
+  if(e&&e.uncertain) return `<div class="error-msg">保存できたか確認できませんでした（${esc(e.message)}）。<br>先生に確認してから、必要ならもう一度押してください。</div>`;
+  return `<div class="error-msg">保存に失敗しました：${esc(e&&e.message||'不明なエラー')}<br>入力内容は残っています。もう一度押してください。</div>`;
 }
 
 function v(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
@@ -254,7 +269,7 @@ async function saveGrade(){
     msg.innerHTML='<div class="success-msg">テスト結果を保存しました！</div>';
     btn.textContent='保存済み';
   }catch(e){
-    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    msg.innerHTML=saveFailMsg(e);
     btn.disabled=false; btn.textContent='テスト結果を保存する';
   }
 }
@@ -270,7 +285,7 @@ async function saveTargetSchools(){
     msg.innerHTML='<div class="success-msg">志望校を保存しました！</div>';
     btn.textContent='保存済み';
   }catch(e){
-    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    msg.innerHTML=saveFailMsg(e);
     btn.disabled=false; btn.textContent='志望校を保存する';
   }
 }
@@ -304,7 +319,7 @@ async function saveReportCard(){
     msg.innerHTML='<div class="success-msg">通知表を保存しました！</div>';
     btn.textContent='保存済み';
   }catch(e){
-    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    msg.innerHTML=saveFailMsg(e);
     btn.disabled=false; btn.textContent='通知表を保存する';
   }
 }

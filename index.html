@@ -1052,9 +1052,23 @@ async function authFetch(url, opts){
   return res;
 }
 
+// GASの応答を確認し、保存できていなければ例外にする。
+// uncertain=true は「保存できたか分からない」（通信断・Googleのエラーページなど）。再送すると二重登録の可能性がある
 async function postToGas(payload){
-  const res = await authFetch('/api/save', {method:'POST', body: JSON.stringify(payload)});
-  return res.json();
+  let res;
+  try{ res = await authFetch('/api/save', {method:'POST', body: JSON.stringify(payload)}); }
+  catch(e){ if(e instanceof TypeError){ const err=new Error('通信できませんでした'); err.uncertain=true; throw err; } throw e; }
+  let data;
+  try{ data = await res.json(); }catch(_){ data = null; }
+  if(!data || data.raw!==undefined){ const err=new Error(`サーバーから正しい応答がありませんでした（HTTP ${res.status}）`); err.uncertain=true; throw err; }
+  if(!res.ok || data.error || data.ok!==true) throw new Error(data.error||('HTTP '+res.status));
+  return data;
+}
+
+// 既存の保存ボタン用の失敗メッセージ
+function saveFailMsg(e){
+  if(e&&e.uncertain) return `<div class="error-msg">保存できたか確認できませんでした（${esc(e.message)}）。<br>スプレッドシートを確認し、保存されていなければもう一度押してください。</div>`;
+  return `<div class="error-msg">保存に失敗しました：${esc(e&&e.message||'不明なエラー')}<br>入力内容は残っています。もう一度押してください。</div>`;
 }
 
 function handleAuthFailure(){
@@ -1373,7 +1387,7 @@ async function saveStudentToSheet(){
     msg.innerHTML='<div class="success-msg">スプレッドシートに保存しました！</div>';
     btn.textContent='保存済み';
   }catch(e){
-    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    msg.innerHTML=saveFailMsg(e);
     btn.disabled=false; btn.textContent='スプレッドシートに保存';
   }
 }
@@ -1435,7 +1449,7 @@ async function saveParentToSheet(){
     msg.innerHTML='<div class="success-msg">スプレッドシートに保存しました！</div>';
     btn.textContent='保存済み';
   }catch(e){
-    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    msg.innerHTML=saveFailMsg(e);
     btn.disabled=false; btn.textContent='スプレッドシートに保存';
   }
 }
@@ -1469,7 +1483,7 @@ async function saveGrade(){
     msg.innerHTML='<div class="success-msg">スプレッドシートに保存しました！</div>';
     btn.textContent='保存済み';
   }catch(e){
-    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    msg.innerHTML=saveFailMsg(e);
     btn.disabled=false; btn.textContent='成績をスプレッドシートに保存';
   }
 }
@@ -1822,7 +1836,7 @@ async function saveKarteToSheet(name){
     await postToGas(payload);
     msg.innerHTML='<div class="success-msg">カルテをシートに保存しました！</div>';
   }catch(e){
-    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    msg.innerHTML=saveFailMsg(e);
   }
 }
 
@@ -1847,7 +1861,7 @@ async function saveTargetSchools(){
     msg.innerHTML='<div class="success-msg">志望校を保存しました！</div>';
     btn.textContent='保存済み';
   }catch(e){
-    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    msg.innerHTML=saveFailMsg(e);
     btn.disabled=false; btn.textContent='志望校を保存';
   }
 }
@@ -1884,7 +1898,7 @@ async function saveReportCard(){
     msg.innerHTML='<div class="success-msg">通知表を保存しました！</div>';
     btn.textContent='保存済み';
   }catch(e){
-    msg.innerHTML='<div class="error-msg">保存に失敗しました。</div>';
+    msg.innerHTML=saveFailMsg(e);
     btn.disabled=false; btn.textContent='通知表を保存';
   }
 }
@@ -1988,7 +2002,7 @@ async function saveAudioToSheet() {
     await postToGas(payload);
     msg.innerHTML = '<div class="success-msg">シートに保存しました！</div>';
   } catch (e) {
-    msg.innerHTML = '<div class="error-msg">保存に失敗しました。</div>';
+    msg.innerHTML = saveFailMsg(e);
   }
 }
 
