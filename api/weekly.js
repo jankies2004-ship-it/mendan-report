@@ -27,7 +27,8 @@ const SYSTEM_PROMPT = `あなたは学習塾「エイメイ学院」の塾長と
 - 「今週の記録」に書かれた事実だけを使う。記録にない出来事・点数・発言・様子は書かない。
 - 生徒のことは「{{生徒}}さん」と書き、名前は全体で1〜2回までにする（2回目以降は省くか「お子さま」）。講師の名前は書かない。
 - 「順調」の記録は「順調に進みました」程度にとどめ、「集中していた」「落ち着いていた」など記録にない様子を付け足さない。
-- 構成：あいさつ1文 → 今週の来室と取り組んだ教科 → 教科ごとの様子 → 定期テストが近ければひとこと → 締めの1文。
+- 構成：あいさつ1文 → 今週の指導回数と取り組んだ教科 → 教科ごとの様子 → 定期テストが近ければひとこと → 締めの1文。
+- 「来室」「通塾」ではなく「指導」という言葉を使う（例：今週は3回の指導で、数学と英語に取り組みました）。
 - 順調だった点はしっかり伝える。つまずきは、塾で行った対応とあわせて「〜を重点的に練習しています」のように前向きに伝え、不安をあおらない。
 - 「気になる」「つまずき」という語や記録の項目名をそのまま並べず、保護者に自然に伝わる言葉に言い換える。
 - ご家庭へのお願いは書かない（必要なら塾長が追記する）。
@@ -60,7 +61,7 @@ function buildPrompt(src) {
     `校舎：${src.school}`,
     `学年：${src.grade || '不明'}`,
     `期間：${md(src.from)}〜${md(src.to)}`,
-    `来室：${src.days}日`,
+    `指導回数：${Number(src.lessons) || 0}回（指導日 ${Number(src.days) || 0}日）`,
     '',
     '今週の記録（指導日・教科ごと）：',
     ...lines,
@@ -193,7 +194,7 @@ export default async function handler(req, res) {
         return;
       }
       const text = finishText(await callClaude(buildPrompt(src), apiKey, started + AI_DEADLINE_MS), src.name);
-      const saved = await gasSave({ ...base, op: 'generated', text, force: b.force === true, count: src.count, days: src.days });
+      const saved = await gasSave({ ...base, op: 'generated', text, force: b.force === true, count: src.count, lessons: src.lessons });
       // 保存に失敗しても生成文は返す（1名ずつ作成したときは画面に残して手動で保存できるようにする）
       if (saved.error) { res.status(200).json({ ...gasError(saved), error: '報告文を保存できませんでした：' + saved.error, text }); return; }
       res.status(200).json(saved);

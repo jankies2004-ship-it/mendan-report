@@ -1646,7 +1646,7 @@ function renderKarte(rawData,rawName){
   const hasData=(data.student&&data.student.length)||(data.parent&&data.parent.length)||(data.grade&&data.grade.length)||(data.audio&&data.audio.length)||(data.notice&&data.notice.length)||hasShido;
   if(!hasData){area.innerHTML=`<div class="empty-state">「${name}」の記録が見つかりませんでした。<br>氏名の表記を確認してください。</div>`;return;}
 
-  // 指導の状況（進度・直近の指導記録・連続回数・つまずきタグ・来室回数）
+  // 指導の状況（進度・直近の指導記録・連続回数・つまずきタグ・指導回数）
   karteShido=null;
   let html=renderShidoKarte(shido);
 
@@ -2351,7 +2351,7 @@ function skRowHtml(name,i){
     <div class="sk-att" data-act="att"><input type="checkbox" tabindex="-1"${r.checked?' checked':''}><span class="sk-name">${esc(name)}${grade?`<span class="sk-grade">${esc(grade)}</span>`:''}</span></div>
     <div class="sk-ctrls">
       <div class="sk-status"><button type="button" class="ok${worry?'':' selected'}" data-act="ok">順調</button><button type="button" class="ng${worry?' selected':''}" data-act="ng">気になる</button></div>
-      <div class="sk-step"><button type="button" data-act="minus" aria-label="来室回数を減らす">−</button><div class="sk-step-val"><b>${r.visits}</b><small>来室</small></div><button type="button" data-act="plus" aria-label="来室回数を増やす">＋</button></div>
+      <div class="sk-step"><button type="button" data-act="minus" aria-label="指導回数を減らす">−</button><div class="sk-step-val"><b>${r.visits}</b><small>指導回数</small></div><button type="button" data-act="plus" aria-label="指導回数を増やす">＋</button></div>
     </div></div>`;
   if(worry)h+=skDetailHtml(r);
   return h+'</div>';
@@ -2478,7 +2478,7 @@ async function skConfirmSave(){
   const notToday=skState.date!==skToday()?'<div class="warn-msg">※ 指導日が今日ではありません</div>':'';
   const body=`<h3>${rows.length}名を保存します（うち気になる ${worry}名）</h3>
     <div style="font-size:13px;color:#555">${esc(skState.date)}　${esc(skState.teacher)}　${esc(skState.subject)}</div>${notToday}
-    <div class="sk-modal-list">${rows.map(r=>`${r.status==='気になる'?'<span class="sk-worry-mark">● 気になる</span> ':''}${esc(r.name)}（来室 ${r.visits}）`).join('<br>')}</div>`;
+    <div class="sk-modal-list">${rows.map(r=>`${r.status==='気になる'?'<span class="sk-worry-mark">● 気になる</span> ':''}${esc(r.name)}（指導 ${r.visits}回）`).join('<br>')}</div>`;
   if(!await skConfirm(body,'保存する'))return;
   await skDoSave(rows);
 }
@@ -2851,7 +2851,7 @@ function wkRenderList(){
     const label=st==='未作成'?'作成':'再作成';
     return `<div class="wk-row"><button type="button" class="wk-row-main" data-act="open" data-i="${i}">
         <span class="wk-row-name">${esc(s.name)}${s.grade?`<span class="sk-grade">${esc(s.grade)}</span>`:''}</span>
-        <span class="wk-row-meta">来室 ${s.days}日・記録 ${s.count}件</span></button>
+        <span class="wk-row-meta">指導回数 ${Number(s.lessons)||0}回・記録 ${s.count}件</span></button>
       <div class="wk-row-ctrls">${wkBadge(s)}<button type="button" class="wk-btn" data-act="gen" data-i="${i}"${wkState.busy[s.key]?' disabled':''}>${label}</button></div></div>`;
   }).join('');
   area.innerHTML=`<div class="card">
@@ -2887,7 +2887,7 @@ async function wkLoadBackupStatus(){
 function wkRecordHtml(r){
   const w=r.status==='気になる';
   return `<div class="kt-rec${w?' worry':''}"><div class="kt-rec-head"><b style="color:#222">${fmtMD(r.date)}</b>${esc(r.subject)}<span>${esc(r.teacher)}</span>
-    <span class="kt-status ${w?'ng':'ok'}">${esc(r.status)}</span><span>来室 ${Number(r.visits)||0}</span></div>
+    <span class="kt-status ${w?'ng':'ok'}">${esc(r.status)}</span><span>指導 ${Number(r.visits)||0}回</span></div>
     ${r.tags.length||r.actions.length?`<div class="kt-chips">${r.tags.map(t=>`<span class="kt-chip">${esc(t)}</span>`).join('')}${r.actions.map(a=>`<span class="kt-chip act">${esc(a)}</span>`).join('')}</div>`:''}
     ${r.memo?`<div class="wk-memo"><span class="wk-memo-lbl">講師メモ（AIには送っていません）</span>${esc(r.memo)}</div>`:''}</div>`;
 }
@@ -2909,7 +2909,7 @@ function wkRenderDetail(){
     <div class="card-title" style="cursor:default;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
       ${esc(s.name)} さん${s.grade?`<span class="sk-grade">${esc(s.grade)}</span>`:''}<span id="wk-detail-badge">${wkBadge(s)}</span>
     </div>
-    <div class="pg-meta" style="margin-bottom:10px">${fmtMD(wkState.from)}〜${fmtMD(wkState.to)}・来室 ${s.days}日・記録 ${s.count}件</div>
+    <div class="pg-meta" style="margin-bottom:10px">${fmtMD(wkState.from)}〜${fmtMD(wkState.to)}・指導回数 ${Number(s.lessons)||0}回・記録 ${s.count}件</div>
     <div class="wk-detail-grid">
       <div>
         <textarea class="wk-text" id="wk-text" placeholder="「AIで作成」を押すと報告文の下書きが入ります。直接入力することもできます。"${busy?' disabled':''}>${esc(text)}</textarea>
@@ -3112,7 +3112,7 @@ async function wkSyncStatuses(){
       if(wkState.busy[n.key])return;
       // 開いている生徒の保存済み本文が変わり、編集中でなければ入力欄も描き直す
       if(n.key===wkState.current&&wkState.edits[n.key]===undefined&&wkSavedText(s)!==((n.report&&n.report.text)||''))redrawCurrent=true;
-      Object.assign(s,{report:n.report,records:n.records,count:n.count,days:n.days,grade:n.grade});
+      Object.assign(s,{report:n.report,records:n.records,count:n.count,days:n.days,lessons:n.lessons,grade:n.grade});
     });
     wkState.students.sort((a,b)=>a.name.localeCompare(b.name,'ja'));
     wkRefresh(redrawCurrent?wkState.current:'__bulk__');
@@ -3207,7 +3207,7 @@ function renderShidoKarte(shido){
     const recBody=recent.map(r=>{
       const w=r.status==='気になる';
       return `<div class="kt-rec${w?' worry':''}"><div class="kt-rec-head"><b style="color:#222">${fmtMD(r.date)}</b>${esc(r.subject)}<span>${esc(r.teacher)}</span>
-        <span class="kt-status ${w?'ng':'ok'}">${esc(r.status)}</span><span>来室 ${r.visits}</span></div>
+        <span class="kt-status ${w?'ng':'ok'}">${esc(r.status)}</span><span>指導 ${r.visits}回</span></div>
         ${r.tags.length||r.actions.length?`<div class="kt-chips">${r.tags.map(t=>`<span class="kt-chip">${esc(t)}</span>`).join('')}${r.actions.map(a=>`<span class="kt-chip act">${esc(a)}</span>`).join('')}</div>`:''}
         ${r.memo?`<div class="kt-memo">${esc(r.memo)}</div>`:''}</div>`;
     }).join('');
@@ -3219,14 +3219,14 @@ function renderShidoKarte(shido){
       const streak=s.ngStreak?`<span class="kt-status ng">気になるが${s.ngStreak}回連続</span>`:`<span class="kt-status ok">順調が${s.okStreak}回連続</span>`;
       const gap=s.sinceLast>=14?`<div class="kt-warn">⚠ ${s.sinceLast}日間 記録がありません</div>`:'';
       return `<div class="kt-sub-row"><div><b>${esc(s.subject)}</b>　${streak}${gap}</div>
-        <div style="text-align:right;font-size:12px;color:#666">最終記録 ${fmtMD(s.lastDate)}（${s.sinceLast<=0?'今日':s.sinceLast+'日前'}）<div class="pg-meta">記録 ${s.count}回・来室 計${s.visits}回</div></div></div>`;
+        <div style="text-align:right;font-size:12px;color:#666">最終記録 ${fmtMD(s.lastDate)}（${s.sinceLast<=0?'今日':s.sinceLast+'日前'}）<div class="pg-meta">記録 ${s.count}回・指導 計${s.visits}回</div></div></div>`;
     }).join('');
     html+=card('教科ごとの状況（連続回数・最終記録）',statBody+'<div class="pg-meta" style="margin-top:6px">連続回数は最新の記録からさかのぼって数えます。最終記録から14日以上空いている教科には⚠を表示します（記録漏れの確認用）。</div>');
 
     // つまずきタグ
     html+=card('つまずきタグ（多い順）','<div id="kt-tags"></div>');
-    // 来室回数の推移
-    html+=card('来室回数の推移（コマごと）','<div id="kt-visits"></div>');
+    // 指導回数の推移
+    html+=card('指導回数の推移（コマごと）','<div id="kt-visits"></div>');
   }
 
   // 保護者への週次報告（閲覧のみ。作成・編集は塾長の「週次報告」タブで行う）
@@ -3281,13 +3281,13 @@ function karteVisitsHtml(){
   const y=v=>padT+plotH-(v/maxV)*plotH;
   const avg=recs.reduce((a,r)=>a+r.visits,0)/recs.length;
   const maxIdx=recs.reduce((m,r,i)=>r.visits>recs[m].visits?i:m,0);
-  let svg=`<svg width="${W}" height="${H}" role="img" aria-label="来室回数の推移（${recs.length}コマ）" onmousemove="chartTip(event)" onclick="chartTip(event)">`;
+  let svg=`<svg width="${W}" height="${H}" role="img" aria-label="指導回数の推移（${recs.length}コマ）" onmousemove="chartTip(event)" onclick="chartTip(event)">`;
   // 目盛り（控えめ）
   [0,maxV].forEach(t=>{svg+=`<line x1="${padL}" x2="${W}" y1="${y(t)}" y2="${y(t)}" stroke="#eee" stroke-width="1"/><text x="${padL-6}" y="${y(t)+4}" font-size="10" fill="#999" text-anchor="end">${t}</text>`;});
   recs.forEach((r,i)=>{
     const x=padL+gap+i*(barW+gap);
     const w=r.status==='気になる';
-    const tip=`${fmtMD(r.date)} ${r.subject} 来室${r.visits}回（${r.status}）`;
+    const tip=`${fmtMD(r.date)} ${r.subject} 指導${r.visits}回（${r.status}）`;
     svg+=`<path d="${roundedTopBar(x,y(r.visits),barW,padT+plotH-y(r.visits),4)}" fill="${w?'#D97706':'#378ADD'}"/>`;
     if(i===recs.length-1||i===maxIdx)svg+=`<text x="${x+barW/2}" y="${y(r.visits)-4}" font-size="10" fill="#444" text-anchor="middle">${r.visits}</text>`;
     if(i===0||i===recs.length-1||i%5===0)svg+=`<text x="${x+barW/2}" y="${H-6}" font-size="10" fill="#999" text-anchor="middle">${fmtMD(r.date)}</text>`;

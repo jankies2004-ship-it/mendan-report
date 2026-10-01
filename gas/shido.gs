@@ -3,13 +3,39 @@
 // 新シートは既存の { sheet: ... } 形式の書き込みでは扱えない（unknown sheet になる）。
 
 const SHIDO_HEADERS = {
-  '指導記録': ['記録ID','入力日時','指導日','校舎','講師','教科','生徒','学年','状態','来室回数','つまずきタグ','対応','一言メモ','対応済みフラグ'],
+  '指導記録': ['記録ID','入力日時','指導日','校舎','講師','教科','生徒','学年','状態','指導回数','つまずきタグ','対応','一言メモ','対応済みフラグ'],
   'タグマスタ': ['教科','タグ名','表示順','有効フラグ'],
   '講師マスタ': ['講師名','所属校舎','有効フラグ'],
   '進度': ['生徒','校舎','学年','教科','教科書','現在の単元','次の定期テスト日','テスト範囲','更新日'],
   // 1行 = 1生徒×1期間。塾長だけが api/weekly.js 経由で読み書きする（gas/weekly.gs）
-  '週次報告': ['報告ID','生徒','校舎','学年','期間開始','期間終了','ステータス','本文','記録件数','来室日数','生成日時','確定日時','送信日時','更新日時']
+  '週次報告': ['報告ID','生徒','校舎','学年','期間開始','期間終了','ステータス','本文','記録件数','指導回数','生成日時','確定日時','送信日時','更新日時']
 };
+
+// 名前を変えた列（旧名 → 新名）。既存のシートは保存時（ensureShidoSheet_）に見出しを書き換える。
+// 書き換え前のシートも読めるよう、読み取りは cellOf_ で旧名も見る
+const SHIDO_RENAMED_HEADERS = {
+  '指導記録': { '来室回数': '指導回数' },
+  '週次報告': { '来室日数': '指導回数' }
+};
+
+// readSheetObjects_ の1行から列の値を取る（旧名の列しかないシートにも対応）
+function cellOf_(row, sheetName, header) {
+  if (row[header] !== undefined) return row[header];
+  const renamed = SHIDO_RENAMED_HEADERS[sheetName] || {};
+  const old = Object.keys(renamed).find(k => renamed[k] === header);
+  return old !== undefined ? row[old] : undefined;
+}
+
+// シートの見出しの旧名を新名に書き換える（列の位置・データはそのまま）
+function renameOldHeaders_(sheet, sheetName) {
+  const renamed = SHIDO_RENAMED_HEADERS[sheetName];
+  if (!renamed || sheet.getLastColumn() < 1) return;
+  const range = sheet.getRange(1, 1, 1, sheet.getLastColumn());
+  const head = range.getValues()[0];
+  let changed = false;
+  const next = head.map(h => { const n = renamed[String(h).trim()]; if (n) { changed = true; return n; } return h; });
+  if (changed) range.setValues([next]);
+}
 
 // 文字列として保持したい列（日付の自動変換を防ぐ）
 const SHIDO_TEXT_COLUMNS = {
@@ -89,7 +115,7 @@ function isEnabled_(v) {
 
 function ensureShidoSheet_(ss, name) {
   let sheet = ss.getSheetByName(name);
-  if (sheet) return sheet;
+  if (sheet) { renameOldHeaders_(sheet, name); return sheet; }
   const headers = SHIDO_HEADERS[name];
   sheet = ss.insertSheet(name);
   sheet.appendRow(headers);
@@ -309,7 +335,7 @@ function validateShidoRecord_(r, i) {
   if (SHIDO_SUBJECTS.indexOf(rec.subject) === -1) throw new Error(where + '：教科が不正です');
   if (!rec.student) throw new Error(where + '：生徒名が未入力です');
   if (SHIDO_STATUSES.indexOf(rec.status) === -1) throw new Error(where + '：状態が不正です');
-  if (!Number.isInteger(rec.visits) || rec.visits < 0 || rec.visits > 99) throw new Error(where + '：来室回数が不正です');
+  if (!Number.isInteger(rec.visits) || rec.visits < 0 || rec.visits > 99) throw new Error(where + '：指導回数が不正です');
   if (rec.status === '順調') { rec.tags = []; rec.actions = []; rec.memo = ''; }
   return rec;
 }
@@ -349,7 +375,7 @@ function saveShidoRecords_(records) {
         '生徒': safeCell_(rec.student),
         '学年': safeCell_(rec.grade),
         '状態': rec.status,
-        '来室回数': rec.visits,
+        '指導回数': rec.visits,
         'つまずきタグ': safeCell_(rec.tags.join(SHIDO_LIST_SEP)),
         '対応': safeCell_(rec.actions.join(SHIDO_LIST_SEP)),
         '一言メモ': safeCell_(rec.memo),
@@ -390,7 +416,7 @@ function getStudentShido_(name, school) {
         subject: String(r['教科'] || ''),
         grade: String(r['学年'] || ''),
         status: String(r['状態'] || ''),
-        visits: Number(r['来室回数']) || 0,
+        visits: Number(cellOf_(r, '指導記録', '指導回数')) || 0,
         tags: splitList_(r['つまずきタグ']),
         actions: splitList_(r['対応']),
         memo: String(r['一言メモ'] || ''),

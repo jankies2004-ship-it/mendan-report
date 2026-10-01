@@ -26,7 +26,7 @@ function backupLock_() {
 
 function ensureBackupSheet_(bss, kind) {
   let sheet = bss.getSheetByName(kind);
-  if (sheet) return sheet;
+  if (sheet) { if (kind === '指導記録') renameOldHeaders_(sheet, '指導記録'); return sheet; }
   const headers = backupHeaders_(kind);
   sheet = bss.insertSheet(kind);
   sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight('bold');

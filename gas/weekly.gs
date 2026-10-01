@@ -50,7 +50,7 @@ function collectWeeklyRecords_(school, from, to, onlyKey) {
       subject: String(r['教科'] || ''),
       grade: String(r['学年'] || ''),
       status: String(r['状態'] || ''),
-      visits: Number(r['来室回数']) || 0,
+      visits: Number(cellOf_(r, '指導記録', '指導回数')) || 0,
       tags: splitList_(r['つまずきタグ']),
       actions: splitList_(r['対応']),
       memo: String(r['一言メモ'] || '')
@@ -67,6 +67,8 @@ function collectWeeklyRecords_(school, from, to, onlyKey) {
     const dates = {};
     g.records.forEach(r => { dates[r.date] = true; });
     g.days = Object.keys(dates).length;
+    // 指導回数＝期間内の各記録の指導回数の合計（1コマ×1教科の記録ごとに入力された回数）
+    g.lessons = g.records.reduce((a, r) => a + r.visits, 0);
   });
   return groups;
 }
@@ -112,7 +114,7 @@ function listWeekly_(school, from, to) {
     const found = reports[key + '|' + range.from + '|' + range.to];
     return {
       key: key, name: g.name, school: g.school, grade: g.grade,
-      days: g.days, count: g.records.length, records: g.records,
+      days: g.days, lessons: g.lessons, count: g.records.length, records: g.records,
       report: found ? found.report : null
     };
   }).sort((a, b) => a.name.localeCompare(b.name, 'ja'));
@@ -150,7 +152,7 @@ function getWeeklySource_(name, school, from, to) {
   const found = wSheet ? readWeeklyReports_(wSheet)[key + '|' + range.from + '|' + range.to] : null;
   return {
     name: g.name, school: g.school, grade: g.grade, from: range.from, to: range.to,
-    days: g.days, count: records.length, records: records, progress: progress,
+    days: g.days, lessons: g.lessons, count: records.length, records: records, progress: progress,
     report: found ? { status: found.report.status } : null
   };
 }
@@ -211,7 +213,7 @@ function saveWeeklyReport_(p) {
 
     const counts = {
       count: Number(p.count) >= 0 ? Math.min(Math.floor(Number(p.count)), 999) : '',
-      days: Number(p.days) >= 0 ? Math.min(Math.floor(Number(p.days)), 99) : ''
+      lessons: Number(p.lessons) >= 0 ? Math.min(Math.floor(Number(p.lessons)), 999) : ''
     };
     const values = buildRow(headers, {
       '報告ID': next.id,
@@ -223,7 +225,7 @@ function saveWeeklyReport_(p) {
       'ステータス': next.status,
       '本文': safeCell_(next.text),
       '記録件数': counts.count,
-      '来室日数': counts.days,
+      '指導回数': counts.lessons,
       '生成日時': next.generatedAt,
       '確定日時': next.confirmedAt,
       '送信日時': next.sentAt,
@@ -232,7 +234,7 @@ function saveWeeklyReport_(p) {
     if (found) {
       // 既存の生徒名の表記・件数は残す（件数は生成時の値。空で上書きしない）
       const h = sheet.getRange(1, 1, 1, headers.length).getValues()[0];
-      ['生徒', '学年', '記録件数', '来室日数'].forEach(name => {
+      ['生徒', '学年', '記録件数', '指導回数'].forEach(name => {
         const idx = headers.indexOf(name);
         if (name === '生徒' || values[idx] === '') values[idx] = found.values[h.indexOf(name)];
       });
