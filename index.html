@@ -2934,7 +2934,8 @@ function wkNext(){
 // 1名分をAIで作成して下書き保存する。まとめて作成からも呼ぶ（そのときは確認を出さず、エラー文を返す）
 async function wkGenerate(key,bulk){
   const s=wkFind(key);
-  if(!s||wkState.busy[key])return '処理中です';
+  // まとめて作成の途中で個別に作成ボタンが押された生徒は、失敗扱いにせず飛ばす
+  if(!s||wkState.busy[key])return bulk?'':'処理中です';
   const st=wkStatus(s);
   let force=false;
   if(bulk){
