@@ -379,6 +379,43 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 .chart-legend{display:flex;gap:12px;font-size:11px;color:#666;margin-bottom:6px}
 .chart-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 
+/* 週次報告（塾長） */
+.admin-only{display:none}
+body.is-admin .admin-only{display:block}
+body.is-admin .tab-btn.admin-only{display:inline-block}
+.wk-range{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.wk-range input{flex:1 1 130px;min-width:0}
+.wk-range span{color:#888}
+.wk-weeknav{display:flex;gap:6px;margin-top:8px}
+.wk-weeknav button,.wk-btn{min-height:44px;padding:8px 12px;border:1px solid #ccc;border-radius:10px;background:#fff;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;color:#333}
+.wk-weeknav button{flex:1}
+.wk-btn.primary{background:#185FA5;border-color:#185FA5;color:#fff}
+.wk-btn.ok{background:#1D9E75;border-color:#1D9E75;color:#fff}
+.wk-btn:disabled,.wk-weeknav button:disabled{opacity:0.45;cursor:not-allowed}
+.wk-summary{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.wk-badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:10px;white-space:nowrap;background:#f0f0f0;color:#777}
+.wk-badge.draft{background:#FEF3C7;color:#854F0B}
+.wk-badge.confirmed{background:#E6F1FB;color:#185FA5}
+.wk-badge.sent{background:#EAF3DE;color:#0F6E56}
+.wk-badge.busy{background:#EDE9FE;color:#5B21B6}
+.wk-row{display:flex;align-items:center;gap:8px;border:1px solid #e5e5e5;border-radius:12px;padding:8px 10px;margin-bottom:8px;background:#fff;flex-wrap:wrap}
+.wk-row.current{border-color:#378ADD;background:#F7FBFF}
+.wk-row-main{flex:1 1 180px;min-height:44px;display:flex;flex-direction:column;justify-content:center;cursor:pointer;background:none;border:none;text-align:left;font-family:inherit;padding:0}
+.wk-row-name{font-size:16px;font-weight:600;color:#222}
+.wk-row-meta{font-size:12px;color:#777;margin-top:2px}
+.wk-row-ctrls{display:flex;gap:6px;align-items:center;margin-left:auto}
+.wk-detail-grid{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:700px){.wk-detail-grid{grid-template-columns:3fr 2fr}}
+.wk-text{width:100%;min-height:320px;font-size:15px;line-height:1.7;padding:12px;border:1px solid #ddd;border-radius:8px;font-family:inherit;color:#222;resize:vertical;outline:none}
+.wk-text:focus{border-color:#378ADD}
+.wk-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.wk-actions .wide{grid-column:1/-1}
+.wk-step{font-size:12px;color:#777;margin-top:8px;line-height:1.6}
+.wk-memo{font-size:13px;color:#333;margin-top:5px;line-height:1.6;white-space:pre-wrap;background:#FFF7ED;border:1px dashed #F59E0B;border-radius:6px;padding:6px 8px}
+.wk-memo-lbl{font-size:10px;font-weight:700;color:#B45309;display:block;margin-bottom:2px}
+.wk-report{border-left:3px solid #378ADD;padding:6px 0 6px 12px;margin-bottom:12px}
+.wk-report-text{font-size:13px;color:#333;line-height:1.7;white-space:pre-wrap;margin-top:4px}
+
 /* Login Gate */
 #login-gate{position:fixed;inset:0;background:#f5f5f0;display:flex;align-items:center;justify-content:center;z-index:9999;padding:1rem}
 #login-gate .login-box{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:2rem 1.75rem;width:100%;max-width:340px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
@@ -420,6 +457,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
       <button class="tab-btn" data-tab="shido" onclick="switchTab('shido')">指導記録</button>
       <button class="tab-btn" data-tab="progress" onclick="switchTab('progress')">進度</button>
       <button class="tab-btn" data-tab="summary" onclick="switchTab('summary')">指導集計</button>
+      <button class="tab-btn admin-only" data-tab="weekly" onclick="switchTab('weekly')">週次報告</button>
       <button class="tab-btn" data-tab="karte" onclick="switchTab('karte')">生徒カルテ</button>
     </div>
     <div class="tab-nav hidden" data-group="mendan">
@@ -512,6 +550,28 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
   <!-- ===== 指導集計（Phase 3） ===== -->
   <div id="screen-summary" class="screen">
     <div class="empty-state">「指導集計」は準備中です</div>
+  </div>
+
+  <!-- ===== 週次報告（塾長のみ。権限はサーバー側 api/weekly.js で確認） ===== -->
+  <div id="screen-weekly" class="screen">
+    <div class="card">
+      <div class="section-tag tag-study">週次報告（塾長）</div>
+      <div class="field"><label>校舎</label><select id="wk-school" onchange="wkOnFilterChange()"></select></div>
+      <div class="field" style="margin-bottom:0">
+        <label>期間</label>
+        <div class="wk-range">
+          <input type="date" id="wk-from" class="sk-date" onchange="wkOnFilterChange()">
+          <span>〜</span>
+          <input type="date" id="wk-to" class="sk-date" onchange="wkOnFilterChange()">
+        </div>
+        <div class="wk-weeknav">
+          <button type="button" onclick="wkShiftWeek(-1)">◀ 前の週</button>
+          <button type="button" onclick="wkSetThisWeek()">今週</button>
+          <button type="button" onclick="wkShiftWeek(1)">次の週 ▶</button>
+        </div>
+      </div>
+    </div>
+    <div id="wk-area"></div>
   </div>
 
   <!-- ===== 生徒面談 ===== -->
@@ -1041,6 +1101,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 <script>
 // ===== Auth =====
 function getAuthToken(){ return localStorage.getItem('authToken') || ''; }
+// 画面の出し分けだけに使う。権限の判定はサーバー側（api/_auth.js）でトークンにより行う
+function isAdmin(){ try{ return localStorage.getItem('authRole')==='admin'; }catch(e){ return false; } }
+function applyRoleUi(){ document.body.classList.toggle('is-admin', isAdmin()); }
 
 function authHeaders(extra){
   return Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+getAuthToken()}, extra||{});
@@ -1073,6 +1136,8 @@ function saveFailMsg(e){
 
 function handleAuthFailure(){
   localStorage.removeItem('authToken');
+  localStorage.removeItem('authRole');
+  applyRoleUi();
   document.getElementById('main-app').style.display='none';
   document.getElementById('login-gate').style.display='flex';
 }
@@ -1093,8 +1158,13 @@ async function handleLogin(ev){
     const data = await res.json();
     if(!res.ok || !data.token){ throw new Error(data.error||'ログインに失敗しました'); }
     localStorage.setItem('authToken', data.token);
+    localStorage.setItem('authRole', data.role==='admin'?'admin':'staff');
+    applyRoleUi();
     document.getElementById('login-gate').style.display='none';
     document.getElementById('main-app').style.display='block';
+    if(document.getElementById('screen-weekly').classList.contains('active')){
+      if(isAdmin())wkEnsureLoaded();else switchTab('shido');
+    }
     if(document.getElementById('screen-shido').classList.contains('active'))skEnsureLoaded();
     if(document.getElementById('screen-progress').classList.contains('active'))pgEnsureLoaded();
   }catch(e){
@@ -1106,6 +1176,7 @@ async function handleLogin(ev){
 }
 
 (function checkAuthOnLoad(){
+  applyRoleUi();
   if(getAuthToken()){
     document.getElementById('login-gate').style.display='none';
     document.getElementById('main-app').style.display='block';
@@ -1205,7 +1276,7 @@ function getDateStr(st){ const d=st.selectedDate; if(!d)return'（日付未選�
 
 // ===== Tab =====
 // 生徒カルテ(karte)は両グループに置き、開いてもグループは切り替えない
-const TAB_GROUP={shido:'shido',progress:'shido',summary:'shido',student:'mendan',parent:'mendan',grade:'mendan',audio:'mendan'};
+const TAB_GROUP={shido:'shido',progress:'shido',summary:'shido',weekly:'shido',student:'mendan',parent:'mendan',grade:'mendan',audio:'mendan'};
 const groupLastTab={shido:'shido',mendan:'student'};
 let currentGroup='shido';
 
@@ -1221,6 +1292,7 @@ function switchGroup(g){
 }
 
 function switchTab(name){
+  if(name==='weekly'&&!isAdmin())name='shido';
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
@@ -1230,6 +1302,7 @@ function switchTab(name){
   window.scrollTo(0,0);
   if(name==='shido'&&getAuthToken())skEnsureLoaded();
   if(name==='progress'&&getAuthToken())pgEnsureLoaded();
+  if(name==='weekly'&&getAuthToken())wkEnsureLoaded();
 }
 
 // ===== Shared helpers =====
@@ -2552,6 +2625,457 @@ async function pgSave(){
   }
 }
 
+// ===== 週次報告（塾長） =====
+// 一覧 → 生徒を開く → 文面を確認・修正 → 確定 → コピー（LINEへ貼り付け）→ 送信済みにする → 次の生徒へ
+// 報告文の生成は api/weekly.js がサーバー側で行う（講師メモはAIに渡さない）。ここでは講師メモを参考表示するだけ
+const WK_SCHOOL_KEY='weeklySchool_v1';
+const WK_STATUS_CLASS={'未作成':'','下書き':'draft','確定':'confirmed','送信済み':'sent'};
+const wkState={inited:false,loading:false,loaded:false,loadSeq:0,school:'',from:'',to:'',
+  students:[],   // [{key,name,school,grade,days,count,records,report}]
+  current:'',    // 開いている生徒のキー（空なら一覧）
+  edits:{},      // 生徒キー -> 編集中で未保存の本文
+  busy:{},       // 生徒キー -> 'generating' | 'saving'
+  bulk:null,     // まとめて作成の進み具合 {total,done,failed:[{name,error}]}
+  bulkResult:null,
+  msg:null};     // {key,html} 詳細画面のメッセージ
+
+function wkYmd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function wkMonday(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;}
+function wkSetRange(monday){
+  const e=new Date(monday);e.setDate(e.getDate()+6);
+  document.getElementById('wk-from').value=wkYmd(monday);
+  document.getElementById('wk-to').value=wkYmd(e);
+}
+function wkFind(key){return wkState.students.find(s=>s.key===key);}
+function wkStatus(s){return(s.report&&s.report.status)||'未作成';}
+function wkSavedText(s){return(s.report&&s.report.text)||'';}
+function wkText(key){const s=wkFind(key);return wkState.edits[key]!==undefined?wkState.edits[key]:(s?wkSavedText(s):'');}
+function wkIsDirty(key){const s=wkFind(key);return !!s&&wkState.edits[key]!==undefined&&wkState.edits[key]!==wkSavedText(s);}
+function wkAnyDirty(){return wkState.students.some(s=>wkIsDirty(s.key));}
+function wkBadge(s){
+  const b=wkState.busy[s.key];
+  if(b)return `<span class="wk-badge busy">${b==='generating'?'作成中…':'保存中…'}</span>`;
+  const st=wkStatus(s);
+  return `<span class="wk-badge ${WK_STATUS_CLASS[st]}">${st}</span>${wkIsDirty(s.key)?'<span class="wk-badge draft" style="margin-left:4px">未保存</span>':''}`;
+}
+
+window.addEventListener('beforeunload',e=>{if(wkAnyDirty()){e.preventDefault();e.returnValue='';}});
+
+function wkEnsureLoaded(){
+  if(!wkState.inited){
+    wkState.inited=true;
+    const sel=document.getElementById('wk-school');
+    sel.innerHTML=document.getElementById('karte-school').innerHTML;
+    let school='';
+    try{school=localStorage.getItem(WK_SCHOOL_KEY)||'';}catch(e){}
+    if(!school)school=skState.school;
+    if(!school){try{school=(JSON.parse(localStorage.getItem(SK_DRAFT_KEY)||'{}')||{}).school||'';}catch(e){}}
+    sel.value=school||'';
+    wkSetRange(wkMonday(new Date()));
+    const area=document.getElementById('wk-area');
+    area.addEventListener('click',wkOnClick);
+    area.addEventListener('input',wkOnInput);
+    wkReadFilters();
+    wkLoad();
+    return;
+  }
+  // タブに戻ったときは最新の状態を読み直す（作成・保存の途中は読み直さない）
+  if(!wkState.loading&&!wkState.bulk&&!Object.keys(wkState.busy).length)wkLoad();
+}
+
+function wkReadFilters(){
+  wkState.school=v('wk-school');wkState.from=v('wk-from');wkState.to=v('wk-to');
+  try{if(wkState.school)localStorage.setItem(WK_SCHOOL_KEY,wkState.school);}catch(e){}
+}
+function wkRestoreFilters(){
+  document.getElementById('wk-school').value=wkState.school;
+  document.getElementById('wk-from').value=wkState.from;
+  document.getElementById('wk-to').value=wkState.to;
+}
+// 校舎・期間を変えると一覧を読み直す。未保存の編集があれば確認する
+function wkConfirmLeave(){
+  if(!wkAnyDirty())return true;
+  if(!confirm('保存していない編集があります。破棄して切り替えますか？'))return false;
+  wkState.edits={};
+  return true;
+}
+function wkOnFilterChange(){
+  if(wkState.bulk||!wkConfirmLeave()){wkRestoreFilters();return;}
+  wkReadFilters();
+  wkState.current='';wkState.edits={};wkState.msg=null;wkState.bulkResult=null;
+  wkLoad();
+}
+function wkSetThisWeek(){
+  if(wkState.bulk||!wkConfirmLeave())return;
+  wkSetRange(wkMonday(new Date()));wkOnFilterChange();
+}
+function wkShiftWeek(n){
+  if(wkState.bulk||!wkConfirmLeave())return;
+  const m=wkMonday(ymdToDate(v('wk-from'))||new Date());
+  m.setDate(m.getDate()+7*n);
+  wkSetRange(m);wkOnFilterChange();
+}
+function wkSyncFilters(){
+  const lock=!!wkState.bulk;
+  document.querySelectorAll('#wk-school,#wk-from,#wk-to,.wk-weeknav button').forEach(el=>{el.disabled=lock;});
+}
+
+async function wkJson(res){
+  let data;
+  try{data=await res.json();}catch(_){throw new Error(`サーバーから正しい応答がありませんでした（HTTP ${res.status}）`);}
+  if(res.status===403){
+    // 塾長のトークンではない（共有パスワードでログインしている）
+    try{localStorage.setItem('authRole','staff');}catch(e){}
+    applyRoleUi();
+  }
+  if(!res.ok||data.error){const err=new Error(data.error||('HTTP '+res.status));err.text=data.text;throw err;}
+  return data;
+}
+function wkErr(e){return esc(e instanceof TypeError?'通信できませんでした':(e&&e.message)||'不明なエラー');}
+
+async function wkLoad(){
+  const area=document.getElementById('wk-area');
+  const {school,from,to}=wkState;
+  wkState.loadSeq++;
+  wkState.loaded=false;
+  wkState.loading=false;
+  if(!school){area.innerHTML='<div class="empty-state">校舎を選択してください</div>';return;}
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(from)||!/^\d{4}-\d{2}-\d{2}$/.test(to)||from>to){area.innerHTML='<div class="error-msg">期間を正しく指定してください</div>';return;}
+  const seq=wkState.loadSeq;
+  wkState.loading=true;
+  if(!wkState.students.length||!wkState.current)area.innerHTML='<div class="loading">指導記録を読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>';
+  try{
+    const res=await authFetch('/api/weekly?action=listWeekly&school='+encodeURIComponent(school)+'&from='+from+'&to='+to);
+    const data=await wkJson(res);
+    if(seq!==wkState.loadSeq)return;
+    wkState.students=data.students||[];
+    wkState.loaded=true;
+    if(wkState.current&&!wkFind(wkState.current))wkState.current='';
+    wkRender();
+  }catch(e){
+    if(seq!==wkState.loadSeq)return;
+    wkState.students=[];wkState.current='';
+    area.innerHTML=`<div class="error-msg">読み込みに失敗しました：${wkErr(e)}</div>`;
+  }finally{
+    if(seq===wkState.loadSeq)wkState.loading=false;
+  }
+}
+
+function wkRender(){
+  wkSyncFilters();
+  if(wkState.current)wkRenderDetail();else wkRenderList();
+}
+// 作成・保存が終わったときの再描画。別の生徒の詳細を編集中なら、入力中の欄を描き直さない
+function wkRefresh(key){
+  wkSyncFilters();
+  if(!wkState.current){wkRenderList();return;}
+  if(!key||wkState.current===key){wkRenderDetail();return;}
+  const el=document.getElementById('wk-bulk-status');
+  if(el)el.innerHTML=wkBulkStatusHtml();
+  wkSyncDetail();
+}
+
+function wkBulkStatusHtml(){
+  const b=wkState.bulk||wkState.bulkResult;
+  if(!b)return '';
+  const failed=b.failed.length?`<br>作成できなかった生徒：${b.failed.map(f=>`${esc(f.name)}（${esc(f.error)}）`).join('、')}`:'';
+  if(wkState.bulk)return `<div class="warn-msg" style="margin:0 0 10px">${b.stopping?'中止しています（作成中の分が終わりしだい止まります）':'まとめて作成中'}… ${b.done} / ${b.total}名${b.failed.length?`（失敗 ${b.failed.length}名）`:''}
+    <br>この画面を開いたままにしてください（閉じても作成済みの分は保存されています）。完了まで校舎・期間は変更できません。作成済みの生徒から確認を始められます。${failed}
+    ${b.stopping?'':'<br><button type="button" class="wk-btn" style="margin-top:6px;min-height:36px" data-act="bulkstop">中止する</button>'}</div>`;
+  const made=b.done-b.failed.length;
+  const rest=b.total-made;
+  const head=b.stopped?`まとめて作成を中止しました（${made} / ${b.total}名を作成）`:`まとめて作成が終わりました（${made} / ${b.total}名）`;
+  return `<div class="${rest?'error-msg':'success-msg'}" style="margin:0 0 10px">${head}${failed}${rest?'<br>作成できた分は保存済みです。残りは未作成のままなので、もう一度「まとめて作成」を押すと残りだけ作成します。':''}</div>`;
+}
+
+function wkRenderList(){
+  const area=document.getElementById('wk-area');
+  const ss=wkState.students;
+  const period=`${fmtMD(wkState.from)}〜${fmtMD(wkState.to)}`;
+  if(!ss.length){area.innerHTML=`<div class="card"><div class="empty-state">${period} に指導記録のある生徒はいません</div></div>`;return;}
+  const counts={'未作成':0,'下書き':0,'確定':0,'送信済み':0};
+  ss.forEach(s=>{counts[wkStatus(s)]++;});
+  const pending=ss.filter(s=>wkStatus(s)==='未作成'&&!wkState.busy[s.key]).length;
+  const rows=ss.map((s,i)=>{
+    const st=wkStatus(s);
+    const label=st==='未作成'?'作成':'再作成';
+    return `<div class="wk-row"><button type="button" class="wk-row-main" data-act="open" data-i="${i}">
+        <span class="wk-row-name">${esc(s.name)}${s.grade?`<span class="sk-grade">${esc(s.grade)}</span>`:''}</span>
+        <span class="wk-row-meta">来室 ${s.days}日・記録 ${s.count}件</span></button>
+      <div class="wk-row-ctrls">${wkBadge(s)}<button type="button" class="wk-btn" data-act="gen" data-i="${i}"${wkState.busy[s.key]?' disabled':''}>${label}</button></div></div>`;
+  }).join('');
+  area.innerHTML=`<div class="card">
+    <div class="card-title" style="cursor:default">${period} の報告（${ss.length}名）</div>
+    <div class="wk-summary">${Object.keys(counts).map(k=>`<span class="wk-badge ${WK_STATUS_CLASS[k]}">${k} ${counts[k]}</span>`).join('')}</div>
+    <div id="wk-bulk-status">${wkBulkStatusHtml()}</div>
+    <button type="button" class="wk-btn primary" style="width:100%;margin-bottom:12px" data-act="bulk"${pending&&!wkState.bulk?'':' disabled'}>未作成の${pending}名分をまとめて作成</button>
+    ${rows}
+    <div class="pg-meta">生徒名をタップすると、報告文とその期間の指導記録・講師メモを確認できます。</div>
+  </div>`;
+}
+
+function wkRecordHtml(r){
+  const w=r.status==='気になる';
+  return `<div class="kt-rec${w?' worry':''}"><div class="kt-rec-head"><b style="color:#222">${fmtMD(r.date)}</b>${esc(r.subject)}<span>${esc(r.teacher)}</span>
+    <span class="kt-status ${w?'ng':'ok'}">${esc(r.status)}</span><span>来室 ${Number(r.visits)||0}</span></div>
+    ${r.tags.length||r.actions.length?`<div class="kt-chips">${r.tags.map(t=>`<span class="kt-chip">${esc(t)}</span>`).join('')}${r.actions.map(a=>`<span class="kt-chip act">${esc(a)}</span>`).join('')}</div>`:''}
+    ${r.memo?`<div class="wk-memo"><span class="wk-memo-lbl">講師メモ（AIには送っていません）</span>${esc(r.memo)}</div>`:''}</div>`;
+}
+
+function wkRenderDetail(){
+  const area=document.getElementById('wk-area');
+  const s=wkFind(wkState.current);
+  if(!s){wkState.current='';wkRenderList();return;}
+  const idx=wkState.students.indexOf(s);
+  const busy=wkState.busy[s.key];
+  const text=wkText(s.key);
+  const msg=wkState.msg&&wkState.msg.key===s.key?wkState.msg.html:'';
+  area.innerHTML=`<div class="card">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+      <button type="button" class="wk-btn" data-act="back">← 一覧へ</button>
+      <span class="pg-meta" style="margin:0 0 0 auto">${idx+1} / ${wkState.students.length}名</span>
+    </div>
+    <div id="wk-bulk-status">${wkBulkStatusHtml()}</div>
+    <div class="card-title" style="cursor:default;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      ${esc(s.name)} さん${s.grade?`<span class="sk-grade">${esc(s.grade)}</span>`:''}<span id="wk-detail-badge">${wkBadge(s)}</span>
+    </div>
+    <div class="pg-meta" style="margin-bottom:10px">${fmtMD(wkState.from)}〜${fmtMD(wkState.to)}・来室 ${s.days}日・記録 ${s.count}件</div>
+    <div class="wk-detail-grid">
+      <div>
+        <textarea class="wk-text" id="wk-text" placeholder="「AIで作成」を押すと報告文の下書きが入ります。直接入力することもできます。"${busy?' disabled':''}>${esc(text)}</textarea>
+        <div class="wk-actions">
+          <button type="button" class="wk-btn" data-act="gen" id="wk-b-gen">${wkStatus(s)==='未作成'&&!text?'AIで作成':'AIで再作成'}</button>
+          <button type="button" class="wk-btn" data-act="draft" id="wk-b-draft">下書き保存</button>
+          <button type="button" class="wk-btn primary" data-act="confirm" id="wk-b-confirm">確定</button>
+          <button type="button" class="wk-btn" data-act="copy" id="wk-b-copy">コピー</button>
+          <button type="button" class="wk-btn ok wide" data-act="sent" id="wk-b-sent">送信済みにする</button>
+          <button type="button" class="wk-btn wide" data-act="next" id="wk-b-next">次の生徒へ ▶</button>
+        </div>
+        <div id="wk-msg">${msg}</div>
+        <div class="wk-step">① 文面を確認・修正 → ② 確定 → ③ コピーしてLINEに貼り付け → ④ 送信済みにする → ⑤ 次の生徒へ</div>
+      </div>
+      <div>
+        <div class="sk-detail-lbl" style="color:#555">この期間の指導記録（${s.count}件）</div>
+        ${s.records.map(wkRecordHtml).join('')}
+      </div>
+    </div>
+  </div>`;
+  wkSyncDetail();
+}
+
+// 入力のたびに描き直さず、ボタンの状態とバッジだけ更新する
+function wkSyncDetail(){
+  const s=wkFind(wkState.current);
+  if(!s)return;
+  const busy=!!wkState.busy[s.key];
+  const st=wkStatus(s);
+  const dirty=wkIsDirty(s.key);
+  const hasText=!!wkText(s.key).trim();
+  const set=(id,dis)=>{const el=document.getElementById(id);if(el)el.disabled=busy||dis;};
+  set('wk-b-gen',false);
+  set('wk-b-draft',!dirty||!hasText);
+  set('wk-b-confirm',!hasText||(!dirty&&(st==='確定'||st==='送信済み')));
+  set('wk-b-copy',!hasText);
+  set('wk-b-sent',dirty||st!=='確定');
+  set('wk-b-next',false);
+  const badge=document.getElementById('wk-detail-badge');
+  if(badge)badge.innerHTML=wkBadge(s);
+}
+
+function wkSetMsg(key,html){wkState.msg={key,html};const el=document.getElementById('wk-msg');if(el&&wkState.current===key)el.innerHTML=html;}
+
+function wkOnInput(e){
+  if(e.target.id!=='wk-text'||!wkState.current)return;
+  wkState.edits[wkState.current]=e.target.value;
+  wkSyncDetail();
+}
+
+function wkOnClick(e){
+  const btn=e.target.closest('[data-act]');
+  if(!btn||btn.disabled)return;
+  const act=btn.dataset.act;
+  const listKey=btn.dataset.i!==undefined?(wkState.students[Number(btn.dataset.i)]||{}).key:'';
+  const key=listKey||wkState.current;
+  if(act==='open'){wkOpen(key);return;}
+  if(act==='back'){wkState.current='';wkRender();window.scrollTo(0,0);return;}
+  if(act==='bulk'){wkBulkGenerate();return;}
+  if(act==='bulkstop'){if(wkState.bulk){wkState.bulk.stopping=true;wkRefresh('__bulk__');}return;}
+  if(act==='gen'){wkGenerate(key);return;}
+  if(act==='draft'){wkSave(key,'saveDraft');return;}
+  if(act==='confirm'){wkSave(key,'confirm');return;}
+  if(act==='sent'){wkSave(key,'markSent');return;}
+  if(act==='copy'){wkCopy(key);return;}
+  if(act==='next'){wkNext();return;}
+}
+
+function wkOpen(key){
+  if(!wkFind(key))return;
+  wkState.current=key;
+  if(wkState.msg&&wkState.msg.key!==key)wkState.msg=null;
+  wkRender();
+  document.getElementById('wk-area').scrollIntoView({block:'start'});
+}
+
+// 未送信の次の生徒へ（一覧の順で、最後まで行ったら先頭に戻る）
+function wkNext(){
+  const ss=wkState.students;
+  const i=ss.findIndex(s=>s.key===wkState.current);
+  for(let n=1;n<ss.length;n++){
+    const s=ss[(i+n)%ss.length];
+    if(wkStatus(s)!=='送信済み'){wkOpen(s.key);return;}
+  }
+  wkState.current='';
+  wkRender();
+  const unsentHere=i>=0&&wkStatus(ss[i])!=='送信済み';
+  document.getElementById('wk-bulk-status').innerHTML=`<div class="success-msg" style="margin:0 0 10px">${unsentHere?'ほかの生徒はすべて送信済みです':'全員分が送信済みになりました'}</div>`;
+  window.scrollTo(0,0);
+}
+
+// 1名分をAIで作成して下書き保存する。まとめて作成からも呼ぶ（そのときは確認を出さず、エラー文を返す）
+async function wkGenerate(key,bulk){
+  const s=wkFind(key);
+  if(!s||wkState.busy[key])return '処理中です';
+  const st=wkStatus(s);
+  let force=false;
+  if(bulk){
+    if(st!=='未作成')return '';
+  }else if(st==='確定'||st==='送信済み'){
+    if(!confirm(`${s.name}さんの報告は「${st}」です。AIで作り直すと下書きに戻ります。よろしいですか？`))return '';
+    force=true;
+  }else if(wkText(key).trim()){
+    if(!confirm('いまの文面をAIの新しい文面で置き換えます。よろしいですか？'))return '';
+  }
+  const seq=wkState.loadSeq;
+  wkState.busy[key]='generating';
+  if(!bulk)wkSetMsg(key,'<div class="warn-msg">AIで作成しています（20秒ほどかかります）…</div>');
+  wkRefresh(key);
+  let error='';
+  try{
+    const res=await authFetch('/api/weekly',{method:'POST',body:JSON.stringify({action:'generate',student:s.name,school:s.school,grade:s.grade,from:wkState.from,to:wkState.to,force})});
+    const data=await wkJson(res);
+    if(seq!==wkState.loadSeq)return '';
+    s.report=data.report;
+    delete wkState.edits[key];
+    if(!bulk)wkSetMsg(key,'<div class="success-msg">下書きを作成しました。内容を確認して「確定」してください</div>');
+  }catch(e){
+    error=e instanceof TypeError?'通信できませんでした':e.message;
+    if(seq!==wkState.loadSeq)return error;
+    // 生成できたが保存に失敗した場合は文面を編集中として残す（下書き保存・確定で保存できる）
+    if(e.text)wkState.edits[key]=e.text;
+    wkSetMsg(key,`<div class="error-msg">作成に失敗しました：${esc(error)}${e.text?'<br>文面は残っています。「下書き保存」または「確定」で保存してください。':''}</div>`);
+    // 応答だけ届かず保存はされていた場合に備えて、シートの状態を読み直す
+    if(!bulk&&!e.text)setTimeout(wkSyncStatuses,0);
+  }finally{
+    if(seq===wkState.loadSeq){delete wkState.busy[key];wkRefresh(key);}
+  }
+  return error;
+}
+
+async function wkBulkGenerate(){
+  if(wkState.bulk)return;
+  const targets=wkState.students.filter(s=>wkStatus(s)==='未作成'&&!wkState.busy[s.key]);
+  if(!targets.length)return;
+  if(!confirm(`未作成の${targets.length}名分の報告文をAIで作成します。よろしいですか？\n（1名あたり20秒ほど。作成済みの生徒から確認を始められます）`))return;
+  const seq=wkState.loadSeq;
+  const b={total:targets.length,done:0,failed:[]};
+  wkState.bulk=b;wkState.bulkResult=null;
+  wkRefresh();
+  const queue=targets.map(s=>s.key);
+  // 同時に2名ずつ作成する（APIの混雑とVercelの実行時間を考えて控えめにする）
+  // 1名ごとに別リクエストなので、人数が多くても1回の実行時間（Vercelの制限）は増えない。
+  // 作成できた分はその都度シートに保存される。失敗・中止した生徒は未作成のまま残り、再実行で残りだけ作成する
+  const worker=async()=>{
+    while(queue.length&&seq===wkState.loadSeq&&!b.stopping){
+      const key=queue.shift();
+      const s=wkFind(key);
+      const error=await wkGenerate(key,true);
+      b.done++;
+      if(error)b.failed.push({key,name:s?s.name:'',error});
+      wkRefresh('__bulk__');
+    }
+  };
+  await Promise.all([worker(),worker()]);
+  b.stopped=!!b.stopping&&queue.length>0;
+  b.total=b.stopped?b.done+queue.length:b.total;
+  if(wkState.bulk===b){wkState.bulk=null;wkState.bulkResult=b;}
+  if(seq!==wkState.loadSeq)return;
+  wkRefresh('__bulk__');
+  // 応答が届かなかった（通信断・時間切れ）が実は保存されていた分も、シートの状態に合わせる
+  if(b.failed.length){
+    await wkSyncStatuses();
+    if(seq!==wkState.loadSeq)return;
+    b.failed=b.failed.filter(f=>{const s=wkFind(f.key);return !s||wkStatus(s)==='未作成';});
+    wkRefresh('__bulk__');
+  }
+}
+
+// シートの最新のステータスを読み直して一覧に反映する（開いている詳細画面の入力欄は描き直さない）
+async function wkSyncStatuses(){
+  const seq=wkState.loadSeq;
+  try{
+    const res=await authFetch('/api/weekly?action=listWeekly&school='+encodeURIComponent(wkState.school)+'&from='+wkState.from+'&to='+wkState.to);
+    const data=await wkJson(res);
+    if(seq!==wkState.loadSeq)return;
+    let redrawCurrent=false;
+    (data.students||[]).forEach(n=>{
+      const s=wkFind(n.key);
+      if(!s){wkState.students.push(n);return;}
+      if(wkState.busy[n.key])return;
+      // 開いている生徒の保存済み本文が変わり、編集中でなければ入力欄も描き直す
+      if(n.key===wkState.current&&wkState.edits[n.key]===undefined&&wkSavedText(s)!==((n.report&&n.report.text)||''))redrawCurrent=true;
+      Object.assign(s,{report:n.report,records:n.records,count:n.count,days:n.days,grade:n.grade});
+    });
+    wkState.students.sort((a,b)=>a.name.localeCompare(b.name,'ja'));
+    wkRefresh(redrawCurrent?wkState.current:'__bulk__');
+  }catch(e){/* 読み直しに失敗しても、画面の状態はそのまま使える */}
+}
+
+async function wkSave(key,action){
+  const s=wkFind(key);
+  if(!s||wkState.busy[key])return;
+  const text=wkText(key);
+  const st=wkStatus(s);
+  if(action!=='markSent'&&!text.trim()){wkSetMsg(key,'<div class="error-msg">報告文が空です</div>');return;}
+  if(action==='saveDraft'&&st==='送信済み'&&!confirm('送信済みの報告を下書きに戻します。よろしいですか？'))return;
+  if(action==='confirm'&&st==='送信済み'&&!confirm('送信済みの報告を修正して確定し直します（「送信済み」は解除されます）。よろしいですか？'))return;
+  const seq=wkState.loadSeq;
+  wkState.busy[key]='saving';
+  wkRefresh(key);
+  try{
+    const res=await authFetch('/api/weekly',{method:'POST',body:JSON.stringify({action,student:s.name,school:s.school,grade:s.grade,from:wkState.from,to:wkState.to,text})});
+    const data=await wkJson(res);
+    if(seq!==wkState.loadSeq)return;
+    s.report=data.report;
+    // 保存中にさらに編集していなければ、編集中の扱いを解除する（前後の空白はGAS側で除かれる）
+    if(wkState.edits[key]===undefined||wkState.edits[key]===text)delete wkState.edits[key];
+    const done={saveDraft:'下書きを保存しました',confirm:'確定しました。「コピー」してLINEに貼り付けてください',markSent:'送信済みにしました'}[action];
+    wkSetMsg(key,`<div class="success-msg">${done}</div>`);
+  }catch(e){
+    if(seq!==wkState.loadSeq)return;
+    wkSetMsg(key,`<div class="error-msg">保存に失敗しました：${wkErr(e)}<br>文面は残っています。もう一度押してください。</div>`);
+  }finally{
+    if(seq===wkState.loadSeq){delete wkState.busy[key];wkRefresh(key);}
+  }
+}
+
+async function wkCopy(key){
+  const s=wkFind(key);
+  const text=wkText(key);
+  if(!s||!text.trim())return;
+  let ok=false;
+  try{await navigator.clipboard.writeText(text);ok=true;}catch(e){}
+  if(!ok){
+    // clipboard API が使えない環境（古いブラウザ・http）向け
+    const ta=document.getElementById('wk-text');
+    if(ta){ta.focus();ta.select();try{ok=document.execCommand('copy');}catch(e){}}
+  }
+  if(!ok){wkSetMsg(key,'<div class="error-msg">コピーできませんでした。文面を長押しして手動でコピーしてください</div>');return;}
+  const confirmed=wkStatus(s)==='確定'&&!wkIsDirty(key);
+  wkSetMsg(key,confirmed
+    ?'<div class="success-msg">コピーしました。LINEに貼り付けて送ったら「送信済みにする」を押してください</div>'
+    :'<div class="warn-msg">コピーしました。ただし、この文面はまだ確定していません。送る前に「確定」してください</div>');
+}
+
 // ===== カルテ：指導の状況 =====
 let karteShido=null,karteTagPeriod='m3',karteVisitSubject='';
 
@@ -2571,7 +3095,8 @@ function shidoSubjectStats(records){
 function renderShidoKarte(shido){
   if(!shido)return '<div class="warn-msg" style="margin-bottom:1rem">指導記録・進度を読み込めませんでした（成績・面談の記録は表示しています）</div>';
   const recs=shido.records||[],prog=shido.progress||[];
-  if(!recs.length&&!prog.length)return '';
+  const reps=shido.reports||[]; // 確定・送信済みのみ（下書きはサーバーが返さない）
+  if(!recs.length&&!prog.length&&!reps.length)return '';
   karteShido=shido;
   let html='';
   const card=(title,body)=>`<div class="card"><div class="card-title collapsed" onclick="toggleCard(this)"><span class="card-toggle">▼</span>${title}</div><div class="card-body hidden">${body}</div></div>`;
@@ -2613,6 +3138,14 @@ function renderShidoKarte(shido){
     html+=card('つまずきタグ（多い順）','<div id="kt-tags"></div>');
     // 来室回数の推移
     html+=card('来室回数の推移（コマごと）','<div id="kt-visits"></div>');
+  }
+
+  // 保護者への週次報告（閲覧のみ。作成・編集は塾長の「週次報告」タブで行う）
+  if(reps.length){
+    const repBody=reps.slice(0,8).map(r=>`<div class="wk-report"><div class="kt-rec-head"><b style="color:#222">${fmtMD(r.from)}〜${fmtMD(r.to)}</b>
+      <span class="wk-badge ${r.status==='送信済み'?'sent':'confirmed'}">${esc(r.status)}</span></div>
+      <div class="wk-report-text">${esc(r.text)}</div></div>`).join('');
+    html+=card(`保護者への週次報告<span style="font-weight:500;color:#888">（確定済み・${reps.length}件）</span>`,repBody+(reps.length>8?'<div class="pg-meta">直近8件を表示しています</div>':''));
   }
   return html;
 }

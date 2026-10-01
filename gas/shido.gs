@@ -6,13 +6,16 @@ const SHIDO_HEADERS = {
   '指導記録': ['記録ID','入力日時','指導日','校舎','講師','教科','生徒','学年','状態','来室回数','つまずきタグ','対応','一言メモ','対応済みフラグ'],
   'タグマスタ': ['教科','タグ名','表示順','有効フラグ'],
   '講師マスタ': ['講師名','所属校舎','有効フラグ'],
-  '進度': ['生徒','校舎','学年','教科','教科書','現在の単元','次の定期テスト日','テスト範囲','更新日']
+  '進度': ['生徒','校舎','学年','教科','教科書','現在の単元','次の定期テスト日','テスト範囲','更新日'],
+  // 1行 = 1生徒×1期間。塾長だけが api/weekly.js 経由で読み書きする（gas/weekly.gs）
+  '週次報告': ['報告ID','生徒','校舎','学年','期間開始','期間終了','ステータス','本文','記録件数','来室日数','生成日時','確定日時','送信日時','更新日時']
 };
 
 // 文字列として保持したい列（日付の自動変換を防ぐ）
 const SHIDO_TEXT_COLUMNS = {
   '指導記録': ['記録ID','入力日時','指導日'],
-  '進度': ['次の定期テスト日','更新日']
+  '進度': ['次の定期テスト日','更新日'],
+  '週次報告': ['報告ID','期間開始','期間終了','生成日時','確定日時','送信日時','更新日時']
 };
 
 const SHIDO_SUBJECTS = ['国語','数学','英語','理科','社会','その他'];
@@ -42,7 +45,7 @@ const SHIDO_STUDENT_SOURCES = [
 
 const SHIDO_GRADE_ORDER = ['小1','小2','小3','小4','小5','小6','中1','中2','中3','高1','高2','高3','既卒'];
 
-const SHIDO_GET_ACTIONS = ['getShidoMasters','listStudentsDetailed','getStudentShido'];
+const SHIDO_GET_ACTIONS = ['getShidoMasters','listStudentsDetailed','getStudentShido','listWeekly','getWeeklySource'];
 
 // 校舎グループの代表名（みずほ台校舎 / みずほ台校舎（Luce）は同じ校舎として扱う）
 function schoolGroupKey_(school) {
@@ -144,6 +147,9 @@ function handleShidoGet_(e) {
     if (action === 'getShidoMasters') return jsonOut_(getShidoMasters_());
     if (action === 'listStudentsDetailed') return jsonOut_(listStudentsDetailed_(e.parameter.school || ''));
     if (action === 'getStudentShido') return jsonOut_(getStudentShido_(e.parameter.name || '', e.parameter.school || ''));
+    // 週次報告（gas/weekly.gs）。api/shido.js は通さず、塾長を確認する api/weekly.js だけが中継する
+    if (action === 'listWeekly') return jsonOut_(listWeekly_(e.parameter.school || '', e.parameter.from, e.parameter.to));
+    if (action === 'getWeeklySource') return jsonOut_(getWeeklySource_(e.parameter.name || '', e.parameter.school || '', e.parameter.from, e.parameter.to));
     return jsonOut_({ error: 'unknown action' });
   } catch (err) {
     return jsonOut_({ error: err.message });
@@ -225,6 +231,7 @@ function handleShidoPost_(data) {
     if (!isShidoKeyValid_(data.shidoKey)) return jsonOut_({ error: 'unauthorized' });
     if (data.shidoAction === 'saveShidoRecords') return jsonOut_(saveShidoRecords_(data.records));
     if (data.shidoAction === 'saveProgress') return jsonOut_(saveProgress_(data.progress));
+    if (data.shidoAction === 'saveWeeklyReport') return jsonOut_(saveWeeklyReport_(data.report));
     return jsonOut_({ error: 'unknown action' });
   } catch (err) {
     return jsonOut_({ error: err.message });
@@ -362,7 +369,26 @@ function getStudentShido_(name, school) {
       });
     });
   }
-  return { records: records, progress: progress };
+  // 週次報告は確定・送信済みのものだけ返す（下書きは塾長の画面以外に出さない）
+  const reports = [];
+  const wSheet = ss.getSheetByName('週次報告');
+  if (wSheet) {
+    readSheetObjects_(wSheet).forEach(r => {
+      if (!match(String(r['生徒'] || ''), String(r['校舎'] || ''))) return;
+      const status = String(r['ステータス'] || '');
+      if (status !== '確定' && status !== '送信済み') return;
+      reports.push({
+        from: fmtDate_(r['期間開始']),
+        to: fmtDate_(r['期間終了']),
+        status: status,
+        text: String(r['本文'] || ''),
+        confirmedAt: fmtDateTime_(r['確定日時']),
+        sentAt: fmtDateTime_(r['送信日時'])
+      });
+    });
+    reports.sort((a, b) => a.from < b.from ? 1 : a.from > b.from ? -1 : 0);
+  }
+  return { records: records, progress: progress, reports: reports };
 }
 
 function fmtDate_(v) {
