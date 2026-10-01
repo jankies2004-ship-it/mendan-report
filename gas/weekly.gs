@@ -6,6 +6,8 @@
 const WEEKLY_STATUSES = ['下書き', '確定', '送信済み'];
 const WEEKLY_MAX_DAYS = 31;
 const WEEKLY_TEXT_MAX = 4000;
+const WEEKLY_LOCK_MS = 15000;
+const WEEKLY_BUSY_MESSAGE = '混み合っているため保存できませんでした。もう一度お試しください';
 
 function validateWeeklyRange_(from, to) {
   const f = String(from || '').trim();
@@ -170,8 +172,11 @@ function saveWeeklyReport_(p) {
   if (text.length > WEEKLY_TEXT_MAX) throw new Error('報告文が長すぎます（' + WEEKLY_TEXT_MAX + '字まで）');
   if (op !== 'sent' && !text) throw new Error('報告文が空です');
 
+  // 同時に保存が集中したときは待ちすぎない（Vercel の実行時間内に応答を返すため）。
+  // この文言は api/weekly.js が「再試行してよいエラー」と判定するのに使う
   const lock = LockService.getScriptLock();
-  lock.waitLock(20000);
+  if (!lock.tryLock(WEEKLY_LOCK_MS)) throw new Error(WEEKLY_BUSY_MESSAGE);
+  let result, backupRow;
   try {
     const sheet = ensureShidoSheet_(getSpreadsheet(), '週次報告');
     const headers = SHIDO_HEADERS['週次報告'];
@@ -235,8 +240,12 @@ function saveWeeklyReport_(p) {
     } else {
       sheet.getRange(sheet.getLastRow() + 1, 1, 1, headers.length).setValues([values]);
     }
-    return { ok: true, report: next };
+    result = { ok: true, report: next };
+    backupRow = backupWeeklyRow_(op, { student: student, school: school, grade: str(p.grade, 10), from: range.from, to: range.to }, next, now);
   } finally {
-    lock.releaseLock();
+    releaseLockAfterFlush_(lock);
   }
+  // 保存操作ごとに1行、別ファイルへ追記（書き換え前の文面も残る）
+  backupAppend_('週次報告履歴', [backupRow]);
+  return result;
 }

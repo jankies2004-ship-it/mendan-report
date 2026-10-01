@@ -482,6 +482,7 @@ function onOpen() {
     .addItem('志望校の月を日付から補完', 'backfillTargetSchoolMonth')
     .addSeparator()
     .addItem('指導系シートを作成（指導記録・タグ/講師マスタ・進度）', 'setupShidoSheets')
+    .addItem('バックアップ先を確認・待ちを再送（指導記録・週次報告）', 'setupBackup')
     .addToUi();
 }
 

@@ -45,7 +45,7 @@ const SHIDO_STUDENT_SOURCES = [
 
 const SHIDO_GRADE_ORDER = ['小1','小2','小3','小4','小5','小6','中1','中2','中3','高1','高2','高3','既卒'];
 
-const SHIDO_GET_ACTIONS = ['getShidoMasters','listStudentsDetailed','getStudentShido','listWeekly','getWeeklySource'];
+const SHIDO_GET_ACTIONS = ['getShidoMasters','listStudentsDetailed','getStudentShido','listWeekly','getWeeklySource','getBackupStatus'];
 
 // 校舎グループの代表名（みずほ台校舎 / みずほ台校舎（Luce）は同じ校舎として扱う）
 function schoolGroupKey_(school) {
@@ -57,6 +57,12 @@ function schoolGroupKey_(school) {
 // 生徒の同一判定キー：空白を除いた名前 + 校舎グループ。学年は含めない（進級しても同じ生徒）
 function studentKey_(name, school) {
   return normName_(name) + '|' + schoolGroupKey_(school);
+}
+
+// ロックを放す前に書き込みを確定させる。確定させずに放すと、次の保存が古い最終行を読んで
+// 同じ行に書き込み、同時に保存した記録が消える（同時10件の保存で3件消えることを確認済み）
+function releaseLockAfterFlush_(lock) {
+  try { SpreadsheetApp.flush(); } finally { lock.releaseLock(); }
 }
 
 function jsonOut_(obj) {
@@ -150,6 +156,7 @@ function handleShidoGet_(e) {
     // 週次報告（gas/weekly.gs）。api/shido.js は通さず、塾長を確認する api/weekly.js だけが中継する
     if (action === 'listWeekly') return jsonOut_(listWeekly_(e.parameter.school || '', e.parameter.from, e.parameter.to));
     if (action === 'getWeeklySource') return jsonOut_(getWeeklySource_(e.parameter.name || '', e.parameter.school || '', e.parameter.from, e.parameter.to));
+    if (action === 'getBackupStatus') return jsonOut_(getBackupStatus_());
     return jsonOut_({ error: 'unknown action' });
   } catch (err) {
     return jsonOut_({ error: err.message });
@@ -277,6 +284,7 @@ function saveShidoRecords_(records) {
 
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
+  let result, backupRows = [];
   try {
     const ss = getSpreadsheet();
     const sheet = ensureShidoSheet_(ss, '指導記録');
@@ -311,10 +319,14 @@ function saveShidoRecords_(records) {
       }));
     });
     if (rows.length) sheet.getRange(lastRow + 1, 1, rows.length, headers.length).setValues(rows);
-    return { ok: true, saved: rows.length, skipped: skipped };
+    result = { ok: true, saved: rows.length, skipped: skipped };
+    backupRows = backupShidoRows_(rows, now);
   } finally {
-    lock.releaseLock();
+    releaseLockAfterFlush_(lock);
   }
+  // 別ファイルへのバックアップはロックの外で（失敗してもバックアップ待ちに残り、保存自体は成功扱い）
+  backupAppend_('指導記録', backupRows);
+  return result;
 }
 
 // ===== 生徒1人分の指導記録・進度（カルテ・進度タブ用） =====
@@ -464,6 +476,6 @@ function saveProgress_(p) {
     }
     return { ok: true, updated: rowIndex > 0, updatedOn: today };
   } finally {
-    lock.releaseLock();
+    releaseLockAfterFlush_(lock);
   }
 }

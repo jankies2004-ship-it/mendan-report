@@ -8,7 +8,13 @@ import { getGasUrl } from './_gas.js';
 export const config = { maxDuration: 60 };
 // AIの呼び出し（再試行を含む）はリクエスト開始からこの時間までに打ち切り、
 // 残り時間でGASへの保存と応答を必ず終える（Vercelの実行時間切れで結果が不明になるのを防ぐ）
-const AI_DEADLINE_MS = 42000;
+const AI_DEADLINE_MS = 35000;
+// GASが混み合っているとき（同時実行の上限・保存の順番待ち）の再試行は、リクエスト開始からこの時間まで
+const GAS_RETRY_UNTIL_MS = 50000;
+const GAS_PARSE_ERROR = 'GASの応答を解析できませんでした';
+// 一時的な失敗（混雑・時間切れ）は retryable を付けて返し、まとめて作成では画面側が自動で再試行する
+const retryableError = message => Object.assign(new Error(message), { retryable: true });
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 const MODEL = 'claude-sonnet-5-5';
 // 保護者に伝えてよい「対応」だけをAIに渡す（「保護者に連絡が必要」「責任教師に共有」などの塾内向けは渡さない）
@@ -82,12 +88,12 @@ async function callClaude(prompt, apiKey, deadline) {
     system: SYSTEM_PROMPT,
     messages: [{ role: 'user', content: prompt }]
   });
-  const tooSlow = new Error('AIの応答に時間がかかったため中断しました（保存はしていません）。もう一度作成してください');
+  const tooSlow = () => retryableError('AIの応答に時間がかかったため中断しました（保存はしていません）');
   // 再試行の待ち時間を入れても締め切りに間に合うときだけ再試行する
   const canRetry = wait => deadline - Date.now() - wait > 8000;
   for (let attempt = 1; attempt <= 3; attempt++) {
     const remaining = deadline - Date.now();
-    if (remaining < 5000) throw tooSlow;
+    if (remaining < 5000) throw tooSlow();
     let response, data;
     try {
       response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -103,15 +109,20 @@ async function callClaude(prompt, apiKey, deadline) {
       });
       data = await response.json();
     } catch (e) {
-      if (e.name === 'TimeoutError' || e.name === 'AbortError') throw tooSlow;
-      if (attempt === 3 || !canRetry(attempt * 2000)) throw new Error('AIに接続できませんでした：' + e.message);
-      await new Promise(r => setTimeout(r, attempt * 2000));
+      if (e.name === 'TimeoutError' || e.name === 'AbortError') throw tooSlow();
+      if (attempt === 3 || !canRetry(attempt * 2000)) throw retryableError('AIに接続できませんでした：' + e.message);
+      await sleep(attempt * 2000);
       continue;
     }
     if (data.error) {
-      const retryable = data.error.type === 'overloaded_error' || response.status === 429 || response.status >= 500;
-      if (retryable && attempt < 3 && canRetry(attempt * 2000)) { await new Promise(r => setTimeout(r, attempt * 2000)); continue; }
-      throw new Error(`AI生成に失敗しました（HTTP${response.status} ${data.error.type}: ${data.error.message}）`);
+      // 429（利用上限）・混雑・5xx は一時的。retry-after があればそれに従う
+      const temporary = data.error.type === 'overloaded_error' || data.error.type === 'rate_limit_error' || response.status === 429 || response.status >= 500;
+      const after = Number(response.headers.get('retry-after'));
+      const wait = after > 0 ? after * 1000 : attempt * 2000 + Math.floor(Math.random() * 1000);
+      if (temporary && attempt < 3 && canRetry(wait)) { await sleep(wait); continue; }
+      const err = new Error(`AI生成に失敗しました（HTTP${response.status} ${data.error.type}: ${data.error.message}）`);
+      if (temporary) err.retryable = true;
+      throw err;
     }
     if (data.stop_reason === 'refusal') throw new Error('AIが生成を断りました。手動で作成してください');
     if (data.stop_reason === 'max_tokens') throw new Error('AIの出力が途中で切れました。もう一度作成してください');
@@ -123,7 +134,12 @@ async function callClaude(prompt, apiKey, deadline) {
 
 async function readGas(gasRes) {
   const text = await gasRes.text();
-  try { return JSON.parse(text); } catch { return { error: 'GASの応答を解析できませんでした' }; }
+  try { return JSON.parse(text); } catch { return { error: GAS_PARSE_ERROR }; }
+}
+
+// GASの一時的な失敗：同時実行の上限でエラーページが返る／保存の順番待ちで混み合った
+function isGasBusy(r) {
+  return !!(r && r.error && (r.error === GAS_PARSE_ERROR || r.error.indexOf('混み合って') !== -1 || /too many|simultaneous/i.test(r.error)));
 }
 
 export default async function handler(req, res) {
@@ -134,19 +150,29 @@ export default async function handler(req, res) {
   const shidoKey = process.env.SHIDO_KEY;
   if (!shidoKey) { res.status(500).json({ error: 'サーバー設定エラー：SHIDO_KEY が設定されていません' }); return; }
 
-  const gasGet = async params => {
+  // 混み合っているときは少し待って再送する。保存は「同じ生徒×期間の行を上書き」なので再送しても二重にならない
+  const withGasRetry = async call => {
+    for (let i = 0; ; i++) {
+      const r = await call();
+      if (!isGasBusy(r) || i >= 4 || Date.now() - started > GAS_RETRY_UNTIL_MS) return r;
+      await sleep(700 * (i + 1) + Math.floor(Math.random() * 700));
+    }
+  };
+  const gasGet = params => withGasRetry(async () => {
     const q = new URLSearchParams({ ...params, token: process.env.AUTH_TOKEN, shidoKey });
     return readGas(await fetch(`${GAS_URL}?${q}`, { redirect: 'follow' }));
-  };
-  const gasSave = async report => readGas(await fetch(GAS_URL, {
+  });
+  const gasSave = report => withGasRetry(async () => readGas(await fetch(GAS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ shidoAction: 'saveWeeklyReport', report, token: process.env.AUTH_TOKEN, shidoKey })
-  }));
+  })));
+  const gasError = r => ({ error: r.error, ...(isGasBusy(r) ? { retryable: true } : {}) });
 
   try {
     if (req.method === 'GET') {
       const { action, school = '', from = '', to = '' } = req.query;
+      if (action === 'backupStatus') { res.status(200).json(await gasGet({ action: 'getBackupStatus' })); return; }
       if (action !== 'listWeekly') { res.status(400).json({ error: 'unknown action' }); return; }
       res.status(200).json(await gasGet({ action, school, from, to }));
       return;
@@ -160,7 +186,7 @@ export default async function handler(req, res) {
       const apiKey = process.env.ANTHROPIC_API_KEY;
       if (!apiKey) { res.status(500).json({ error: 'ANTHROPIC_API_KEY が設定されていません' }); return; }
       const src = await gasGet({ action: 'getWeeklySource', name: b.student || '', school: b.school || '', from: b.from || '', to: b.to || '' });
-      if (src.error) { res.status(200).json({ error: src.error }); return; }
+      if (src.error) { res.status(200).json(gasError(src)); return; }
       const st = src.report && src.report.status;
       if ((st === '確定' || st === '送信済み') && b.force !== true) {
         res.status(200).json({ error: `この報告はすでに${st}です。作り直す場合は確認のうえ再作成してください` });
@@ -168,16 +194,18 @@ export default async function handler(req, res) {
       }
       const text = finishText(await callClaude(buildPrompt(src), apiKey, started + AI_DEADLINE_MS), src.name);
       const saved = await gasSave({ ...base, op: 'generated', text, force: b.force === true, count: src.count, days: src.days });
-      // 保存に失敗しても生成文は返す（画面に残して手動で保存できるようにする）
-      if (saved.error) { res.status(200).json({ error: '報告文を保存できませんでした：' + saved.error, text }); return; }
+      // 保存に失敗しても生成文は返す（1名ずつ作成したときは画面に残して手動で保存できるようにする）
+      if (saved.error) { res.status(200).json({ ...gasError(saved), error: '報告文を保存できませんでした：' + saved.error, text }); return; }
       res.status(200).json(saved);
       return;
     }
 
     const op = POST_OPS[b.action];
     if (!op) { res.status(400).json({ error: 'unknown action' }); return; }
-    res.status(200).json(await gasSave({ ...base, op, text: b.text }));
+    const saved = await gasSave({ ...base, op, text: b.text });
+    res.status(200).json(saved.error ? gasError(saved) : saved);
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.status(e.retryable ? 503 : 500).json({ error: e.message, ...(e.retryable ? { retryable: true } : {}) });
   }
 }
+
