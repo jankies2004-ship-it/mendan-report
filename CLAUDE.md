@@ -12,6 +12,7 @@
   - `save.js`（既存シートへの追記）/ `karte.js`（生徒一覧・カルテ取得）/ `shido.js`（指導系。許可した action のみ中継）
   - `save-public.js`（認証なし。成績・志望校・通知表のみ。`action` は除去して転送）/ `claude.js`（AI生成）/ `login.js`
   - `weekly.js`（週次報告。**塾長トークンのみ**（`checkAdmin`）。報告文のプロンプトはここで組み立て、Anthropic API を呼ぶ）
+  - `admin.js`（塾長のみの管理操作。今は講師の追加 `addTeacher` → GAS `addTeacher_`。同名が無効なら有効に戻す。画面は指導記録タブの「＋ 講師を追加（塾長のみ）」、所属校舎の初期値はみずほ台校舎）
 - **デプロイ**: GitHub → Vercel自動デプロイ / GASは`npx clasp push` + `npx clasp deploy --deploymentId AKfycbwtLtrArQ1ECX0cNLh85rMJ6MaV3t-A3qDNxuPpbgg-LjTU8mMDOfdDEN2jZqzs5LP5zw`
 
 ## 環境変数（Vercel）
