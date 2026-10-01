@@ -196,6 +196,42 @@ function getShidoMasters_() {
   return { tags: tags, teachers: teachers };
 }
 
+// 講師マスタに講師を追加する。同じ名前（空白を除いて同じ）が無効になっていれば有効に戻す（行は増やさない）
+function addTeacher_(t) {
+  const name = String((t && t.name) || '').trim().slice(0, 50).split(SHIDO_LIST_SEP).join('・');
+  const school = canonicalSchool(String((t && t.school) || '').trim().slice(0, 50));
+  if (!normName_(name)) throw new Error('講師名を入力してください');
+  if (!school) throw new Error('所属校舎を選択してください');
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  let result;
+  try {
+    const sheet = ensureShidoSheet_(getSpreadsheet(), '講師マスタ');
+    const rows = sheet.getDataRange().getValues();
+    const h = rows[0];
+    const nameIdx = h.indexOf('講師名'), flagIdx = h.indexOf('有効フラグ'), schoolIdx = h.indexOf('所属校舎');
+    let found = -1;
+    for (let i = 1; i < rows.length; i++) {
+      if (normName_(rows[i][nameIdx]) === normName_(name)) { found = i; break; }
+    }
+    if (found > 0) {
+      if (isEnabled_(rows[found][flagIdx])) throw new Error('「' + name + '」はすでに登録されています');
+      sheet.getRange(found + 1, flagIdx + 1).setValue(true);
+      result = { ok: true, reenabled: true, name: String(rows[found][nameIdx]).trim(), school: String(rows[found][schoolIdx] || '') };
+    } else {
+      // シートの実際の列順に合わせる（列を並べ替えていても崩れない）
+      const row = buildRow(h, { '講師名': safeCell_(name), '所属校舎': safeCell_(school), '有効フラグ': true });
+      sheet.getRange(sheet.getLastRow() + 1, 1, 1, row.length).setValues([row]);
+      result = { ok: true, reenabled: false, name: name, school: school };
+    }
+  } finally {
+    releaseLockAfterFlush_(lock);
+  }
+  result.teachers = getShidoMasters_().teachers;
+  return result;
+}
+
 function listStudentsDetailed_(school) {
   const ss = getSpreadsheet();
   const map = {};
@@ -239,6 +275,8 @@ function handleShidoPost_(data) {
     if (data.shidoAction === 'saveShidoRecords') return jsonOut_(saveShidoRecords_(data.records));
     if (data.shidoAction === 'saveProgress') return jsonOut_(saveProgress_(data.progress));
     if (data.shidoAction === 'saveWeeklyReport') return jsonOut_(saveWeeklyReport_(data.report));
+    // 講師の追加（塾長のみ。api/admin.js だけが中継する）
+    if (data.shidoAction === 'addTeacher') return jsonOut_(addTeacher_(data.teacher));
     return jsonOut_({ error: 'unknown action' });
   } catch (err) {
     return jsonOut_({ error: err.message });

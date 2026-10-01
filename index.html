@@ -488,6 +488,14 @@ body.is-admin .tab-btn.admin-only{display:inline-block}
         <label>講師</label>
         <select id="sk-teacher" onchange="skOnHeaderChange()"><option value="">読み込み中...</option></select>
         <label class="sk-inline-check"><input type="checkbox" id="sk-all-teachers" onchange="skOnAllTeachersChange()">全校舎の講師を表示</label>
+        <!-- 講師の追加（塾長のみ表示。権限はサーバー側 api/admin.js で確認） -->
+        <details class="sk-criteria admin-only" id="tm-box" style="margin:8px 0 0">
+          <summary>＋ 講師を追加（塾長のみ）</summary>
+          <div class="field" style="margin:6px 0"><label>講師名</label><input type="text" id="tm-name" maxlength="50" placeholder="例：山田 花子" autocomplete="off"></div>
+          <div class="field" style="margin:6px 0"><label>所属校舎</label><select id="tm-school"></select></div>
+          <button type="button" class="wk-btn primary" id="tm-add-btn" style="width:100%" onclick="tmAddTeacher()">講師を追加</button>
+          <div id="tm-msg"></div>
+        </details>
       </div>
       <div class="field" style="margin-bottom:0">
         <label>教科</label>
@@ -2173,6 +2181,7 @@ async function skEnsureLoaded(){
     document.getElementById('sk-all-teachers').checked=skState.allTeachers;
     skRenderSubjects();
     skRenderTeachers();
+    tmInit();
     const list=document.getElementById('sk-list');
     list.addEventListener('click',skOnListClick);
     list.addEventListener('input',skOnListInput);
@@ -2241,6 +2250,45 @@ function skOnHeaderChange(){
   skState.teacher=v('sk-teacher');
   skSaveDraft();
 }
+// --- 講師の追加（塾長のみ） ---
+const TM_DEFAULT_SCHOOL='みずほ台校舎';
+function tmInit(){
+  const sel=document.getElementById('tm-school');
+  if(sel.options.length)return;
+  // 校舎の選択肢は既存の一覧を使い、「-- 校舎を選択 --」は除く。初期値はみずほ台校舎
+  sel.innerHTML=document.getElementById('karte-school').innerHTML;
+  if(sel.options[0]&&!sel.options[0].value)sel.remove(0);
+  sel.value=TM_DEFAULT_SCHOOL;
+}
+async function tmAddTeacher(){
+  const btn=document.getElementById('tm-add-btn');
+  const msg=document.getElementById('tm-msg');
+  const name=v('tm-name').trim();
+  const school=v('tm-school');
+  if(btn.disabled)return;
+  if(!name){msg.innerHTML='<div class="error-msg">講師名を入力してください</div>';return;}
+  btn.disabled=true;btn.textContent='追加中...';msg.innerHTML='';
+  try{
+    const res=await authFetch('/api/admin',{method:'POST',body:JSON.stringify({action:'addTeacher',name,school})});
+    let data;
+    try{data=await res.json();}catch(_){throw new Error(`サーバーから正しい応答がありませんでした（HTTP ${res.status}）`);}
+    if(res.status===403){try{localStorage.setItem('authRole','staff');}catch(e){}applyRoleUi();}
+    if(!res.ok||data.error||!data.ok)throw new Error(data.error||('HTTP '+res.status));
+    if(skMasters)skMasters.teachers=data.teachers||skMasters.teachers;
+    // 追加した講師をそのまま選べるようにする（指導記録の校舎と所属が違っても選択欄には出す）
+    skState.teacher=data.name;
+    skRenderTeachers();
+    document.getElementById('sk-teacher').value=data.name;
+    skSaveDraft();
+    document.getElementById('tm-name').value='';
+    msg.innerHTML=`<div class="success-msg">${esc(data.name)}（${esc(data.school||school)}）を${data.reenabled?'有効に戻しました':'追加しました'}</div>`;
+  }catch(e){
+    msg.innerHTML=`<div class="error-msg">追加できませんでした：${esc(e instanceof TypeError?'通信できませんでした':e.message)}</div>`;
+  }finally{
+    btn.disabled=false;btn.textContent='講師を追加';
+  }
+}
+
 function skOnAllTeachersChange(){skState.allTeachers=document.getElementById('sk-all-teachers').checked;skRenderTeachers();skSaveDraft();}
 function skSelectSubject(s){skState.subject=s;skRenderSubjects();skRenderList();skSaveDraft();}
 
