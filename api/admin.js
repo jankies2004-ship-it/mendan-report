@@ -1,10 +1,10 @@
-// 塾長だけが行う管理操作（講師の追加）。塾長トークンを確認してからGASへ中継する。
-import { checkAdmin } from './_auth.js';
+// 管理操作（講師の追加）。ログインした人なら誰でも使える。GASへは合言葉 SHIDO_KEY を付けて中継する。
+import { checkAuth } from './_auth.js';
 import { getGasUrl } from './_gas.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') { res.status(405).end(); return; }
-  if (!checkAdmin(req, res)) return;
+  if (!checkAuth(req, res)) return;
   const GAS_URL = getGasUrl(res);
   if (!GAS_URL) return;
   const shidoKey = process.env.SHIDO_KEY;

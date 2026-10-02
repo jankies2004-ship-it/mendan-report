@@ -379,10 +379,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',san
 .chart-legend{display:flex;gap:12px;font-size:11px;color:#666;margin-bottom:6px}
 .chart-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 
-/* 週次報告（塾長） */
-.admin-only{display:none}
-body.is-admin .admin-only{display:block}
-body.is-admin .tab-btn.admin-only{display:inline-block}
+/* 週次報告 */
 .wk-range{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .wk-range input{flex:1 1 130px;min-width:0}
 .wk-range span{color:#888}
@@ -457,7 +454,7 @@ body.is-admin .tab-btn.admin-only{display:inline-block}
       <button class="tab-btn" data-tab="shido" onclick="switchTab('shido')">指導記録</button>
       <button class="tab-btn" data-tab="progress" onclick="switchTab('progress')">進度</button>
       <button class="tab-btn" data-tab="summary" onclick="switchTab('summary')">指導集計</button>
-      <button class="tab-btn admin-only" data-tab="weekly" onclick="switchTab('weekly')">週次報告</button>
+      <button class="tab-btn" data-tab="weekly" onclick="switchTab('weekly')">週次報告</button>
       <button class="tab-btn" data-tab="karte" onclick="switchTab('karte')">生徒カルテ</button>
     </div>
     <div class="tab-nav hidden" data-group="mendan">
@@ -488,9 +485,9 @@ body.is-admin .tab-btn.admin-only{display:inline-block}
         <label>講師</label>
         <select id="sk-teacher" onchange="skOnHeaderChange()"><option value="">読み込み中...</option></select>
         <label class="sk-inline-check"><input type="checkbox" id="sk-all-teachers" onchange="skOnAllTeachersChange()">全校舎の講師を表示</label>
-        <!-- 講師の追加（塾長のみ表示。権限はサーバー側 api/admin.js で確認） -->
-        <details class="sk-criteria admin-only" id="tm-box" style="margin:8px 0 0">
-          <summary>＋ 講師を追加（塾長のみ）</summary>
+        <!-- 講師の追加（ログインした全員が使える） -->
+        <details class="sk-criteria" id="tm-box" style="margin:8px 0 0">
+          <summary>＋ 講師を追加</summary>
           <div class="field" style="margin:6px 0"><label>講師名</label><input type="text" id="tm-name" maxlength="50" placeholder="例：山田 花子" autocomplete="off"></div>
           <div class="field" style="margin:6px 0"><label>所属校舎</label><select id="tm-school"></select></div>
           <button type="button" class="wk-btn primary" id="tm-add-btn" style="width:100%" onclick="tmAddTeacher()">講師を追加</button>
@@ -560,10 +557,10 @@ body.is-admin .tab-btn.admin-only{display:inline-block}
     <div class="empty-state">「指導集計」は準備中です</div>
   </div>
 
-  <!-- ===== 週次報告（塾長のみ。権限はサーバー側 api/weekly.js で確認） ===== -->
+  <!-- ===== 週次報告 ===== -->
   <div id="screen-weekly" class="screen">
     <div class="card">
-      <div class="section-tag tag-study">週次報告（塾長）</div>
+      <div class="section-tag tag-study">週次報告</div>
       <div class="field"><label>校舎</label><select id="wk-school" onchange="wkOnFilterChange()"></select></div>
       <div class="field" style="margin-bottom:0">
         <label>期間</label>
@@ -1109,9 +1106,6 @@ body.is-admin .tab-btn.admin-only{display:inline-block}
 <script>
 // ===== Auth =====
 function getAuthToken(){ return localStorage.getItem('authToken') || ''; }
-// 画面の出し分けだけに使う。権限の判定はサーバー側（api/_auth.js）でトークンにより行う
-function isAdmin(){ try{ return localStorage.getItem('authRole')==='admin'; }catch(e){ return false; } }
-function applyRoleUi(){ document.body.classList.toggle('is-admin', isAdmin()); }
 
 function authHeaders(extra){
   return Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+getAuthToken()}, extra||{});
@@ -1144,8 +1138,6 @@ function saveFailMsg(e){
 
 function handleAuthFailure(){
   localStorage.removeItem('authToken');
-  localStorage.removeItem('authRole');
-  applyRoleUi();
   document.getElementById('main-app').style.display='none';
   document.getElementById('login-gate').style.display='flex';
 }
@@ -1166,12 +1158,10 @@ async function handleLogin(ev){
     const data = await res.json();
     if(!res.ok || !data.token){ throw new Error(data.error||'ログインに失敗しました'); }
     localStorage.setItem('authToken', data.token);
-    localStorage.setItem('authRole', data.role==='admin'?'admin':'staff');
-    applyRoleUi();
     document.getElementById('login-gate').style.display='none';
     document.getElementById('main-app').style.display='block';
     if(document.getElementById('screen-weekly').classList.contains('active')){
-      if(isAdmin())wkEnsureLoaded();else switchTab('shido');
+      wkEnsureLoaded();
     }
     if(document.getElementById('screen-shido').classList.contains('active'))skEnsureLoaded();
     if(document.getElementById('screen-progress').classList.contains('active'))pgEnsureLoaded();
@@ -1184,7 +1174,6 @@ async function handleLogin(ev){
 }
 
 (function checkAuthOnLoad(){
-  applyRoleUi();
   if(getAuthToken()){
     document.getElementById('login-gate').style.display='none';
     document.getElementById('main-app').style.display='block';
@@ -1300,7 +1289,6 @@ function switchGroup(g){
 }
 
 function switchTab(name){
-  if(name==='weekly'&&!isAdmin())name='shido';
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+name).classList.add('active');
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
@@ -2250,7 +2238,7 @@ function skOnHeaderChange(){
   skState.teacher=v('sk-teacher');
   skSaveDraft();
 }
-// --- 講師の追加（塾長のみ） ---
+// --- 講師の追加 ---
 const TM_DEFAULT_SCHOOL='みずほ台校舎';
 function tmInit(){
   const sel=document.getElementById('tm-school');
@@ -2272,7 +2260,6 @@ async function tmAddTeacher(){
     const res=await authFetch('/api/admin',{method:'POST',body:JSON.stringify({action:'addTeacher',name,school})});
     let data;
     try{data=await res.json();}catch(_){throw new Error(`サーバーから正しい応答がありませんでした（HTTP ${res.status}）`);}
-    if(res.status===403){try{localStorage.setItem('authRole','staff');}catch(e){}applyRoleUi();}
     if(!res.ok||data.error||!data.ok)throw new Error(data.error||('HTTP '+res.status));
     if(skMasters)skMasters.teachers=data.teachers||skMasters.teachers;
     // 追加した講師をそのまま選べるようにする（指導記録の校舎と所属が違っても選択欄には出す）
@@ -2673,7 +2660,7 @@ async function pgSave(){
   }
 }
 
-// ===== 週次報告（塾長） =====
+// ===== 週次報告 =====
 // 一覧 → 生徒を開く → 文面を確認・修正 → 確定 → コピー（LINEへ貼り付け）→ 送信済みにする → 次の生徒へ
 // 報告文の生成は api/weekly.js がサーバー側で行う（講師メモはAIに渡さない）。ここでは講師メモを参考表示するだけ
 const WK_SCHOOL_KEY='weeklySchool_v1';
@@ -2772,11 +2759,6 @@ async function wkJson(res){
   let data;
   // 応答がJSONでない（時間切れ・混雑でエラーページが返った）ときは、一時的な失敗として扱う
   try{data=await res.json();}catch(_){const err=new Error(`サーバーから正しい応答がありませんでした（HTTP ${res.status}）`);err.retryable=res.status>=500;throw err;}
-  if(res.status===403){
-    // 塾長のトークンではない（共有パスワードでログインしている）
-    try{localStorage.setItem('authRole','staff');}catch(e){}
-    applyRoleUi();
-  }
   if(!res.ok||data.error){const err=new Error(data.error||('HTTP '+res.status));err.text=data.text;err.retryable=!!data.retryable;throw err;}
   return data;
 }

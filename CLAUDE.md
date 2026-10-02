@@ -11,8 +11,8 @@
   - `_auth.js` 共通認証 / `_gas.js` GAS_URL取得（**未設定ならエラー。本番URLへのフォールバックはしない**）
   - `save.js`（既存シートへの追記）/ `karte.js`（生徒一覧・カルテ取得）/ `shido.js`（指導系。許可した action のみ中継）
   - `save-public.js`（認証なし。成績・志望校・通知表のみ。`action` は除去して転送）/ `claude.js`（AI生成）/ `login.js`
-  - `weekly.js`（週次報告。**塾長トークンのみ**（`checkAdmin`）。報告文のプロンプトはここで組み立て、Anthropic API を呼ぶ）
-  - `admin.js`（塾長のみの管理操作。今は講師の追加 `addTeacher` → GAS `addTeacher_`。同名が無効なら有効に戻す。画面は指導記録タブの「＋ 講師を追加（塾長のみ）」、所属校舎の初期値はみずほ台校舎）
+  - `weekly.js`（週次報告。ログインした全員が使える。報告文のプロンプトはここで組み立て、Anthropic API を呼ぶ）
+  - `admin.js`（講師の追加 `addTeacher` → GAS `addTeacher_`。同名が無効なら有効に戻す。画面は指導記録タブの「＋ 講師を追加」、所属校舎の初期値はみずほ台校舎。ログインした全員が使える）
 - **デプロイ**: GitHub → Vercel自動デプロイ / GASは`npx clasp push` + `npx clasp deploy --deploymentId AKfycbwtLtrArQ1ECX0cNLh85rMJ6MaV3t-A3qDNxuPpbgg-LjTU8mMDOfdDEN2jZqzs5LP5zw`
 
 ## 環境変数（Vercel）
@@ -20,9 +20,7 @@
 - `SHIDO_KEY`（指導系の合言葉。`api/shido.js` だけがGASへ付与する。未設定なら `api/shido.js` はエラー）
 - `AUTH_TOKEN` / `SHIDO_KEY` はGAS側スクリプトプロパティの同名の値と一致させる（テスト環境は本番と別の値にする）
 - GAS側は `SHIDO_KEY` 未設定または不一致なら指導系の処理をすべて `unauthorized` で拒否する（旧 save-public 等の経路からは届かない）
-- `ADMIN_PASSWORD` / `ADMIN_TOKEN`（塾長用。`APP_PASSWORD` / `AUTH_TOKEN` と**別の値**にする。同じ値・未設定なら塾長機能は使えない）
-  - ログインで塾長パスワードなら `ADMIN_TOKEN`、共有パスワードなら `AUTH_TOKEN` を返す。`ADMIN_TOKEN` は共有トークンでできることもすべてできる
-  - GASへは常に `AUTH_TOKEN` を送る（GAS側の設定追加は不要）。塾長かどうかは Vercel 側だけで判定する
+- パスワードは講師・塾長で共通（`APP_PASSWORD` の1つだけ）。2026-10-02 に塾長専用パスワード（ADMIN_PASSWORD/ADMIN_TOKEN）は廃止。週次報告・講師の追加もログインした全員が使える（ユーザーの判断）
 
 ## GAS重要事項
 - `clasp push`はHEADのみ更新。変更を反映するには必ず`clasp deploy --deploymentId ...`も実行する
@@ -69,7 +67,7 @@
 - 指導系のPOSTは `shidoAction` で振り分ける（既存の保護者面談が「次回アクション」を `action` キーで送るため、`action` で判定しない）
 
 ## 週次報告の仕様・ルール
-- 塾長だけが「週次報告」タブで作成・編集・確定・送信済み更新を行う。タブの表示は `authRole`（localStorage）で出し分けるだけで、権限は `api/weekly.js` の `checkAdmin` で判定する
+- 週次報告の作成・編集・確定・送信済み更新はログインした全員ができる（運用上は主に塾長が行う）。パスワードで講師・塾長は区別しない
 - ステータス：行なし=未作成 → 下書き → 確定 → 送信済み。「送信済み」は確定済みの本文と一致するときだけ（GAS側でも確認）。確定・送信済みをAIで作り直すときは `force` が必要
 - 期間は月〜日がデフォルト（最大31日）。期間内の指導記録を生徒（`studentKey_`）ごとにまとめる。週の「指導回数」は**期間内の各記録の指導回数の合計**（AIには指導日の日数も渡す）
 - **講師メモ・講師名はAIに渡さない**：`getWeeklySource_` の時点で除き、`api/weekly.js` の `buildPrompt` も許可した項目だけ使う。「対応」は `PARENT_ACTIONS`（保護者に伝えてよいもの）だけ渡す。生徒名も渡さず `{{生徒}}` を生成後に置き換える

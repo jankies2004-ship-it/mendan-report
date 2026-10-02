@@ -1,7 +1,7 @@
-// 週次報告（塾長専用）。塾長トークンを確認してからGASへ中継し、報告文の生成もここで行う。
+// 週次報告。ログインした人なら誰でも使える。GASへ中継し、報告文の生成もここで行う。
 // プロンプトはサーバー側で組み立てる（クライアントから文面の材料を受け取らない）。
 // 講師メモ・講師名はGAS（getWeeklySource_）の時点で除かれ、ここでも許可した項目しか使わない。
-import { checkAdmin } from './_auth.js';
+import { checkAuth } from './_auth.js';
 import { getGasUrl } from './_gas.js';
 
 // 1リクエスト = 1名分。まとめて作成は画面側から1名ずつ呼ぶので、人数が増えても1回の実行時間は増えない
@@ -145,7 +145,7 @@ function isGasBusy(r) {
 
 export default async function handler(req, res) {
   const started = Date.now();
-  if (!checkAdmin(req, res)) return;
+  if (!checkAuth(req, res)) return;
   const GAS_URL = getGasUrl(res);
   if (!GAS_URL) return;
   const shidoKey = process.env.SHIDO_KEY;
